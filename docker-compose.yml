@@ -1,0 +1,47 @@
+services:
+  # db:
+  #   image: postgres
+  #   container_name: postgres-db
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: ${DATABASE_USERNAME}
+  #     POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+  #     POSTGRES_DB: senior-project # <-- Updated database name
+  #   ports:
+  #     - "5400:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+  # backend:
+  #   build: ./backend
+  #   container_name: flask-backend
+  #   restart: always
+  #   volumes:
+  #     - ./backend:/app
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     -  "5002:5000"
+  #   environment:
+  #     DATABASE_URL: ${DATABASE_URL}
+
+  frontend:
+    build: ./frontend
+    container_name: vite-frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5001:5001"
+    # depends_on:
+    #   - backend
+
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #   - "8081:8080"
+
+volumes:
+  postgres_data:
+    driver: local
