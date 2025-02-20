@@ -9,6 +9,7 @@ export default defineConfig({
     host: true,
     port: 5001,
   },
+  assetsInclude: ['**/*.stl'],
   plugins: [tailwindcss(), react()],
   resolve: {
     alias: {

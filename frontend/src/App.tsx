@@ -6,41 +6,43 @@ import { LOGIN_PATH, HOMEPAGE_PATH } from '@/constants/path';
 import Layout from '@/components/Layout';
 import LoginPage from '@/pages/LoginPage/LoginPage';
 import Homepage from './pages/Homepage/Homepage';
+import Test from './Test';
 
 const App = () => {
   const { user } = useAuth(); // ✅ Get user state
   console.log('app', user);
   return (
-    <Router>
-      <Routes>
-        <Route path={LOGIN_PATH} element={user ? <Navigate to={HOMEPAGE_PATH} replace /> : <LoginPage />} />
+    <Test/>
+    // <Router>
+    //   <Routes>
+    //     <Route path={LOGIN_PATH} element={user ? <Navigate to={HOMEPAGE_PATH} replace /> : <LoginPage />} />
       
-          <Route
-            path={HOMEPAGE_PATH}
-            element={
-              user ? (
-                <Layout>
-                  <Homepage />
-                </Layout>
-              ) : (
-                <Navigate to={LOGIN_PATH} replace />
-              )
-            }
-          />
+    //       <Route
+    //         path={HOMEPAGE_PATH}
+    //         element={
+    //           user ? (
+    //             <Layout>
+    //               <Homepage />
+    //             </Layout>
+    //           ) : (
+    //             <Navigate to={LOGIN_PATH} replace />
+    //           )
+    //         }
+    //       />
  
-        <Route element={<Layout />}>
-          {routes.map(({ path, element, protected: isProtected, allowedRoles }) =>
-            isProtected ? (
-              <Route key={path} element={<ProtectedRoute allowedRoles={allowedRoles} />}>
-                <Route path={path} element={element} />
-              </Route>
-            ) : (
-              <Route key={path} path={path} element={element} />
-            )
-          )}
-        </Route>
-      </Routes>
-    </Router>
+    //     <Route element={<Layout />}>
+    //       {routes.map(({ path, element, protected: isProtected, allowedRoles }) =>
+    //         isProtected ? (
+    //           <Route key={path} element={<ProtectedRoute allowedRoles={allowedRoles} />}>
+    //             <Route path={path} element={element} />
+    //           </Route>
+    //         ) : (
+    //           <Route key={path} path={path} element={element} />
+    //         )
+    //       )}
+    //     </Route>
+    //   </Routes>
+    // </Router>
   );
 };
 
