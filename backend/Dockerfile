@@ -1,7 +1,5 @@
-# Use official Python image
-FROM python:3.10
+FROM python:3.11
 
-# Set the working directory
 WORKDIR /app
 
 # Copy dependency files first
@@ -9,6 +7,7 @@ COPY requirements.txt .
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install watchdog  # For live reload
 
 # Copy application files
 COPY . .
@@ -16,5 +15,5 @@ COPY . .
 # Expose Flask port
 EXPOSE 5000
 
-# Run the Flask application
-CMD ["python", "app.py"]
+# Run database migrations and start Flask with live reload
+CMD ["sh", "-c", "flask db upgrade && watchmedo auto-restart --directory=. --pattern=*.py --recursive -- flask run --host=0.0.0.0 --port=5000 --debug"]

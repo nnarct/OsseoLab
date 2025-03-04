@@ -1,0 +1,225 @@
+openapi: 3.0.0
+info:
+  title: Authentication API
+  description: API endpoints for user registration and login.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5002
+    description: Local development server
+
+paths:
+  /register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      description: Register a new user with role-based permissions.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstname
+                - lastname
+                - email
+                - password
+                - role
+              properties:
+                firstname:
+                  type: string
+                  example: "John"
+                lastname:
+                  type: string
+                  example: "Doe"
+                email:
+                  type: string
+                  format: email
+                  example: "john.doe@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+                role:
+                  type: string
+                  enum: ["admin", "doctor", "tech"]
+                  example: "doctor"
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: "User registered successfully"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        example: "123e4567-e89b-12d3-a456-426614174000"
+                      role:
+                        type: string
+                        example: "doctor"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 400
+                  error:
+                    type: string
+                    example: "Invalid Body"
+                  message:
+                    type: string
+                    example: "Missing required fields"
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 409
+                  error:
+                    type: string
+                    example: "Email is already registered"
+        "500":
+          description: Registration failed due to a server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  error:
+                    type: string
+                    example: "Registration failed. Please try again."
+                  message:
+                    type: string
+                    example: "Database error"
+
+  /login:
+    post:
+      tags:
+        - Auth
+      summary: User login
+      description: Authenticates a user and returns a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "john.doe@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Login successful"
+                  data:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                        example: "your_generated_jwt_token"
+                      userData:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            example: "123e4567-e89b-12d3-a456-426614174000"
+                          email:
+                            type: string
+                            format: email
+                            example: "john.doe@example.com"
+                          firstname:
+                            type: string
+                            example: "john"
+                          lastname:
+                            type: string
+                            example: "doe"
+                          role:
+                            type: string
+                            example: "doctor"
+
+        "400":
+          description: Missing email or password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 400
+                  error:
+                    type: string
+                    example: "Missing email or password"
+        "401":
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: "Invalid email or password"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: "Internal Server Error"
+                  error:
+                    type: string
+                    example: "An error occurred: Database error"

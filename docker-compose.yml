@@ -1,29 +1,30 @@
 services:
-  # db:
-  #   image: postgres
-  #   container_name: postgres-db
-  #   restart: always
-  #   environment:
-  #     POSTGRES_USER: ${DATABASE_USERNAME}
-  #     POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-  #     POSTGRES_DB: senior-project # <-- Updated database name
-  #   ports:
-  #     - "5400:5432"
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
+  db:
+    image: postgres
+    container_name: flask_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: senior-project
+    ports:
+      - "5400:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-  # backend:
-  #   build: ./backend
-  #   container_name: flask-backend
-  #   restart: always
-  #   volumes:
-  #     - ./backend:/app
-  #   depends_on:
-  #     - db
-  #   ports:
-  #     -  "5002:5000"
-  #   environment:
-  #     DATABASE_URL: ${DATABASE_URL}
+  backend:
+    build: ./backend
+    container_name: flask-backend
+    restart: always
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+    ports:
+      - "5002:5000"
+    env_file:
+      - ./backend/.env
+    command: ["sh", "-c", "flask db upgrade && watchmedo auto-restart --directory=. --pattern=*.py --recursive -- flask run --host=0.0.0.0 --port=5000 --debug"]
 
   frontend:
     build: ./frontend
@@ -33,14 +34,14 @@ services:
       - /app/node_modules
     ports:
       - "5001:5001"
-    # depends_on:
-    #   - backend
+    depends_on:
+      - backend
 
-  # adminer:
-  #   image: adminer
-  #   restart: always
-  #   ports:
-  #   - "8081:8080"
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8081:8080"
 
 volumes:
   postgres_data:

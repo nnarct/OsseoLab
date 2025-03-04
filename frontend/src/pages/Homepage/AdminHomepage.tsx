@@ -1,4 +1,7 @@
+import StlList from '../StlList/StlList';
+
 const AdminHomepage = () => {
-  return <div>AdminHomepage</div>;
+  return <StlList />;
 };
+
 export default AdminHomepage;

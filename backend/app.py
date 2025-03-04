@@ -1,20 +1,58 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-import os
+from flask import Flask, request, jsonify
+from routes import register_routes
+from config.config import Config
+from config.extensions import db, migrate, cors
+from config.jwt_handler import configure_jwt
 
+# ✅ Initialize Flask App
 app = Flask(__name__)
+app.config.from_object(Config)
 
-# Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL", "postgresql://snpuser:snppassword@localhost:5432/senior-project")
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# ✅ Initialize Extensions
+db.init_app(app)
+migrate.init_app(app, db)
+cors.init_app(app, resources={
+    r"/*": {
+        "origins": Config.CORS_ORIGINS,         "supports_credentials": True
+    }
+})
 
-db = SQLAlchemy(app)
+# ✅ Configure JWT
+jwt = configure_jwt(app)
 
-# Define a test route
-@app.route('/')
-def hello():
-    return "Hello, Flask!"
+# ✅ Register Routes
+register_routes(app)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
 
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = request.headers.get(
+        "Origin", "*")
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return response
+
+# ✅ Custom Error Handlers
+
+
+@app.errorhandler(404)
+def handle_not_found(error):
+    return jsonify({
+        "statusCode": 404,
+        "error": "Not Found",
+        "message": "The requested endpoint does not exist."
+    }), 404
+
+
+@app.errorhandler(405)
+def handle_method_not_allowed(error):
+    return jsonify({
+        "statusCode": 405,
+        "error": "Method Not Allowed",
+        "message": "This HTTP method is not allowed for the requested endpoint."
+    }), 405
+
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0")

@@ -1,3 +1,8 @@
 flask
 flask_sqlalchemy
 psycopg2
+python-dotenv
+flask-cors
+werkzeug
+flask-migrate
+flask-jwt-extended
