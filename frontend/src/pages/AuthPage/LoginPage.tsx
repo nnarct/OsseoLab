@@ -11,6 +11,7 @@ import {
   Input,
   Typography,
   message,
+  Divider,
 } from 'antd';
 import styled from 'styled-components';
 import LOGO from '@/assets/OsseoLabsLogo.svg';
@@ -84,6 +85,13 @@ const LoginPage = () => {
                 {loading ? 'Logging in...' : 'Login'}
               </Button>
             </Item>
+            <Divider />
+            <div className='flex justify-center gap-x-2'>
+              <Typography.Text>Don't have an account yet?</Typography.Text>
+              <Typography.Text>|</Typography.Text>
+
+              <Typography.Link onClick={()=>navigate('/register')}>Register Now</Typography.Link>
+            </div>
           </Form>
         </Card>
       </Flex>
