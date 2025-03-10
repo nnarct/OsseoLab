@@ -14,4 +14,5 @@ export type STLDataType = {
   id: string;
   filename: string;
   url: string;
+  original_filename: string;
 };

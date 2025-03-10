@@ -70,12 +70,20 @@ const StlList = () => {
       ),
     },
     {
-      title: 'Filename',
+      title: 'Model Name',
       dataIndex: 'filename',
       key: 'filename',
       width: '45%',
       render: (filename) => <span className='whitespace-nowrap'>{filename}</span>,
       sorter: (a, b) => a.filename.localeCompare(b.filename),
+    },
+    {
+      title: 'Filename',
+      dataIndex: 'original_filename',
+      key: 'original_filename',
+      width: '45%',
+      render: (original_filename) => <span className='whitespace-nowrap'>{original_filename}</span>,
+      sorter: (a, b) => a.original_filename.localeCompare(b.original_filename),
     },
     {
       title: 'Action',
