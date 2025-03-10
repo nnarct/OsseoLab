@@ -1,39 +1,63 @@
-import { Suspense, useState } from 'react';
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
-import Loader from '../../StlEssential/Loader';
-import Editor from '../../StlEssential/Editor';
-import { Canvas } from '@react-three/fiber';
-import { Object3D } from 'three';
-import { Panel } from '../../StlEssential/MultiLeva';
-interface StlDisplayProps {
-  url?: string;
-}
-const StlDisplay: React.FC<StlDisplayProps> = ({ url = 'mandible1.stl' }) => {
-  const [selected, setSelected] = useState<Object3D[]>();
+// import { Suspense } from 'react';
+// import { Canvas } from '@react-three/fiber/native';
+// import { useGLTF } from '@react-three/drei/native';
+// import { JSX } from 'react/jsx-runtime';
 
+import { Canvas } from '@react-three/fiber';
+import { Typography } from 'antd';
+
+// interface StlDisplayProps {
+//   fileUrl: string;
+// }
+// const Model: React.FC<{ fileUrl: string } & JSX.IntrinsicElements["group"]> = ({ fileUrl, ...props }) => {
+//   const { scene } = useGLTF(fileUrl);
+//   return <primitive object={scene} {...props} />;
+// };
+
+// const StlDisplay: React.FC<StlDisplayProps> = ({ fileUrl }) => {
+//   return (
+//     <>
+//       <Canvas>
+//         <ambientLight />
+//         <Suspense fallback={null}>
+//           <Model fileUrl={fileUrl} />
+//         </Suspense>
+//       </Canvas>
+//     </>
+//   );
+// };
+
+// export default StlDisplay;
+
+// // import modelPath from './path/to/model.glb'
+
+// // function Model(props) {
+// //   const gltf = useGLTF(modelPath)
+// //   return <primitive {...props} object={gltf.scene} />
+// // }
+
+// // export default function App() {
+// //   return (
+// //     <Canvas>
+// //       <ambientLight />
+// //       <Suspense>
+// //         <Model />
+// //       </Suspense>
+// //     </Canvas>
+// //   )
+// // }
+
+const StlDisplay = ({ url }: { url: string }) => {
+  console.log({ url });
   return (
-    // <div className='h-screen'>
     <>
-      <Canvas style={{ backgroundColor: 'black', borderRadius: 8 }}>
-        <Suspense fallback={<Loader />}>
-          <PerspectiveCamera
-            makeDefault
-            fov={60}
-            aspect={window.innerWidth / window.innerHeight}
-            position={[3, 0.15, 3]}
-            near={1}
-            far={5000}
-            position-z={600}
-          ></PerspectiveCamera>
-          <Editor setSelected={setSelected} url={url} />
-          <directionalLight color={0xeb4634} position={[1, 0.75, 0.5]} />
-          <directionalLight color={0xccccff} position={[-1, 0.75, -0.5]} />
-        </Suspense>
-        <OrbitControls />
+      <Typography.Title>{url}</Typography.Title>
+      <Canvas>
+        <mesh>
+          <boxGeometry />
+        </mesh>
       </Canvas>
-      <Panel selected={selected} />
     </>
-    // </div>
   );
 };
 
