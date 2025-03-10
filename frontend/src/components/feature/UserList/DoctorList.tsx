@@ -7,7 +7,7 @@ const DoctorList = () => {
 
   return (
     <Card title='Doctor List'>
-      <Table dataSource={data} columns={userColumns} loading={isLoading} rowKey={'id'} />
+      <Table dataSource={data} columns={userColumns} loading={isLoading} rowKey={'id'} scroll={{ x: 'auto' }} />
     </Card>
   );
 };
