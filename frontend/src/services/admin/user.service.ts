@@ -7,6 +7,7 @@ export const useGetUsers = () => {
     queryKey: ['users'],
     queryFn: fetchUsers,
     staleTime: 1000 * 60 * 5,
+    retry: 1,
   });
 };
 
@@ -15,6 +16,7 @@ export const useGetAdmins = () => {
     queryKey: ['admins'],
     queryFn: fetchAdmins,
     staleTime: 1000 * 60 * 5,
+    retry: 1,
   });
 };
 
@@ -23,6 +25,7 @@ export const useGetTechnicians = () => {
     queryKey: ['technicians'],
     queryFn: fetchTechnicians,
     staleTime: 1000 * 60 * 5,
+    retry: 1,
   });
 };
 
@@ -31,5 +34,6 @@ export const useGetDoctors = () => {
     queryKey: ['doctors'],
     queryFn: fetchDoctors,
     staleTime: 1000 * 60 * 5,
+    retry: 1,
   });
 };
