@@ -1,4 +1,4 @@
-import { Layout, Image } from 'antd';
+import { Layout, Image, Button } from 'antd';
 import { Outlet, useNavigate } from 'react-router-dom';
 // import routesConfig from '@/config/routesConfig'; // Import the routes array
 
@@ -7,12 +7,14 @@ import LOGO_IMG from '@/assets/OsseoLabsLogo.svg';
 
 import SidebarMenu from '@/components/common/SidebarMenu';
 import SidebarUserInfo from '@/components/common/SidebarUserInfo';
+import { useState } from 'react';
+import { AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
 
 const { Content, Sider, Footer } = Layout;
 
 const AppLayout = () => {
   const navigate = useNavigate();
-
+  const [collapsed, setCollapsed] = useState<boolean>(false);
   // 🔹 Convert `routesConfig` into Ant Design `Menu` items format
   // const menuItems = routesConfig.map((route) => ({
   //   key: route.path, // Menu item key (must match route)
@@ -44,19 +46,30 @@ const AppLayout = () => {
         />
       </Header> */}
       {/* <div className='container mx-auto flex h-full items-center justify-between'> */}
-      <Sider style={siderStyle}>
+      <Sider
+        trigger={null}
+        style={siderStyle}
+        collapsed={collapsed}
+        collapsible
+        onCollapse={() => setCollapsed(!collapsed)}
+      >
         <div className='flex h-full w-full flex-col'>
-          <div className='flex justify-center py-3' style={{ borderBottom: '1px solid rgb(5,5,5,0.05)' }}>
-            <Image
-              preview={false}
-              onClick={() => navigate(HOMEPAGE_PATH)}
-              src={LOGO_IMG}
-              height={48}
-              className='px-4'
+          <div
+            className='flex items-center justify-center px-4 py-3'
+            style={{ borderBottom: '1px solid rgb(5,5,5,0.05)' }}
+          >
+            <Image preview={false} onClick={() => navigate(HOMEPAGE_PATH)} src={LOGO_IMG} height={48} className='' />
+            <Button
+              type='text'
+              icon={collapsed ? <AiOutlineMenuUnfold /> : <AiOutlineMenuFold />}
+              onClick={() => setCollapsed(!collapsed)}
+              style={{
+                fontSize: '16px',
+              }}
             />
           </div>
           <SidebarMenu />
-          <SidebarUserInfo />
+          <SidebarUserInfo collapsed={collapsed} />
         </div>
       </Sider>
       <Layout>
