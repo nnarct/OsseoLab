@@ -24,7 +24,8 @@ def get_stls():
             {
                 "id": stl.id,
                 "filename": stl.filename,
-                "url": f"{BASE_URL}/stl_files/{stl.id}"
+                "url": f"{BASE_URL}/stl_files/{stl.id}",
+                "original_filename": stl.original_filename
             }
             for stl in stl_files
         ]
@@ -67,16 +68,22 @@ def upload_stl():
         file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
         file.save(file_path)
 
-        new_stl = STL(filename=nickname, filepath=unique_filename)
+        new_stl = STL(
+            filename=nickname,
+            filepath=unique_filename,
+            original_filename=file.filename
+        )
         db.session.add(new_stl)
         db.session.commit()
 
         return jsonify({
             "statusCode": 201,
             "message": "File uploaded",
-            "data": {"id": new_stl.id,
-                     "nickname": nickname,
-                     "url": f"{BASE_URL}/stl_files/{new_stl.id}"}
+            "data": {
+                "id": new_stl.id,
+                "nickname": nickname,
+                "url": f"{BASE_URL}/stl_files/{new_stl.id}"
+            }
         }), 201
     except Exception:
         return jsonify({"statusCode": 500, "error": "Internal Server Error"})
