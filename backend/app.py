@@ -3,6 +3,7 @@ from routes import register_routes
 from config.config import Config
 from config.extensions import db, migrate, cors
 from config.jwt_handler import configure_jwt
+from werkzeug.exceptions import HTTPException
 
 # ✅ Initialize Flask App
 app = Flask(__name__)
@@ -53,6 +54,21 @@ def handle_method_not_allowed(error):
         "message": "This HTTP method is not allowed for the requested endpoint."
     }), 405
 
+@app.errorhandler(403)
+def forbidden_error(error):
+    return jsonify({
+        "statusCode": 403,
+        "error": "Forbidden",
+        "message": error.description  # This will be "Access denied"
+    }), 403
+
+@app.errorhandler(HTTPException)
+def handle_http_exception(e):
+    return jsonify({
+        "statusCode": e.code,
+        "error": e.name,
+        "message": e.description
+    }), e.code
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
