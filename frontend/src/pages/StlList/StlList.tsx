@@ -1,15 +1,17 @@
 import { getStlList, STLDataType } from '@/api/stl.api';
-import StlUploader from '@/components/feature/StlList/StlUploader';
-import StlDisplay from '@/components/feature/StlList/StlDisplay';
+import StlUploader from '@/components/feature/StlList/UploadForm/StlUploader';
+import StlDisplay from '@/components/feature/StlList/StlDisplay/StlDisplay';
 import { Button, Card, Input, Table, TableProps, Tooltip, Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { IoMdCheckmark, IoMdCopy } from 'react-icons/io';
 // import StlViewer from './STLViewer';
 
+const DEMO_STL = 'http://localhost:5002//stl_files/d0bc50ed-6143-489f-ac3c-f8323d2fe86c';
+
 const StlList = () => {
   const stlDisplayRef = useRef<HTMLDivElement | null>(null);
   const [stls, setStls] = useState<STLDataType[]>([]);
-  const [selectedStl, setSelectedStl] = useState<string | null>(null);
+  const [selectedStl, setSelectedStl] = useState<string | null>(DEMO_STL);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState<string>('');
   const [filteredData, setFilteredData] = useState<STLDataType[]>([]);
@@ -101,14 +103,7 @@ const StlList = () => {
 
   return (
     <div className='container mx-auto'>
-      <Card title={'STL List'}>
-        <div className='mb-6 flex justify-between'>
-          <Input.Search allowClear placeholder='Enter STL name' className='mr-6 max-w-80' onSearch={setSearchValue} />
-          <StlUploader />
-        </div>
-        <Table dataSource={filteredData} columns={columns} rowKey='id' scroll={{ x: 'auto' }} />
-      </Card>
-      <div ref={stlDisplayRef} className='mt-6 h-[60vw] max-h-[80vh] rounded-lg bg-slate-800'>
+      <div ref={stlDisplayRef} className='mb-6 rounded-lg bg-slate-800'>
         {selectedStl ? (
           <div className='h-full w-full'>
             <StlDisplay url={selectedStl} />
@@ -119,6 +114,14 @@ const StlList = () => {
           </Typography.Title>
         )}
       </div>
+
+      <Card title={'STL List'}>
+        <div className='mb-6 flex justify-between'>
+          <Input.Search allowClear placeholder='Enter STL name' className='mr-6 max-w-80' onSearch={setSearchValue} />
+          <StlUploader />
+        </div>
+        <Table dataSource={filteredData} columns={columns} rowKey='id' scroll={{ x: 'auto' }} />
+      </Card>
     </div>
   );
 };
