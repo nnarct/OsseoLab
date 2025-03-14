@@ -1,39 +1,31 @@
-import { Suspense, useCallback, useState } from 'react';
+import { Suspense, useCallback, useRef, useState } from 'react';
 import { v4 as uuid } from 'uuid';
-import { Button, ColorPicker, Dropdown, Flex, List, Radio, Slider, Typography } from 'antd';
+import { Button, Dropdown, List, Select, MenuProps } from 'antd';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 
-import type { TranslateMode } from './types';
+import type { TransformControlsMode, PlaneDataType } from './types';
 import Model from './Model';
 import Controllers from './Controllers';
 import ClippingPlane from './ClippingPlane';
-import { FaCheck, FaTrashAlt } from 'react-icons/fa';
+import PlaneListItem from './PlaneListItem';
+import SceneHandler from './SceneHandler';
 
 const StlDisplay = ({ url }: { url: string }) => {
-  const [planes, setPlanes] = useState<
-    {
-      id: string;
-      plane: THREE.Plane;
-      position: THREE.Vector3;
-      mode: TranslateMode;
-      frontColor: string;
-      backColor: string;
-      opacity: number;
-    }[]
-  >([]);
+  const [planes, setPlanes] = useState<PlaneDataType[]>([]);
   const [activePlaneId, setActivePlaneId] = useState<string | null>(null);
-  const [applyClipping, setApplyClipping] = useState(false);
-
+  const [selectedCutPlanes, setSelectedCutPlanes] = useState<(string | undefined)[]>([undefined, undefined]);
+  const sceneHandlerRef = useRef<{ applyCut: () => void } | null>(null);
+  const [apply, setApply] = useState<boolean>(false);
   const addPlane = useCallback(() => {
     const id = uuid();
     const newPlane = {
       id,
       plane: new THREE.Plane(new THREE.Vector3(1, 0, 0), 0),
       position: new THREE.Vector3(0, 0, 0),
-      mode: 'translate' as TranslateMode,
-      frontColor: 'rgb(0,255,0)',
-      backColor: 'rgb(255,0,0)',
+      mode: 'translate' as TransformControlsMode,
+      frontColor: '#00ff00',
+      backColor: '#ff0000',
       opacity: 0.5,
     };
 
@@ -49,7 +41,7 @@ const StlDisplay = ({ url }: { url: string }) => {
   const updatePlaneProperty = useCallback(
     (
       id: string,
-      property: Partial<{ mode: TranslateMode; frontColor: string; backColor: string; opacity: number }>
+      property: Partial<{ mode: TransformControlsMode; frontColor: string; backColor: string; opacity: number }>
     ) => {
       setPlanes((prevPlanes) => prevPlanes.map((plane) => (plane.id === id ? { ...plane, ...property } : plane)));
     },
@@ -57,77 +49,97 @@ const StlDisplay = ({ url }: { url: string }) => {
   );
 
   const handleSelectPlane = useCallback((id: string) => setActivePlaneId(id), []);
-  
+
+  // ✅ Fix: Ensure Plane 2 dropdown correctly excludes Plane 1
+  const handlePlaneSelect = (index: number, value: string | undefined) => {
+    setSelectedCutPlanes((prev) => {
+      const updated = [...prev];
+      updated[index] = value;
+
+      // If Plane 1 is changed and matches Plane 2, reset Plane 2
+      if (index === 0 && updated[1] === value) {
+        updated[1] = undefined;
+      }
+
+      return updated;
+    });
+  };
+
+  const applyCut = () => {
+    // sceneHandlerRef.current?.applyCut();
+    setApply(true);
+  };
+  const unapplyCut = () => {
+    // sceneHandlerRef.current?.applyCut();
+    setApply(false);
+  };
+
   return (
     <>
       <div className='flex gap-3 p-3'>
         <Button onClick={addPlane}>Add Cutting Plane</Button>
-        <Button onClick={() => setApplyClipping(!applyClipping)}>{applyClipping ? 'Reset Cut' : 'Cut'}</Button>
+        <Dropdown
+          overlay={
+            <div className='flex flex-col gap-y-4 rounded-md bg-white p-3 inset-shadow-2xs'>
+              <Select
+                value={selectedCutPlanes[0]}
+                className='min-w-24'
+                allowClear
+                placeholder='Select Plane 1'
+                onChange={(value) => handlePlaneSelect(0, value)}
+                disabled={planes.length === 0}
+              >
+                {planes.map(({ id }, idx) => (
+                  <Select.Option value={id} key={id}>
+                    {id}
+                  </Select.Option>
+                ))}
+              </Select>
+
+              <Select
+                value={selectedCutPlanes[1]}
+                className='min-w-24'
+                allowClear
+                placeholder='Select Plane 2'
+                onChange={(value) => handlePlaneSelect(1, value)}
+                disabled={planes.length < 2}
+              >
+                {planes
+                  .filter(({ id }) => id !== selectedCutPlanes[0]) // ✅ Properly filters out Plane 1
+                  .map(({ id }, idx) => (
+                    <Select.Option value={id} key={id}>
+                      {id}
+                    </Select.Option>
+                  ))}
+              </Select>
+
+              <Button onClick={applyCut} disabled={!selectedCutPlanes[0]} className='mt-2 w-full'>
+                Apply Cut
+              </Button>
+              <Button onClick={unapplyCut} disabled={!selectedCutPlanes[0]} className='mt-2 w-full'>
+                Unapply Cut
+              </Button>
+            </div>
+          }
+          trigger={['click']}
+        >
+          <Button>Cut</Button>
+        </Dropdown>
       </div>
 
       {planes.length > 0 && (
         <div className='px-3'>
           <List header='Plane List' bordered className='bg-white'>
             {planes.map((plane, idx) => (
-              <List.Item
+              <PlaneListItem
                 key={plane.id}
-                actions={[
-                  <Dropdown
-                    overlay={
-                      <div className='rounded-md bg-white p-3 shadow-lg'>
-                        <p>Front Color</p>
-                        <ColorPicker
-                          disabledAlpha={true}
-                          format='rgb'
-                          value={plane.frontColor}
-                          onChange={(color) => updatePlaneProperty(plane.id, { frontColor: color.toRgbString() })}
-                        />
-                        <p className='mt-2'>Back Color</p>
-                        <ColorPicker
-                          disabledAlpha={true}
-                          format='rgb'
-                          value={plane.backColor}
-                          onChange={(color) => updatePlaneProperty(plane.id, { backColor: color.toRgbString() })}
-                        />
-                        <p className='mt-2'>Opacity</p>
-                        <Slider
-                          min={0}
-                          max={1}
-                          step={0.05}
-                          value={plane.opacity}
-                          onChange={(value) => updatePlaneProperty(plane.id, { opacity: value })}
-                        />
-                      </div>
-                    }
-                    trigger={['click']}
-                  >
-                    <Button>Customize</Button>
-                  </Dropdown>,
-                  <Button
-                    onClick={() => handleSelectPlane(plane.id)}
-                    type={plane.id === activePlaneId ? 'primary' : 'default'}
-                    icon={<FaCheck />}
-                    shape={'circle'}
-                  />,
-                  <Button onClick={() => removePlane(plane.id)} icon={<FaTrashAlt />} />,
-                ]}
-              >
-                <Flex gap={12} align='center'>
-                  <Typography.Text>Plane {idx + 1} :</Typography.Text>
-                  <Radio.Group
-                    optionType='button'
-                    buttonStyle='solid'
-                    disabled={activePlaneId !== plane.id}
-                    value={plane.mode}
-                    onChange={(e) => updatePlaneProperty(plane.id, { mode: e.target.value })}
-                    options={[
-                      { value: 'translate', label: 'Move' },
-                      { value: 'scale', label: 'Scale' },
-                      { value: 'rotate', label: 'Rotate' },
-                    ]}
-                  />
-                </Flex>
-              </List.Item>
+                plane={plane}
+                idx={idx}
+                activePlaneId={activePlaneId}
+                handleSelectPlane={handleSelectPlane}
+                removePlane={removePlane}
+                updatePlaneProperty={updatePlaneProperty}
+              />
             ))}
           </List>
         </div>
@@ -136,11 +148,12 @@ const StlDisplay = ({ url }: { url: string }) => {
       <Canvas shadows style={{ height: '90vh' }} className='mt-3 rounded-lg bg-black'>
         <Controllers />
         <Suspense fallback={<>Loading...</>}>
-          <Model url={url} clippingPlanes={applyClipping ? planes.map((p) => p.plane) : []} />
+          <Model url={url} clippingPlanes={apply ? planes.map((p) => p.plane) : []} />
         </Suspense>
         {planes.map((planeObj) => (
           <ClippingPlane key={planeObj.id} {...planeObj} isActive={planeObj.id === activePlaneId} />
         ))}
+        <SceneHandler ref={sceneHandlerRef} selectedCutPlanes={selectedCutPlanes as string[]} planes={planes} />
       </Canvas>
     </>
   );

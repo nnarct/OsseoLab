@@ -2,7 +2,7 @@ import { TransformControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { TranslateMode } from './types';
+import type { TransformControlsMode } from './types';
 
 const ClippingPlane = ({
   mode,
@@ -11,7 +11,7 @@ const ClippingPlane = ({
   backColor = 'rgb(255,0,0)',
   opacity = 0.5,
 }: {
-  mode: TranslateMode;
+  mode: TransformControlsMode;
   isActive: boolean;
   frontColor?: string;
   backColor?: string;
@@ -26,7 +26,10 @@ const ClippingPlane = ({
     const match = rgb.match(/\d+/g)?.map((n) => parseInt(n) / 255);
     return match ? `${match[0]}, ${match[1]}, ${match[2]}` : '1.0, 1.0, 1.0';
   };
-
+  const hexToShaderRGB = (hex: string) => {
+    const color = new THREE.Color(hex); // Convert Hex to THREE.Color
+    return `${color.r.toFixed(2)}, ${color.g.toFixed(2)}, ${color.b.toFixed(2)}`;
+  };
   const vertexShader = `
     varying vec3 vNormal;
     void main() {
@@ -35,16 +38,16 @@ const ClippingPlane = ({
     }
   `;
 
-  const fragmentShader = (front: string, back: string, alpha: number) => `
-    varying vec3 vNormal;
-    void main() {
-      if (gl_FrontFacing) {
-        gl_FragColor = vec4(${front}, ${alpha});
-      } else {
-        gl_FragColor = vec4(${back}, ${alpha});
-      }
+  const fragmentShader = (frontHex: string, backHex: string, alpha: number) => `
+  varying vec3 vNormal;
+  void main() {
+    if (gl_FrontFacing) {
+      gl_FragColor = vec4(${frontHex}, ${alpha});
+    } else {
+      gl_FragColor = vec4(${backHex}, ${alpha});
     }
-  `;
+  }
+`;
 
   useEffect(() => {
     if (isActive && transformRef.current && planeRef.current) {
@@ -52,11 +55,14 @@ const ClippingPlane = ({
     }
   }, [isActive]);
 
-  // 🔥 **Update the shader dynamically when colors or opacity change**
   useEffect(() => {
     if (materialRef.current) {
-      materialRef.current.fragmentShader = fragmentShader(rgbToShader(frontColor), rgbToShader(backColor), opacity);
-      materialRef.current.needsUpdate = true; // ✅ Force shader update
+      materialRef.current.fragmentShader = fragmentShader(
+        hexToShaderRGB(frontColor),
+        hexToShaderRGB(backColor),
+        opacity
+      );
+      materialRef.current.needsUpdate = true;
     }
   }, [frontColor, backColor, opacity]);
 
@@ -65,7 +71,7 @@ const ClippingPlane = ({
       {isActive && (
         <TransformControls
           ref={transformRef}
-          object={planeRef.current}
+          object={planeRef.current || undefined}
           mode={mode}
           camera={camera}
           domElement={gl.domElement}

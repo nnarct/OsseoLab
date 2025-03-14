@@ -6,6 +6,7 @@ import * as THREE from 'three';
 const Model = ({ url, clippingPlanes }: { url: string; clippingPlanes?: THREE.Plane[] }) => {
   const geometry = useLoader(STLLoader, url);
   const meshRef = useRef<THREE.Mesh>(null);
+  const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const { camera, gl } = useThree();
 
   useEffect(() => {
@@ -28,13 +29,16 @@ const Model = ({ url, clippingPlanes }: { url: string; clippingPlanes?: THREE.Pl
     meshRef.current?.rotation.set(-Math.PI / 2, 0, 0);
   }, [geometry, camera, gl]);
 
+
   return (
     <mesh ref={meshRef} geometry={geometry}>
       <meshStandardMaterial
+        ref={materialRef}
         color='#E8D7C0'
         metalness={0.1}
         roughness={0.6}
-        clippingPlanes={clippingPlanes} // Clipping is applied dynamically
+        clippingPlanes={clippingPlanes}
+        clipIntersection={true}
         clipShadows
       />
     </mesh>
