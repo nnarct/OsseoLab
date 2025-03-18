@@ -11,4 +11,3 @@ export interface PlaneDataType {
   backColor: string;
   opacity: number;
 }
-

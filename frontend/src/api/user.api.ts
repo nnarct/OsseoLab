@@ -3,7 +3,7 @@ import { axios } from '@/config/axiosConfig';
 export const fetchUsers = async () => {
   try {
     const response = await axios.get('/user/list');
-    console.log({response });
+    console.log({ response });
     return response.data.data;
   } catch (error) {
     console.log({ error });
