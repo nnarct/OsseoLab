@@ -14,7 +14,7 @@ const { Content, Sider, Footer } = Layout;
 
 const AppLayout = () => {
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState<boolean>(false);
+  const [collapsed, setCollapsed] = useState<boolean>(true);
   // 🔹 Convert `routesConfig` into Ant Design `Menu` items format
   // const menuItems = routesConfig.map((route) => ({
   //   key: route.path, // Menu item key (must match route)
