@@ -20,7 +20,7 @@ const Model = ({ url }: { url: string }) => {
 
   useEffect(() => {
     if (materialRef.current && planes.length > 0 && apply) {
-      materialRef.current.clippingPlanes = [planes[0].plane];
+      materialRef.current.clippingPlanes = planes.map(item => item.plane)
     } else if (materialRef.current && !apply) {
       materialRef.current.clippingPlanes = null;
     }
