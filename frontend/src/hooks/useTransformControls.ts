@@ -15,7 +15,7 @@ export const useTransformControls = (
     if (isActive && transformRef.current && planeRef.current) {
       transformRef.current.attach(planeRef.current);
     }
-  }, [isActive]);
+  }, [isActive, planeRef]);
 
   useEffect(() => {
     const transform = transformRef.current;

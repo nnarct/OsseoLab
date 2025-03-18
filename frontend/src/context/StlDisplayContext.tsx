@@ -5,7 +5,7 @@ import { v4 as uuid } from 'uuid';
 
 interface StlDisplayContextType {
   planes: PlaneDataType[];
-  setPlanes:React.Dispatch<React.SetStateAction<PlaneDataType[]>>,
+  setPlanes: React.Dispatch<React.SetStateAction<PlaneDataType[]>>;
 
   activePlaneId: string | null;
   setActivePlaneId: React.Dispatch<React.SetStateAction<string | null>>;
@@ -28,6 +28,8 @@ interface StlDisplayContextType {
   selectedCutPlanes: (string | undefined)[];
 
   apply: boolean;
+
+  resetModel: () => void;
 }
 
 const StlDisplayContext = createContext<StlDisplayContextType | undefined>(undefined);
@@ -54,7 +56,6 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
     setPlanes((prevPlanes) => [...prevPlanes, newPlane]);
     setActivePlaneId(id);
   }, []);
-
 
   const handleCuttingPlaneSelect = (index: number, value: string | undefined) => {
     setSelectedCutPlanes((prev) => {
@@ -94,7 +95,11 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
     setApply(false);
   };
 
- 
+  const resetModel = () => {
+    setPlanes([]);
+    unapplyCut();
+  };
+
   return (
     <StlDisplayContext.Provider
       value={{
@@ -110,7 +115,8 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
         selectedCutPlanes,
         sceneHandlerRef,
         apply,
-        setPlanes
+        setPlanes,
+        resetModel,
       }}
     >
       {children}

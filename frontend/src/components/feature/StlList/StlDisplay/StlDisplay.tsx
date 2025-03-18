@@ -1,12 +1,10 @@
 import { StlDisplayProvider } from '@/context/StlDisplayContext';
-import CanvasScene from './CanvasScene';
-import MenuBar from './MenuBar';
 import Center from './Center';
 
-const StlDisplay = ({ url }: { url: string }) => {
+const StlDisplay = ({ url, id }: { url: string; id: string }) => {
   return (
     <StlDisplayProvider>
-      <Center url={url}/>
+      <Center url={url} id={id} />
       {/* <MenuBar />
       <CanvasScene url={url} /> */}
     </StlDisplayProvider>

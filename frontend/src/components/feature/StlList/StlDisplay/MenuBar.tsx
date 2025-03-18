@@ -1,15 +1,29 @@
-import { Button, Dropdown, Select } from 'antd';
+import { Button } from 'antd';
 import PlaneList from './PlaneList';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 
-const MenuBar = () => {
-  const { apply, addPlane, handleCuttingPlaneSelect, planes, selectedCutPlanes, applyCut, unapplyCut } =
-    useStlDisplay();
+const MenuBar = ({ onSave }: { onSave: () => void }) => {
+  const { apply, addPlane, applyCut, unapplyCut } = useStlDisplay();
+
+ 
   return (
     <>
       <div className='flex gap-3 p-3'>
         <Button onClick={addPlane}>Add Cutting Plane</Button>
-        {/* <Dropdown
+
+        <Button onClick={apply ? unapplyCut : applyCut}>{apply ? 'undo cut' : 'cut'}</Button>
+        <Button onClick={onSave} >Save</Button>
+      </div>
+
+      <PlaneList />
+    </>
+  );
+};
+
+export default MenuBar;
+
+{
+  /* <Dropdown
           overlay={
             <div className='flex flex-col gap-y-4 rounded-md bg-white p-3 inset-shadow-2xs'>
               <Select
@@ -55,13 +69,5 @@ const MenuBar = () => {
           trigger={['click']}
         >
           <Button onClick={apply ? unapplyCut : applyCut}>{apply ? 'undo cut' : 'cut'}</Button>
-        </Dropdown> */}
-        <Button onClick={apply ? unapplyCut : applyCut}>{apply ? 'undo cut' : 'cut'}</Button>
-      </div>
-
-      <PlaneList />
-    </>
-  );
-};
-
-export default MenuBar;
+        </Dropdown> */
+}
