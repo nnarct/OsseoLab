@@ -16,26 +16,21 @@ export const initializeSTLModel = (
 ) => {
   if (!geometry) return;
 
-  // Enable local clipping
   gl.localClippingEnabled = true;
 
-  // Compute bounding box
   geometry.computeBoundingBox();
   const center = new THREE.Vector3();
   geometry.boundingBox?.getCenter(center);
   geometry.translate(-center.x, -center.y, -center.z);
 
-  // Adjust camera to fit model
   const size = new THREE.Vector3();
   geometry.boundingBox?.getSize(size);
   const maxSize = Math.max(size.x, size.y, size.z);
   camera.position.set(0, 0, maxSize);
   camera.lookAt(0, 0, 0);
 
-  // Improve shading
   geometry.computeVertexNormals();
 
-  // Set mesh rotation
   if (meshRef.current) {
     meshRef.current.rotation.set(-Math.PI / 2, 0, 0);
   }
@@ -46,7 +41,7 @@ export const initializeSTLModel = (
  * @param hex - The hex color string.
  * @returns A string formatted as `r, g, b` values.
  */
-export const hexToShaderRGB = (hex: string) => {
+const hexToShaderRGB = (hex: string) => {
   const color = new THREE.Color(hex);
   return `${color.r.toFixed(2)}, ${color.g.toFixed(2)}, ${color.b.toFixed(2)}`;
 };
@@ -58,7 +53,7 @@ export const hexToShaderRGB = (hex: string) => {
  * @param alpha - Opacity value.
  * @returns GLSL fragment shader code.
  */
-export const generateFragmentShader = (frontHex: string, backHex: string, alpha: number) => `
+const generateFragmentShader = (frontHex: string, backHex: string, alpha: number) => `
   varying vec3 vNormal;
   void main() {
     gl_FragColor = vec4(gl_FrontFacing ? vec3(${frontHex}) : vec3(${backHex}), ${alpha});
@@ -73,3 +68,19 @@ export const vertexShader = `
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
+
+/**
+ * Creates a shader material for the clipping plane.
+ * @param frontColor - Hex color for the front side of the plane.
+ * @param backColor - Hex color for the back side of the plane.
+ * @param opacity - Opacity of the shader material.
+ * @returns A THREE.ShaderMaterial instance.
+ */
+export const createClippingPlaneMaterial = (frontColor: string, backColor: string, opacity: number) => {
+  return new THREE.ShaderMaterial({
+    transparent: true,
+    vertexShader: vertexShader,
+    fragmentShader: generateFragmentShader(hexToShaderRGB(frontColor), hexToShaderRGB(backColor), opacity),
+    side: THREE.DoubleSide,
+  });
+};
