@@ -1,6 +1,7 @@
 import type { Plane, Vector3 } from 'three';
 
 export type TransformControlsMode = 'translate' | 'scale' | 'rotate';
+
 export interface PlaneDataType {
   id: string;
   plane: Plane;
@@ -10,3 +11,4 @@ export interface PlaneDataType {
   backColor: string;
   opacity: number;
 }
+

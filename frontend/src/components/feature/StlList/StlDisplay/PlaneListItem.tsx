@@ -1,43 +1,22 @@
 import { Button, List, Radio, Flex, Typography } from 'antd';
 import { FaCheck, FaTrashAlt } from 'react-icons/fa';
 import PlaneSettings from './PlaneSettings';
-import type { TransformControlsMode } from './types';
+import type { PlaneDataType } from '@/types/stlDisplay';
+import { useStlDisplay } from '@/hooks/useStlDisplay';
 
-const PlaneListItem = ({
-  plane,
-  idx,
-  activePlaneId,
-  handleSelectPlane,
-  removePlane,
-  updatePlaneProperty,
-}: {
-  plane: {
-    id: string;
-    mode: string;
-    frontColor: string;
-    backColor: string;
-    opacity: number;
-  };
-  idx: number;
-  activePlaneId: string | null;
-  handleSelectPlane: (id: string) => void;
-  removePlane: (id: string) => void;
-  updatePlaneProperty: (
-    id: string,
-    property: Partial<{ mode: TransformControlsMode; frontColor: string; backColor: string; opacity: number }>
-  ) => void;
-}) => {
+const PlaneListItem = ({ plane, idx }: { plane: PlaneDataType; idx: number }) => {
+  const { removePlane, setActivePlaneId, activePlaneId, updatePlaneProperty } = useStlDisplay();
+
   return (
     <List.Item
       actions={[
-        <PlaneSettings plane={plane} updatePlaneProperty={updatePlaneProperty} />,
-
+        <PlaneSettings plane={plane} />,
         <Button onClick={() => removePlane(plane.id)} icon={<FaTrashAlt />} danger />,
       ]}
     >
       <Flex gap={12} align='center'>
         <Button
-          onClick={() => handleSelectPlane(plane.id)}
+          onClick={() => setActivePlaneId(plane.id)}
           type={plane.id === activePlaneId ? 'primary' : 'default'}
           icon={<FaCheck />}
           shape={'circle'}

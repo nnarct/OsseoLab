@@ -1,21 +1,11 @@
 import { ColorPicker, Dropdown, Slider, Button, Flex } from 'antd';
-import { RiEqualizer3Line } from 'react-icons/ri';
 
-const PlaneSettings = ({
-  plane,
-  updatePlaneProperty,
-}: {
-  plane: {
-    id: string;
-    frontColor: string;
-    backColor: string;
-    opacity: number;
-  };
-  updatePlaneProperty: (
-    id: string,
-    property: Partial<{ frontColor: string; backColor: string; opacity: number }>
-  ) => void;
-}) => {
+import { RiEqualizer3Line } from 'react-icons/ri';
+import { useStlDisplay } from '@/hooks/useStlDisplay';
+import type { PlaneDataType } from '@/types/stlDisplay';
+
+const PlaneSettings = ({ plane }: { plane: PlaneDataType }) => {
+  const { updatePlaneProperty } = useStlDisplay();
   return (
     <Dropdown
       placement='bottomRight'
