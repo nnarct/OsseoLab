@@ -1,6 +1,10 @@
+import DoctorList from '@/components/feature/UserList/DoctorList';
+
 const DoctorHomepage = () => {
   return (
-    <div>DoctorHomepage</div>
-  )
-}
-export default DoctorHomepage
+    <div>
+      <DoctorList />
+    </div>
+  );
+};
+export default DoctorHomepage;
