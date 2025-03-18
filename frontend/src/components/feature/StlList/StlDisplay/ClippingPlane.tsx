@@ -49,6 +49,36 @@ const ClippingPlane = ({
     }
   }, [frontColor, backColor, opacity]);
 
+  const updatePlane = useCallback(() => {
+    if (!planeRef.current) return;
+  
+    const mesh = planeRef.current;
+    const worldNormal = new THREE.Vector3();
+    const worldPosition = new THREE.Vector3();
+    
+    mesh.getWorldPosition(worldPosition);
+  
+  
+    worldNormal.set(0, 0, 1).applyQuaternion(mesh.quaternion).normalize();
+  
+    plane.setFromNormalAndCoplanarPoint(worldNormal, worldPosition).normalize();
+  
+    setPlanes((prevItems) =>
+      prevItems.map((item) => (item.id === id ? { ...item, plane: plane } : item))
+    );
+  }, [id, plane, setPlanes]);
+  
+
+  useEffect(() => {
+    const transformRefCurrent = transformRef.current;
+    if (transformRefCurrent) {
+      transformRefCurrent.addEventListener('change', updatePlane);
+    }
+    return () => {
+      transformRefCurrent.removeEventListener('change', updatePlane);
+    };
+  }, [gl, plane, updatePlane]);
+
   return (
     <>
       {isActive && (
@@ -68,10 +98,6 @@ const ClippingPlane = ({
           vertexShader={vertexShader}
           fragmentShader={generateFragmentShader(hexToShaderRGB(frontColor), hexToShaderRGB(backColor), opacity)}
           side={THREE.DoubleSide}
-          uniforms={{
-            resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-            planeSize: { value: new THREE.Vector2(planeRef.current?.scale.x || 1, planeRef.current?.scale.y || 1) },
-          }}
         />
       </mesh>
     </>
