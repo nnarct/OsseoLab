@@ -15,4 +15,6 @@ export type STLDataType = {
   filename: string;
   url: string;
   original_filename: string;
+  created_at: string;
+  last_updated: string;
 };

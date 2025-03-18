@@ -5,13 +5,15 @@ import { Button, Card, Input, Table, TableProps, Tooltip, Typography } from 'ant
 import { useEffect, useRef, useState } from 'react';
 import { IoMdCheckmark, IoMdCopy } from 'react-icons/io';
 // import StlViewer from './STLViewer';
+import dayjs from 'dayjs';
 
-const DEMO_STL = 'http://localhost:5002//stl_files/d0bc50ed-6143-489f-ac3c-f8323d2fe86c';
+const DEMO_STL = 'http://localhost:5002/stl_files/d0bc50ed-6143-489f-ac3c-f8323d2fe86c';
 
 const StlList = () => {
   const stlDisplayRef = useRef<HTMLDivElement | null>(null);
   const [stls, setStls] = useState<STLDataType[]>([]);
-  const [selectedStl, setSelectedStl] = useState<string | null>(DEMO_STL);
+  const [selectedStl, setSelectedStl] = useState<string | null>('');
+  const [selectedStlId, setSelectedStlId] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState<string>('');
   const [filteredData, setFilteredData] = useState<STLDataType[]>([]);
@@ -19,8 +21,10 @@ const StlList = () => {
     const fetchData = async () => {
       try {
         const data = await getStlList();
-        setStls(data);
-        setFilteredData(data);
+        const sorted = data.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+        setStls(sorted);
+        setFilteredData(sorted);
       } catch (error) {
         console.error('Error fetching STL files:', error);
       }
@@ -34,8 +38,9 @@ const StlList = () => {
     setFilteredData(filtered);
   }, [searchValue, stls]);
 
-  const handleViewClick = (url: string) => {
+  const handleViewClick = (url: string, id: string) => {
     setSelectedStl(url);
+    setSelectedStlId(id);
     setTimeout(() => {
       stlDisplayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
@@ -53,29 +58,44 @@ const StlList = () => {
   };
 
   const columns: TableProps<STLDataType>['columns'] = [
+    // {
+    //   title: 'ID',
+    //   dataIndex: 'id',
+    //   key: 'id',
+    //   width: '45%',
+    //   render: (id) => (
+    //     <div className='flex items-center space-x-1'>
+    //       <span className='whitespace-nowrap'>{id}</span>
+    //       <Tooltip title={copiedId === id ? 'Copied!' : 'Copy'}>
+    //         <Button
+    //           type='text'
+    //           icon={copiedId === id ? <IoMdCheckmark style={{ color: 'green' }} /> : <IoMdCopy />}
+    //           onClick={() => handleCopyId(id)}
+    //         />
+    //       </Tooltip>
+    //     </div>
+    //   ),
+    // },
     {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      width: '45%',
-      render: (id) => (
-        <div className='flex items-center space-x-1'>
-          <span className='whitespace-nowrap'>{id}</span>
-          <Tooltip title={copiedId === id ? 'Copied!' : 'Copy'}>
-            <Button
-              type='text'
-              icon={copiedId === id ? <IoMdCheckmark style={{ color: 'green' }} /> : <IoMdCopy />}
-              onClick={() => handleCopyId(id)}
-            />
-          </Tooltip>
-        </div>
-      ),
+      title: 'created at',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      width: '15%',
+      render: (time) => dayjs(time).format('HH:mm:ss DD MMM'),
+    },
+    {
+      title: 'last updated',
+      dataIndex: 'last_updated',
+      key: 'last_updated',
+      width: '15%',
+      sorter: (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+      render: (time) => dayjs(time).format('HH:mm:ss DD MMM'),
     },
     {
       title: 'Model Name',
       dataIndex: 'filename',
       key: 'filename',
-      width: '45%',
+      width: '30%',
       render: (filename) => <span className='whitespace-nowrap'>{filename}</span>,
       sorter: (a, b) => a.filename.localeCompare(b.filename),
     },
@@ -83,7 +103,7 @@ const StlList = () => {
       title: 'Filename',
       dataIndex: 'original_filename',
       key: 'original_filename',
-      width: '45%',
+      width: '30%',
       render: (original_filename) => <span className='whitespace-nowrap'>{original_filename}</span>,
       sorter: (a, b) => a.original_filename.localeCompare(b.original_filename),
     },
@@ -93,8 +113,12 @@ const StlList = () => {
       key: 'url',
       width: '10%',
       align: 'center',
-      render: (url) => (
-        <Button type='primary' onClick={() => handleViewClick(url)}>
+      render: (_, record) => (
+        <Button
+          type='primary'
+          disabled={selectedStlId === record.id}
+          onClick={() => handleViewClick(record.url, record.id)}
+        >
           View
         </Button>
       ),
@@ -106,7 +130,7 @@ const StlList = () => {
       <div ref={stlDisplayRef} className='mb-6 rounded-lg bg-slate-800'>
         {selectedStl ? (
           <div className='h-full w-full'>
-            <StlDisplay url={selectedStl} />
+            <StlDisplay url={selectedStl} id={selectedStlId} />
           </div>
         ) : (
           <Typography.Title className='flex h-full w-full items-center justify-center !text-white' level={3}>
