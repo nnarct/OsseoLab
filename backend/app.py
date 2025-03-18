@@ -14,7 +14,9 @@ db.init_app(app)
 migrate.init_app(app, db)
 cors.init_app(app, resources={
     r"/*": {
-        "origins": Config.CORS_ORIGINS,         "supports_credentials": True
+        "origins": Config.CORS_ORIGINS,
+        "allow_headers": ["Authorization", "Content-Type"],
+        "supports_credentials": True
     }
 })
 
@@ -54,6 +56,7 @@ def handle_method_not_allowed(error):
         "message": "This HTTP method is not allowed for the requested endpoint."
     }), 405
 
+
 @app.errorhandler(403)
 def forbidden_error(error):
     return jsonify({
@@ -62,6 +65,7 @@ def forbidden_error(error):
         "message": error.description  # This will be "Access denied"
     }), 403
 
+
 @app.errorhandler(HTTPException)
 def handle_http_exception(e):
     return jsonify({
@@ -69,6 +73,7 @@ def handle_http_exception(e):
         "error": e.name,
         "message": e.description
     }), e.code
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
