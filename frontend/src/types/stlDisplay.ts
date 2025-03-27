@@ -11,3 +11,14 @@ export interface PlaneDataType {
   backColor: string;
   opacity: number;
 }
+
+export type STLDataType = {
+  id: string;
+  filename: string;
+  url: string;
+  original_filename: string;
+  created_at: string;
+  last_updated: string;
+};
+
+export type STLResponseDataType = STLDataType
