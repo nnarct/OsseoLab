@@ -2,17 +2,18 @@ import { Button } from 'antd';
 import PlaneList from './PlaneList';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 
-const MenuBar = ({ onSave }: { onSave: () => void }) => {
+const MenuBar = ({ onSave, saving }: { onSave: () => void; saving: boolean }) => {
   const { apply, addPlane, applyCut, unapplyCut } = useStlDisplay();
 
- 
   return (
     <>
       <div className='flex gap-3 p-3'>
         <Button onClick={addPlane}>Add Cutting Plane</Button>
 
         <Button onClick={apply ? unapplyCut : applyCut}>{apply ? 'undo cut' : 'cut'}</Button>
-        <Button onClick={onSave} >Save</Button>
+        <Button onClick={onSave} loading={saving}>
+          Save
+        </Button>
       </div>
 
       <PlaneList />
