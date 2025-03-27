@@ -3,7 +3,7 @@ import os
 import uuid
 from models.STL import STL
 from config.extensions import db
-
+from datetime import datetime, timezone
 
 stl_bp = Blueprint("stl", __name__)  # Blueprint instance
 
@@ -33,9 +33,8 @@ def get_stls():
             for stl in stl_files
         ]
         return jsonify({"statusCode": 200, "message": "STL File List", "data": stl_list}), 200
-    except Exception:
-        return jsonify({"statusCode": 500, "error": "Internal Server Error"}), 500
-
+    except Exception as e:
+        return jsonify({"statusCode": 500, "error": "Internal Server Error", "message" : str(e)}), 500
 
 @stl_bp.route("/stl_files/<string:id>", methods=["GET"])
 def serve_stl(id):
@@ -43,14 +42,14 @@ def serve_stl(id):
         stl_entry = STL.query.filter_by(id=id).first()
 
         if not stl_entry:
-            return jsonify({"error": "File not found"}), 404
+            return jsonify({"statusCode": 500, "error": "File not found"}), 404
 
         relative_path = stl_entry.filepath.lstrip("/")
         upload_folder = current_app.config.get("UPLOAD_FOLDER", UPLOAD_FOLDER)
 
         return send_from_directory(upload_folder, relative_path)
-    except Exception:
-        return jsonify({"statusCode": 500, "error": "Internal Server Error"}), 500
+    except Exception as e:
+        return jsonify({"statusCode": 500, "error": "Internal Server Error", "details": str(e)}), 500
 
 
 @stl_bp.route("/upload", methods=["POST"])
@@ -120,12 +119,13 @@ def update_stl(id):
             os.remove(old_file_path)
 
         # Save new STL file
-        unique_filename = f"{uuid.uuid4()}_{file.filename}"
-        new_file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
-        file.save(new_file_path)
+        # unique_filename = f"{uuid.uuid4()}_{file.filename}"
+        # new_file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+        file.save(old_file_path)
 
-        # Update database record
-        stl_entry.filepath = unique_filename
+        now_utc = datetime.now(timezone.utc)
+        # # Update database record
+        stl_entry.last_updated=now_utc
         db.session.commit()
 
         return jsonify({
@@ -138,4 +138,4 @@ def update_stl(id):
             }
         }), 200
     except Exception as e:
-        return jsonify({"statusCode": 500, "error": "Internal Server Error", "details": str(e)}), 500
+        return jsonify({"statusCode": 500, "error": "Internal Server Error", "message": str(e)}), 500
