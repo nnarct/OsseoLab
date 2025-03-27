@@ -1,5 +1,7 @@
 import { axios } from '@/config/axiosConfig.ts';
-export const getStlList = async (): Promise<STLDataType[]> => {
+import type { STLResponseDataType } from '@/types/stlDisplay';
+
+export const getStlList = async (): Promise<STLResponseDataType[]> => {
   try {
     const response = await axios.get('/stl/list');
 
@@ -10,11 +12,3 @@ export const getStlList = async (): Promise<STLDataType[]> => {
   }
 };
 
-export type STLDataType = {
-  id: string;
-  filename: string;
-  url: string;
-  original_filename: string;
-  created_at: string;
-  last_updated: string;
-};

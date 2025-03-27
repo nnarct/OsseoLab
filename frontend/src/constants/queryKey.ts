@@ -1,0 +1,1 @@
+export const STL_LIST_QUERY_KEY = 'stl-list'
