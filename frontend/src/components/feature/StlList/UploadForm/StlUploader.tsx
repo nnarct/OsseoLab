@@ -3,22 +3,26 @@ import { Upload, Button, message, Input, Form, Modal, Typography } from 'antd';
 import axios from '@/config/axiosConfig';
 import { useState } from 'react';
 import { TiUploadOutline } from 'react-icons/ti';
+import { useQueryClient } from '@tanstack/react-query';
+import { STL_LIST_QUERY_KEY } from '@/constants/queryKey';
 
 const StlUploader = () => {
   // const [nickname, setNickname] = useState("");
+  const [messageApi, contextHolder] = message.useMessage();
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [form] = Form.useForm();
+  const queryClient = useQueryClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = async (values: any) => {
     const nickname = values.nickname;
     if (!nickname.trim()) {
-      message.error('Please enter a nickname for the file!');
+      messageApi.error('Please enter a nickname for the file!');
       return;
     }
     if (!file) {
-      message.error('Please select an STL file!');
+      messageApi.error('Please select an STL file!');
       return;
     }
 
@@ -32,11 +36,13 @@ const StlUploader = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      message.success(`File "${nickname}" uploaded successfully!`);
+      messageApi.success(`File "${nickname}" uploaded successfully!`);
       console.log('Uploaded:', response.data);
+      queryClient.invalidateQueries({ queryKey: [STL_LIST_QUERY_KEY] });
+      messageApi.success('uploaded');
       setFile(null);
     } catch (error) {
-      message.error('Upload failed!');
+      messageApi.error('Upload failed!');
       console.error(error);
     } finally {
       closeModal();
@@ -49,6 +55,7 @@ const StlUploader = () => {
 
   return (
     <>
+      {contextHolder}
       <Button type='primary' onClick={openModal}>
         Add STL file
       </Button>
