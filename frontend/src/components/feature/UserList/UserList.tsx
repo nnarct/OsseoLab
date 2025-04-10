@@ -5,10 +5,18 @@ import { userColumns } from './userColumns';
 
 const UserList = () => {
   const { data, isLoading } = useGetUsers();
-
+  const roleColumn = { key: 'role', dataIndex: 'role', title: 'Role' };
+  const columns =
+    userColumns && userColumns.length > 1
+      ? [
+          ...userColumns.slice(0, userColumns.length - 1),
+          roleColumn,
+          userColumns[userColumns.length - 1],
+        ]
+      : [...(userColumns ?? []), roleColumn];
   return (
-    <Card title='Admin List'>
-      <Table dataSource={data} columns={userColumns} loading={isLoading} rowKey={'id'} scroll={{ x: 'auto' }} />
+    <Card title='User List'>
+      <Table dataSource={data} columns={columns} loading={isLoading} rowKey={'id'} scroll={{ x: 'auto' }} />
     </Card>
   );
 };
