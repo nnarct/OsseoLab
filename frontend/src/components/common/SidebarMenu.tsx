@@ -2,7 +2,7 @@
 import { Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { FaUserFriends, FaRegImages } from 'react-icons/fa';
+import { FaUserFriends, FaRegImages, FaChartBar } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 
 const SidebarMenu = () => {
@@ -14,11 +14,12 @@ const SidebarMenu = () => {
 
   // Define menu items
   const adminMenu = [
+    { key: '/', label: 'Dashboard', icon: <FaChartBar />, onClick: () => navigate('/') },
     {
-      key: '/',
+      key: '/stl-list',
       label: 'STL List',
       icon: <FaRegImages />,
-      onClick: () => navigate('/'),
+      onClick: () => navigate('/stl-list'),
     },
     {
       key: 'userlist',
@@ -62,13 +63,7 @@ const SidebarMenu = () => {
 
   return (
     <div className='flex-1 p-2 text-gray-400'>
-      <Menu
-        mode='inline'
-        theme='light'
-        selectedKeys={selectedKeys}
-        items={menuItems[role]}
-        className='!border-none'
-      />
+      <Menu mode='inline' theme='light' selectedKeys={selectedKeys} items={menuItems[role]} className='!border-none' />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 import { UserRole } from '@/types/user';
-import StlList from '@/pages/StlList/StlList';
 
+const StlList = lazy(() => import('@/pages/StlList/StlList'));
 const DoctorList = lazy(() => import('@/components/feature/UserList/DoctorList'));
 const AdminList = lazy(() => import('@/components/feature/UserList/AdminList'));
 const UserList = lazy(() => import('@/components/feature/UserList/UserList'));
@@ -10,6 +10,13 @@ const TechnicianList = lazy(() => import('@/components/feature/UserList/Technici
 // { id: 'homepage', name: 'Homepage', path: '/', element: <Homepage /> },
 
 const adminRoutes = [
+  {
+    id: 'stl  list',
+    name: 'STL List',
+    path: '/stl-list',
+    element: <StlList />,
+    requiredRole: [UserRole.Admin],
+  },
   {
     id: 'user  list',
     name: 'User List',
@@ -47,7 +54,9 @@ const adminRoutes = [
     requiredRole: [UserRole.Admin],
   },
 ];
+
 const routesConfig = adminRoutes;
+
 // {
 //   id: 'admin',
 //   name: 'Admin Dashboard',

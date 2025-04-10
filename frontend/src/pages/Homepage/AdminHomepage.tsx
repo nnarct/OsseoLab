@@ -1,7 +1,7 @@
-import StlList from '../StlList/StlList';
+import DashboardPage from '@/pages/Dashboard/DashboardPage';
 
 const AdminHomepage = () => {
-  return <StlList />;
+  return <DashboardPage />;
 };
 
 export default AdminHomepage;
