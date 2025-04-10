@@ -12,7 +12,7 @@ def admin_required(f):
         user_data = claims.get('userData')
         if user_data.get('role') != Role.ADMIN:
 
-            abort(403, description="Access denied")
+            abort(403, description="Access denied. Admin Only.")
 
         return f(*args, **kwargs)
 
@@ -26,8 +26,7 @@ def tech_required(f):
         user_data = claims.get('userData')
         if user_data.get('role') != Role.TECH:
 
-            abort(403, description="Access denied")
-
+            abort(403, description="Access denied. Technician Only")
         return f(*args, **kwargs)
     return decorated_function
 
@@ -39,7 +38,7 @@ def doctor_required(f):
         user_data = claims.get('userData')
         if user_data.get('role') != Role.DOCTOR:
 
-            abort(403, description="Access denied")
+            abort(403, description="Access denied. Doctor Only.")
 
         return f(*args, **kwargs)
 
