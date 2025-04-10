@@ -5,7 +5,7 @@ import { userColumns } from '@/components/feature/UserList/userColumns';
 const TechnicianList = () => {
   const { data, isLoading } = useGetTechnicians();
   return (
-    <Card title='Admin List'>
+    <Card title='Technician List'>
       <Table dataSource={data} columns={userColumns} loading={isLoading} rowKey={'id'} scroll={{ x: 'auto' }} />
     </Card>
   );
