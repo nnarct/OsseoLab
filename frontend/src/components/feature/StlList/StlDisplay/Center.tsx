@@ -16,11 +16,16 @@ import { CSG } from 'three-csg-ts';
 import SceneSetter from './SceneSetter';
 import { useSceneStore } from '@/store/useSceneStore';
 import { convert } from '@/services/stlExporter/convert';
+import Angle from './Angle';
+
 const Center = ({ url, id }: { url: string; id: string }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { planes, resetModel } = useStlDisplay();
   const meshRef = useRef<THREE.Mesh>(null);
+  const [angleActive, setAngleActive] = useState(false);
+  const [saving, setSaving] = useState(false);
+
   useEffect(() => {
     resetModel();
   }, [url]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -129,6 +134,7 @@ const Center = ({ url, id }: { url: string; id: string }) => {
         {planes.map((planeObj) => (
           <ClippingPlane key={planeObj.id} {...planeObj} />
         ))}
+        {/* <Angle active={angleActive} /> */}
       </Canvas>
     </>
   );
