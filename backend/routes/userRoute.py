@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from models.User import User
 from models.enums import Role
 from config.extensions import db
-from service.authService import admin_required
+from services.authService import admin_required
 from werkzeug.exceptions import HTTPException
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")

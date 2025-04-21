@@ -1,7 +1,7 @@
 from models.User import User
 from models.Tech import Tech
 from models.Doctor import Doctor
-from service.authService import admin_required
+from services.authService import admin_required
 from flask import Blueprint, request, jsonify, send_from_directory, current_app
 from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 import os

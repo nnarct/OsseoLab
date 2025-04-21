@@ -2,6 +2,7 @@ import datetime
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
+from services.authService import get_user_role
 
 from models.Doctor import Doctor
 from models.Tech import Tech
@@ -124,4 +125,24 @@ def login():
             "statusCode": 500,
             "message": "Internal Server Error",
             "error": f"An error occurred: {e}"
+        }), 500
+
+
+@auth_bp.route("/auth/permission", methods=["GET"])
+def get_role():
+    """Returns the role of the authenticated user or 'visitor' if unauthenticated"""
+    try:
+        role = get_user_role()
+        return jsonify({
+            "statusCode": 200,
+            "message": f"You have permission of {role}",
+            "data": {
+                "role": role
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "statusCode": 500,
+            "message": "Internal Server Error",
+            "error": str(e)
         }), 500
