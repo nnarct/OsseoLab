@@ -1,10 +1,22 @@
 import { Button } from 'antd';
 import PlaneList from './PlaneList';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
+import { useMeasureStore } from '@/store/useMeasureStore';
 
-const MenuBar = ({ onSave, saving }: { onSave: () => void; saving: boolean }) => {
+// import { MeasureDistance } from './MeasureDistance';
+
+const MenuBar = ({
+  onSave,
+  saving,
+}: {
+  onSave: () => void;
+  saving: boolean;
+}) => {
   const { apply, addPlane, applyCut, unapplyCut } = useStlDisplay();
-
+  const { activeMeasure, setActiveMeasure, panelInfo } = useMeasureStore();
+  const setMeasure = () => {
+    setActiveMeasure(!activeMeasure);
+  };
   return (
     <>
       <div className='flex gap-3 p-3'>
@@ -14,9 +26,14 @@ const MenuBar = ({ onSave, saving }: { onSave: () => void; saving: boolean }) =>
         <Button onClick={onSave} loading={saving}>
           Save
         </Button>
+        <Button onClick={setMeasure} type={activeMeasure?'primary':'default'} >
+        {/* className={`measure-button ${activeMeasure ? 'active' : ''}`}*/}
+         {activeMeasure ? 'Exit Measure' : 'Measure'} 
+        </Button>
       </div>
-
+      {activeMeasure && <div className='bg-blue-100 py-2'>{panelInfo}</div>}
       <PlaneList />
+      {/* <MeasureDistance /> */}
     </>
   );
 };

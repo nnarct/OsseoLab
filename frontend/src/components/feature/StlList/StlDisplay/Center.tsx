@@ -16,6 +16,10 @@ import { CSG } from 'three-csg-ts';
 import SceneSetter from './SceneSetter';
 import { useSceneStore } from '@/store/useSceneStore';
 import { convert } from '@/services/stlExporter/convert';
+import MeasureDistance from './MeasureDistance';
+import { MeasureTool } from './MeasureTool';
+import { useMeasureStore } from '@/store/useMeasureStore';
+
 const Center = ({ url, id }: { url: string; id: string }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -26,6 +30,8 @@ const Center = ({ url, id }: { url: string; id: string }) => {
   }, [url]); // eslint-disable-line react-hooks/exhaustive-deps
   const queryClient = useQueryClient();
 
+ const {activeMeasure} = useMeasureStore()
+  
   const applyClippingPlanes = (geometry: THREE.BufferGeometry, planes: THREE.Plane[]) => {
     const positions = geometry.attributes.position.array;
     const newPositions = [];
@@ -121,6 +127,7 @@ const Center = ({ url, id }: { url: string; id: string }) => {
           await save(id);
         }}
         saving={isLoading}
+
       />
       <Canvas style={{ height: '80vh', maxWidth: '80vh', width: 'auto', background: 'black', marginInline: 'auto' }}>
         <SceneSetter />
@@ -129,7 +136,10 @@ const Center = ({ url, id }: { url: string; id: string }) => {
         {planes.map((planeObj) => (
           <ClippingPlane key={planeObj.id} {...planeObj} />
         ))}
+       {activeMeasure && <MeasureTool />}
+        {/* {measureActive && <MeasureDistance />} */}
       </Canvas>
+      {/* <MeasureDistance /> */}
     </>
   );
 };
