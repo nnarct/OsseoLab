@@ -24,7 +24,7 @@ const Lighting = () => {
   return (
     <>
       <directionalLight ref={whiteLightRef} intensity={2} color={0xffffff} />
-      <ContactShadows position={[0, -1.5, 0]} opacity={0.35} blur={3} color={'#A9A9A9'} />
+      {/* <ContactShadows position={[0, -1.5, 0]} opacity={0.35} blur={3} color={'#A9A9A9'} /> */}
     </>
   );
 };
