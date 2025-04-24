@@ -2,16 +2,11 @@ import { Button } from 'antd';
 import PlaneList from './PlaneList';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 import { useMeasureStore } from '@/store/useMeasureStore';
+import LineList from '../MeasureTool/LineList';
 
 // import { MeasureDistance } from './MeasureDistance';
 
-const MenuBar = ({
-  onSave,
-  saving,
-}: {
-  onSave: () => void;
-  saving: boolean;
-}) => {
+const MenuBar = ({ onSave, saving }: { onSave: () => void; saving: boolean }) => {
   const { apply, addPlane, applyCut, unapplyCut } = useStlDisplay();
   const { activeMeasure, setActiveMeasure, panelInfo } = useMeasureStore();
   const setMeasure = () => {
@@ -26,12 +21,17 @@ const MenuBar = ({
         <Button onClick={onSave} loading={saving}>
           Save
         </Button>
-        <Button onClick={setMeasure} type={activeMeasure?'primary':'default'} >
-        {/* className={`measure-button ${activeMeasure ? 'active' : ''}`}*/}
-         {activeMeasure ? 'Exit Measure' : 'Measure'} 
+        <Button onClick={setMeasure} type={activeMeasure ? 'primary' : 'default'}>
+          {/* className={`measure-button ${activeMeasure ? 'active' : ''}`}*/}
+          {activeMeasure ? 'Exit Measure' : 'Measure'}
         </Button>
       </div>
-      {activeMeasure && <div className='bg-blue-100 py-2'>{panelInfo}</div>}
+      {activeMeasure && (
+        <>
+          <div className='bg-blue-100 py-2'>{panelInfo}</div>
+          <LineList />
+        </>
+      )}
       <PlaneList />
       {/* <MeasureDistance /> */}
     </>

@@ -1,15 +1,9 @@
+import * as THREE from 'three';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { useThree } from '@react-three/fiber';
-import * as THREE from 'three';
-import { Line } from '@react-three/drei';
+import { Line, Text } from '@react-three/drei';
 import { useMeasureStore } from '@/store/useMeasureStore';
-
-interface MarkerProps {
-  position: THREE.Vector3;
-  normal: THREE.Vector3;
-  radius: number;
-  lookAtNormal?: boolean;
-}
+import type { MarkerProps, IntersectionData } from '@/types/measureTool';
 
 const Marker = ({ position, normal, radius, lookAtNormal = true }: MarkerProps) => {
   const markerRef = useRef<THREE.Object3D>(null);
@@ -64,14 +58,10 @@ const Marker = ({ position, normal, radius, lookAtNormal = true }: MarkerProps) 
   );
 };
 
-interface IntersectionData {
-  point: THREE.Vector3;
-  normal: THREE.Vector3;
-}
-
 export const MeasureTool = () => {
   const { camera, gl, scene } = useThree();
-  const [markers, setMarkers] = useState<IntersectionData[]>([]);
+  const { markerPairs, setMarkerPairs, addMarker, currentMarker } = useMeasureStore();
+
   const [hoverMarker, setHoverMarker] = useState<IntersectionData | null>(null);
   const [markerRadius, setMarkerRadius] = useState<number>(1.0);
   const [mouseDownPosition, setMouseDownPosition] = useState<{ x: number; y: number } | null>(null);
@@ -87,9 +77,10 @@ export const MeasureTool = () => {
   }, [scene]);
 
   const handleClick = (event: MouseEvent) => {
+
     const intersection = getIntersection(event.clientX, event.clientY);
     if (!intersection) {
-      setMarkers([]);
+      setMarkerPairs([]);
       setPanelInfo('Select a point.');
       return;
     }
@@ -101,12 +92,7 @@ export const MeasureTool = () => {
       normal: intersection.normal,
     };
 
-    if (markers.length >= 2) {
-      setMarkers([markerData]);
-      setPanelInfo('Select another point.');
-    } else {
-      setMarkers((prev) => [...prev, markerData]);
-    }
+    addMarker(markerData);
   };
 
   const handleMouseMove = (event: MouseEvent) => {
@@ -141,62 +127,88 @@ export const MeasureTool = () => {
       gl.domElement.removeEventListener('mouseup', handleMouseUp);
       gl.domElement.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [markers, mouseDownPosition]);
+  }, [mouseDownPosition]);
 
-  useEffect(() => {
-    if (markers.length === 2) {
-      const distance = markers[0].point.distanceTo(markers[1].point).toFixed(3);
-      const angle = markers[0].normal.angleTo(markers[1].normal) * (180 / Math.PI);
-      setPanelInfo(`Distance: ${distance} units \nAngle: ${angle.toFixed(1)}\u00b0`);
-    }
-  }, [markers]);
+  // useEffect(() => {
+  // if (markers.length === 2) {
+  //   const distance = markers[0].point.distanceTo(markers[1].point).toFixed(3);
+  //   const angle = markers[0].normal.angleTo(markers[1].normal) * (180 / Math.PI);
+  //   setPanelInfo(`Distance: ${distance} units \nAngle: ${angle.toFixed(1)}\u00b0`);
+  // }
+
+  // }, [markers]);
 
   function getIntersection(x: number, y: number): IntersectionData | null {
     const mouse = new THREE.Vector2();
     const canvas = gl.domElement;
     const rect = canvas.getBoundingClientRect();
-
+  
     mouse.x = ((x - rect.left) / rect.width) * 2 - 1;
     mouse.y = -((y - rect.top) / rect.height) * 2 + 1;
-
+  
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
-
+  
     const intersects = raycaster.intersectObjects(scene.children, true);
+    console.log('Intersects:', intersects); // ← add this
+  
     for (const intersect of intersects) {
       if (intersect.face && intersect.object) {
         const normalMatrix = new THREE.Matrix3().getNormalMatrix(intersect.object.matrixWorld);
         const worldNormal = intersect.face.normal.clone().applyMatrix3(normalMatrix).normalize();
-
         const point = intersect.point.clone().add(worldNormal.clone().multiplyScalar(0.01));
-
-        return {
-          point,
-          normal: worldNormal,
-        };
+        return { point, normal: worldNormal };
       }
     }
     return null;
   }
-
+  
+  useEffect(() => {
+    console.log({ currentMarker, markerPairs });
+  }, [currentMarker, markerPairs]);
   return (
     <>
       {hoverMarker && (
         <Marker position={hoverMarker.point} normal={hoverMarker.normal} radius={markerRadius} lookAtNormal={true} />
       )}
-      {markers.map((marker, index) => (
-        <Marker key={index} position={marker.point} normal={marker.normal} radius={markerRadius} />
-      ))}
-      {markers.length === 2 && (
-        <Line
-          points={[markers[0].point, markers[1].point]}
-          color='#fffb00'
-          lineWidth={1}
-          depthTest={false}
-          polygonOffset={true}
-          polygonOffsetFactor={-1}
-        />
+      {currentMarker[0] && (
+        <Marker position={currentMarker[0].point} normal={currentMarker[0].normal} radius={markerRadius} />
       )}
+      {markerPairs.map((pair, index) => (
+        <group key={index}>
+          <Marker position={pair.origin.point} normal={pair.origin.normal} radius={markerRadius} />
+          <Marker position={pair.destination.point} normal={pair.destination.normal} radius={markerRadius} />
+          <Line
+            points={[pair.origin.point, pair.destination.point]}
+            color='#fffb00'
+            lineWidth={1}
+            depthTest={false}
+            polygonOffset={true}
+            polygonOffsetFactor={-1}
+          />
+          <group
+            position={
+              pair.origin.point.clone()
+                .add(pair.destination.point)
+                .multiplyScalar(0.5)
+                .add(new THREE.Vector3(0, markerRadius * 2, 0))
+            }
+          >
+            <mesh>
+              <circleGeometry args={[markerRadius * 1.8, 32]} />
+              <meshBasicMaterial color="white" />
+            </mesh>
+            <Text
+              fontSize={markerRadius * 2}
+              color="black"
+              anchorX="center"
+              anchorY="middle"
+            >
+              {index + 1}
+            </Text>
+          </group>
+        </group>
+      ))}
     </>
   );
 };
