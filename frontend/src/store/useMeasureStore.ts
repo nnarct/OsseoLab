@@ -9,7 +9,9 @@ interface MeasureState {
   setPanelInfo: (panelInfo: string) => void;
   currentMarker: IntersectionData[];
   addMarker: (marker: IntersectionData) => void;
+  removePair: (index:number) => void
   markerPairs: MarkerPairDataType[];
+  
   setMarkerPairs: (markersPair: MarkerPairDataType[]) => void;
 }
 
@@ -37,6 +39,10 @@ export const useMeasureStore = create<MeasureState>((set) => ({
         return { currentMarker: updatedCurrent };
       }
     }),
+    removePair: (index: number) =>
+      set((state) => ({
+        markerPairs: state.markerPairs.filter((_, i) => i !== index),
+      })),
   markerPairs: [],
   setMarkerPairs: (markerPairs: MarkerPairDataType[]) => set({ markerPairs }),
 }));
