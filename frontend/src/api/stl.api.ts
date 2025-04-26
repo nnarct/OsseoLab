@@ -1,5 +1,5 @@
 import { axios } from '@/config/axiosConfig.ts';
-import type { STLResponseDataType } from '@/types/stlDisplay';
+import type { STLResponseDataType, STLLinkDataType } from '@/types/stlDisplay';
 
 export const getStlList = async (): Promise<STLResponseDataType[]> => {
   try {
@@ -12,3 +12,16 @@ export const getStlList = async (): Promise<STLResponseDataType[]> => {
   }
 };
 
+export const getStlById = async (id: string): Promise<STLLinkDataType> => {
+  try {
+    const response = await axios.get(`/stl/${id}`);
+    console.log({ response });
+    return {
+      id: response.data.data.id,
+      url: response.data.data.url,
+    };
+  } catch (error) {
+    console.log({ error });
+    throw error;
+  }
+};

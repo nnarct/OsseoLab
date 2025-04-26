@@ -21,4 +21,6 @@ export type STLDataType = {
   last_updated: string;
 };
 
-export type STLResponseDataType = STLDataType
+export type STLResponseDataType = STLDataType;
+
+export type STLLinkDataType = Pick<STLDataType, 'id' | 'url'>;
