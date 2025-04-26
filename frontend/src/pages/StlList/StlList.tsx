@@ -13,8 +13,8 @@ const StlList = () => {
   const { data } = useGetStlList();
   const stlDisplayRef = useRef<HTMLDivElement | null>(null);
   const [stls, setStls] = useState<STLDataType[]>([]);
-  const [selectedStl, setSelectedStl] = useState<string | null>('');
-  const [selectedStlId, setSelectedStlId] = useState<string>('');
+  // const [selectedStl, setSelectedStl] = useState<string | null>('');
+  // const [selectedStlId, setSelectedStlId] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string>('');
   const [filteredData, setFilteredData] = useState<STLDataType[]>([]);
 
@@ -33,29 +33,16 @@ const StlList = () => {
   }, [searchValue, stls]);
 
   return (
-    <div className='container mx-auto'>
-      <div ref={stlDisplayRef} className='mb-6 rounded-lg bg-slate-800'>
-        {selectedStl ? (
-          <div className='h-full w-full'>
-            <StlDisplay url={selectedStl} id={selectedStlId} />
-          </div>
-        ) : (
-          <Typography.Title className='flex h-full w-full items-center justify-center !text-white' level={3}>
-            Select one STL to display
-          </Typography.Title>
-        )}
-      </div>
-
+    <div className='p-4'>
       <Card title={'STL List'}>
         <div className='mb-6 flex justify-between'>
           <Input.Search allowClear placeholder='Enter STL name' className='mr-6 max-w-80' onSearch={setSearchValue} />
           <StlUploader />
         </div>
         <StlTable
-          setSelectedStl={setSelectedStl}
-          setSelectedStlId={setSelectedStlId}
-          stlDisplayRef={stlDisplayRef}
-          selectedStlId={selectedStlId}
+          // setSelectedStl={setSelectedStl}
+          // setSelectedStlId={setSelectedStlId}
+          // selectedStlId={selectedStlId}
           filteredData={filteredData}
         />
       </Card>

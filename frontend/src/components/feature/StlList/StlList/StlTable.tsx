@@ -5,14 +5,15 @@ import StlIdCell from './StlIdCell';
 import { useNavigate } from 'react-router-dom';
 
 type Props = {
-  selectedStlId: string;
-  setSelectedStl: React.Dispatch<React.SetStateAction<string | null>>;
-  setSelectedStlId: React.Dispatch<React.SetStateAction<string>>;
-  stlDisplayRef: React.MutableRefObject<HTMLDivElement | null>;
+  // selectedStlId: string;
+  // setSelectedStl: React.Dispatch<React.SetStateAction<string | null>>;
+  // setSelectedStlId: React.Dispatch<React.SetStateAction<string>>;
+  // stlDisplayRef: React.MutableRefObject<HTMLDivElement | null>;
   filteredData: STLDataType[];
 };
 
-const StlTable = ({ setSelectedStl, setSelectedStlId, stlDisplayRef, selectedStlId, filteredData }: Props) => {
+// const StlTable = ({ setSelectedStl, setSelectedStlId, stlDisplayRef, selectedStlId, filteredData }: Props) => {
+const StlTable = ({ filteredData }: Props) => {
   // v1: For seeing stl in single same page
   // const handleViewClick = (url: string, id: string) => {
   //   setSelectedStl(url);
@@ -68,7 +69,7 @@ const StlTable = ({ setSelectedStl, setSelectedStlId, stlDisplayRef, selectedStl
       width: '10%',
       align: 'center',
       render: (_, record) => (
-        <Button type='primary' disabled={selectedStlId === record.id} onClick={() => handleViewClick(record.id)}>
+        <Button type='primary' onClick={() => handleViewClick(record.id)}>
           View
         </Button>
       ),
