@@ -40,8 +40,8 @@
 // export default StlDisplay;
 
 
-const StlDisplay = () => {
-  return 'STL Display'
-}
+// const StlDisplay = () => {
+//   return 'STL Display'
+// }
 
-export default StlDisplay
+// export default StlDisplay
