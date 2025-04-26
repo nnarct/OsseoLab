@@ -6,17 +6,13 @@ import { useStlDisplay } from '@/hooks/useStlDisplay';
 interface MenuBarProps {
   onSave: () => void;
   saving: boolean;
-  angleActive: boolean;
-  onToggleAngle: () => void;
 }
 
 const MenuBar = ({
   onSave,
-  saving,
-  angleActive,      
-  onToggleAngle,    
+  saving,  
 }: MenuBarProps) => {
-  const { apply, addPlane, applyCut, unapplyCut } = useStlDisplay();
+  const { apply, addPlane, applyCut, unapplyCut, toggleAngleActive, isAngleActive} = useStlDisplay();
 
   return (
     <>
@@ -27,10 +23,10 @@ const MenuBar = ({
         </Button>
 
         <Button
-          type={angleActive ? 'primary' : 'default'}
-          onClick={onToggleAngle}
+          type={isAngleActive ? 'primary' : 'default'}
+          onClick={toggleAngleActive}
         >
-          {angleActive ? 'Cancel Angle' : 'Angle'}
+          {isAngleActive ? 'Cancel Angle' : 'Angle'}
         </Button>
 
         <Button onClick={onSave} loading={saving}>

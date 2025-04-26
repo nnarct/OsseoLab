@@ -30,6 +30,9 @@ interface StlDisplayContextType {
   apply: boolean;
 
   resetModel: () => void;
+
+  toggleAngleActive: () => void;
+  isAngleActive: boolean;
 }
 
 const StlDisplayContext = createContext<StlDisplayContextType | undefined>(undefined);
@@ -40,7 +43,8 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
   const [selectedCutPlanes, setSelectedCutPlanes] = useState<(string | undefined)[]>([undefined, undefined]);
   const sceneHandlerRef = useRef<{ applyCut: () => void } | null>(null);
   const [apply, setApply] = useState<boolean>(false);
-
+  const [isAngleActive, setIsAngleActive] = useState<boolean>(false);
+  const toggleAngleActive = () => setIsAngleActive(!isAngleActive);
   const addPlane = useCallback(() => {
     const id = uuid();
     const newPlane = {
@@ -117,6 +121,8 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
         apply,
         setPlanes,
         resetModel,
+        toggleAngleActive,
+        isAngleActive,
       }}
     >
       {children}

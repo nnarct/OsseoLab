@@ -23,7 +23,6 @@ const Center = ({ url, id }: { url: string; id: string }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { planes, resetModel } = useStlDisplay();
   const meshRef = useRef<THREE.Mesh>(null);
-  const [angleActive, setAngleActive] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -127,14 +126,15 @@ const Center = ({ url, id }: { url: string; id: string }) => {
         }}
         saving={isLoading}
       />
-      <Canvas style={{ height: '80vh', maxWidth: '80vh', width: 'auto', background: 'black', marginInline: 'auto' }}>
+      {/* <Canvas style={{ height: '80vh', maxWidth: '80vh', width: 'auto', background: '#f7f7f7', marginInline: 'auto' }}> */}
+      <Canvas style={{ width: 'auto', height: '90vh', background: '#f7f7f7', marginInline: 'auto' }}>
         <SceneSetter />
         <Controllers />
         <Model url={url} meshRef={meshRef} />
         {planes.map((planeObj) => (
           <ClippingPlane key={planeObj.id} {...planeObj} />
         ))}
-        {/* <Angle active={angleActive} /> */}
+        <Angle />
       </Canvas>
     </>
   );
