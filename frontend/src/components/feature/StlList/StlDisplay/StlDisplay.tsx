@@ -1,10 +1,15 @@
 import { StlDisplayProvider } from '@/context/StlDisplayContext';
 import Center from './Center';
+import { useGetStlById } from '@/services/admin/stl.service';
 
-const StlDisplay = ({ url, id }: { url: string; id: string }) => {
+const StlDisplay = ({ url, id }: { url?: string; id: string }) => {
+  const { data } = useGetStlById(id);
+  //if error
+  // if loading
+  if(!data) return 'data missing'
   return (
     <StlDisplayProvider>
-      <Center url={url} id={id} />
+      <Center url={data.url} id={id} />
       {/* <MenuBar />
       <CanvasScene url={url} /> */}
     </StlDisplayProvider>

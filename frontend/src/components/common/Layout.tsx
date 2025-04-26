@@ -74,7 +74,8 @@ const AppLayout = () => {
       </Sider>
       <Layout>
         {/* 🔹 Page Content */}
-        <Content className='p-8' style={{ flex: 1, overflow: 'initial' }}>
+        {/* <Content className='p-8' style={{ flex: 1, overflow: 'initial' }}> */}
+        <Content style={{ flex: 1, overflow: 'initial' }}>
           <Outlet /> {/* 🚀 This renders the current route's component */}
         </Content>
 

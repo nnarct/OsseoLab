@@ -1,11 +1,10 @@
-import { useState } from "react";
-import { Tooltip, Button } from "antd";
-import { IoMdCheckmark, IoMdCopy } from "react-icons/io";
+import { useState } from 'react';
+import { Tooltip, Button } from 'antd';
+import { IoMdCheckmark, IoMdCopy } from 'react-icons/io';
 
 type Props = { id: string };
-const IDColumn = ({ id }: Props) => {
+const StlIdCell = ({ id }: Props) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  
 
   const handleCopyId = async (id: string) => {
     try {
@@ -32,4 +31,4 @@ const IDColumn = ({ id }: Props) => {
   );
 };
 
-export default IDColumn;
+export default StlIdCell;

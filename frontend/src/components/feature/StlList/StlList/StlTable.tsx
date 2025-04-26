@@ -1,7 +1,8 @@
 import dayjs from 'dayjs';
 import { TableProps, Button, Table } from 'antd';
 import type { STLDataType } from '@/types/stlDisplay';
-import IDColumn from './IDColumn';
+import StlIdCell from './StlIdCell';
+import { useNavigate } from 'react-router-dom';
 
 type Props = {
   selectedStlId: string;
@@ -12,12 +13,20 @@ type Props = {
 };
 
 const StlTable = ({ setSelectedStl, setSelectedStlId, stlDisplayRef, selectedStlId, filteredData }: Props) => {
-  const handleViewClick = (url: string, id: string) => {
-    setSelectedStl(url);
-    setSelectedStlId(id);
-    setTimeout(() => {
-      stlDisplayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
+  // v1: For seeing stl in single same page
+  // const handleViewClick = (url: string, id: string) => {
+  //   setSelectedStl(url);
+  //   setSelectedStlId(id);
+  //   setTimeout(() => {
+  //     stlDisplayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  //   }, 100);
+  // };
+
+  // v2: For seeing stl in new page
+  const navigate = useNavigate();
+  const handleViewClick = (id: string) => {
+    console.log('handleViewClick', id);
+    navigate('/case/' + id);
   };
 
   const columns: TableProps<STLDataType>['columns'] = [
@@ -59,11 +68,7 @@ const StlTable = ({ setSelectedStl, setSelectedStlId, stlDisplayRef, selectedStl
       width: '10%',
       align: 'center',
       render: (_, record) => (
-        <Button
-          type='primary'
-          disabled={selectedStlId === record.id}
-          onClick={() => handleViewClick(record.url, record.id)}
-        >
+        <Button type='primary' disabled={selectedStlId === record.id} onClick={() => handleViewClick(record.id)}>
           View
         </Button>
       ),
@@ -72,7 +77,7 @@ const StlTable = ({ setSelectedStl, setSelectedStlId, stlDisplayRef, selectedStl
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      render: (id) => <IDColumn id={id} />,
+      render: (id) => <StlIdCell id={id} />,
     },
   ];
   return <Table dataSource={filteredData} columns={columns} rowKey='id' scroll={{ x: 'auto' }} />;

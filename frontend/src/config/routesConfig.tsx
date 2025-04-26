@@ -6,6 +6,7 @@ const DoctorList = lazy(() => import('@/components/feature/UserList/DoctorList')
 const AdminList = lazy(() => import('@/components/feature/UserList/AdminList'));
 const UserList = lazy(() => import('@/components/feature/UserList/UserList'));
 const TechnicianList = lazy(() => import('@/components/feature/UserList/TechnicianList'));
+const Case = lazy(() => import('@/pages/StlList/Case'));
 
 // { id: 'homepage', name: 'Homepage', path: '/', element: <Homepage /> },
 
@@ -52,6 +53,14 @@ const adminRoutes = [
     path: '/doctor/list',
     element: <DoctorList />,
     requiredRole: [UserRole.Admin],
+  },
+
+  {
+    id: 'case',
+    name: 'Case',
+    path: '/case/:id',
+    element: <Case />,
+    requiredRole: [UserRole.Admin, UserRole.Technician, UserRole.Doctor],
   },
 ];
 
