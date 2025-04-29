@@ -3,7 +3,7 @@ import type { PlaneDataType, TransformControlsMode } from '@/types/stlDisplay';
 import { createContext, ReactNode, useCallback, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { v4 as uuid } from 'uuid';
-import type { IntersectionData, MarkerPairDataType } from '@/types/measureTool';
+import type { IntersectionData, MarkerPairDataType, AngleGroupDataType } from '@/types/measureTool';
 
 interface SceneHandlerRefType {
   camera?: THREE.PerspectiveCamera;
@@ -24,8 +24,10 @@ interface StlDisplayContextType {
   angleHandler: {
     isActive: boolean;
     // toggle: () => void;
-    // add: () => void;
-    // clear: () => void;
+    angleGroup: AngleGroupDataType[];
+    currentAngleGroup: IntersectionData[];
+    addMarker: (markerData: IntersectionData) => void;
+    clear: () => void;
   };
 
   planeHandler: {
@@ -78,6 +80,43 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
   const [panelInfo, setPanelInfo] = useState<string | null>('Select a point.');
   const [currentMarker, setCurrentMarker] = useState<IntersectionData | null>(null);
   const [markerPairs, setMarkerPairs] = useState<MarkerPairDataType[]>([]);
+
+  // Angle
+  const [angleGroup, setAngleGroup] = useState<AngleGroupDataType[]>([]);
+  const [currentAngleGroup, setCurrentAngleGroup] = useState<IntersectionData[]>([]);
+
+  const clearAngle = () => {
+    setAngleGroup([]);
+    setCurrentAngleGroup([]);
+  };
+
+  const addAngleMarker = (markerData: IntersectionData) => {
+    if (currentAngleGroup.length === 0 || !currentAngleGroup) {
+      console.log('Adding origin');
+      setCurrentAngleGroup([markerData]);
+      setPanelInfo('Select the second point.');
+    }
+    if (currentAngleGroup.length === 1) {
+      console.log('Adding middle');
+      setCurrentAngleGroup((prev) => [...(prev || []), markerData]);
+      setPanelInfo('Select the third point.');
+    }
+    if (currentAngleGroup.length === 2) {
+      console.log('Adding destination');
+      setCurrentAngleGroup((prev) => [...(prev || []), markerData]);
+      setPanelInfo('Select the first point.');
+      const newAngleGroup = {
+        origin: currentAngleGroup[0],
+        middle: currentAngleGroup[1],
+        destination: markerData,
+      };
+      setAngleGroup((prev) => (prev ? [...prev, newAngleGroup] : [newAngleGroup]));
+      setCurrentAngleGroup([]);
+      setPanelInfo('Select a point.');
+    }
+  };
+
+  //  todo: rename
   const addMarker = (marker: IntersectionData) => {
     if (currentMarker) {
       const newPair: MarkerPairDataType = {
@@ -224,6 +263,10 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
         },
         angleHandler: {
           isActive: currentTool === 'angle',
+          angleGroup,
+          currentAngleGroup,
+          addMarker: addAngleMarker,
+          clear: clearAngle,
           // add: () => {}, // placeholder if needed
           // clear: () => setCurrentTool(null), // clear example
         },

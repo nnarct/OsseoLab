@@ -7,9 +7,12 @@ import LineList from '../MeasureTool/LineList';
 import { FiRefreshCcw } from 'react-icons/fi';
 import * as THREE from 'three';
 import { MAX_ZOOM, MIN_ZOOM } from '@/constants/stlDisplay';
-
+import { FaRuler } from 'react-icons/fa';
+import { MdOutlineContentCut } from 'react-icons/md';
 // import { MeasureDistance } from './MeasureDistance';
-
+import { RxAngle } from 'react-icons/rx';
+import { FaFloppyDisk } from "react-icons/fa6";
+import { LuSquareDashedBottom } from "react-icons/lu";
 interface MenuBarProps {
   onSave: () => void;
   saving: boolean;
@@ -67,17 +70,24 @@ const MenuBar = ({ onSave, saving }: MenuBarProps) => {
   return (
     <>
       <div className='flex gap-3 p-3'>
-        <Button onClick={handleAddPlane}>Add Cutting Plane</Button>
-        <Button onClick={handleCutToggle} disabled={planeHandler.getPlanes().length === 0}>
+        <Button onClick={handleAddPlane} icon={<LuSquareDashedBottom/>}>Plane</Button>
+        <Button
+          onClick={handleCutToggle}
+          disabled={planeHandler.getPlanes().length === 0}
+          icon={<MdOutlineContentCut />}
+        >
           {isCut ? 'Undo Cut' : 'Cut'}
         </Button>
-        <Button type={isAngleActive ? 'primary' : 'default'} onClick={handleToggleAngle}>
+        <Button type={isAngleActive ? 'primary' : 'default'} onClick={handleToggleAngle} icon={<RxAngle />}>
           {isAngleActive ? 'Cancel Angle' : 'Angle'}
         </Button>
-        <Button type={isMeasureActive ? 'primary' : 'default'} onClick={handleToggleMeasure}>
-          {isMeasureActive ? 'Exit Measure' : 'Measure'}
-        </Button>
-        <Button onClick={handleSave} loading={saving}>
+        <Tooltip defaultOpen title={isMeasureActive ? 'Exit Measure' : 'Measure'}>
+          {' '}
+          <Button type={isMeasureActive ? 'primary' : 'default'} onClick={handleToggleMeasure} icon={<FaRuler />}>
+            {/* {isMeasureActive ? 'Exit Measure' : 'Measure'} */}
+          </Button>
+        </Tooltip>
+        <Button onClick={handleSave} loading={saving} icon={<FaFloppyDisk />}>
           Save
         </Button>
         <Tooltip title='Reset 3D Model'>

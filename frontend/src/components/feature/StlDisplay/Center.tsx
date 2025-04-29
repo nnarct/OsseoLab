@@ -16,16 +16,19 @@ import { CSG } from 'three-csg-ts';
 import SceneSetter from './SceneSetter';
 import { useSceneStore } from '@/store/useSceneStore';
 import { convert } from '@/services/stlExporter/convert';
-import Angle from './AngleTool/Angle';
+// import Angle from './AngleTool/Angle';
 
 import MeasureDistance from './MeasureDistance';
 import { MeasureTool } from './MeasureTool/MeasureTool';
+import AngleTool from './AngleTool/AngleTool';
+// import AngleTool from './AngleTool/Angle';
 
 const Center = ({ url, id }: { url: string; id: string }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { planeHandler, resetModel, measureHandler } = useStlDisplay();
+  const { planeHandler, angleHandler,resetModel, measureHandler } = useStlDisplay();
   const { isActive: isMeasureActive } = measureHandler;
+  const { isActive: isAngleActive } = angleHandler;
   const planes = planeHandler.getPlanes();
   const meshRef = useRef<THREE.Mesh>(null);
   const [saving, setSaving] = useState(false);
@@ -139,7 +142,9 @@ const Center = ({ url, id }: { url: string; id: string }) => {
         {planes.map((planeObj) => (
           <ClippingPlane key={planeObj.id} {...planeObj} />
         ))}
-        <Angle />
+{/* <Angle/> */}
+
+        {isAngleActive && <AngleTool />}
         {isMeasureActive && <MeasureTool />}
         {/* {measureActive && <MeasureDistance />} */}
       </Canvas>

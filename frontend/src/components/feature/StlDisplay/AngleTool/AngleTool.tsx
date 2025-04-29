@@ -5,17 +5,20 @@ import { Line, Html } from '@react-three/drei';
 import type { IntersectionData } from '@/types/measureTool';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 
-import  Marker  from './Marker';
+import Marker from '@/components/feature/StlDisplay/MeasureTool/Marker';
 
-export const MeasureTool = () => {
+
+const AngleTool = () => {
   const { camera, gl, scene } = useThree();
-  // const { markerPairs, setMarkerPairs, addMarker, currentMarker } = useMeasureStore();
-  const { measureHandler } = useStlDisplay();
-  const { markerPairs, clear, addMarker, currentMarker, setPanelInfo } = measureHandler;
-  const [hoverMarker, setHoverMarker] = useState<IntersectionData | null>(null);
+
+  
   const [markerRadius, setMarkerRadius] = useState<number>(1.0);
   const [mouseDownPosition, setMouseDownPosition] = useState<{ x: number; y: number } | null>(null);
+  const [hoverMarker, setHoverMarker] = useState<IntersectionData | null>(null);
+  const [panelInfo, setPanelInfo] = useState<string>('Select a point.');
 
+  const {angleHandler} = useStlDisplay();
+  const { currentAngleGroup, angleGroup, addMarker, clear } = angleHandler;
   useEffect(() => {
     const box = new THREE.Box3().setFromObject(scene);
     const sphere = box.getBoundingSphere(new THREE.Sphere());
@@ -28,25 +31,7 @@ export const MeasureTool = () => {
     box.getSize(size);
     console.log('🔎 Model size:', size); // Example: size.x (width), size.y (height), size.z (depth)
   }, [scene]);
-
-  const handleClick = (event: MouseEvent) => {
-    const intersection = getIntersection(event.clientX, event.clientY);
-    if (!intersection) {
-      clear();
-      setPanelInfo('Select a point.');
-      return;
-    }
-
-    const movedPoint = intersection.point.clone().add(intersection.normal.clone().multiplyScalar(0.01));
-
-    const markerData = {
-      point: movedPoint,
-      normal: intersection.normal,
-    };
-
-    addMarker(markerData);
-  };
-
+ 
   const getIntersection = (x: number, y: number): IntersectionData | null => {
     const mouse = new THREE.Vector2();
     const canvas = gl.domElement;
@@ -61,7 +46,7 @@ export const MeasureTool = () => {
     const intersects = raycaster.intersectObjects(scene.children, true);
 
     //!! fix: extreme rerender
-    console.log('Intersects:', intersects); // ← add this
+    // console.log('Intersects:', intersects); // ← add this
 
     for (const intersect of intersects) {
       if (intersect.face && intersect.object) {
@@ -110,33 +95,53 @@ export const MeasureTool = () => {
     };
   }, [mouseDownPosition]);
 
-  // useEffect(() => {
-  // if (markers.length === 2) {
-  //   const distance = markers[0].point.distanceTo(markers[1].point).toFixed(3);
-  //   const angle = markers[0].normal.angleTo(markers[1].normal) * (180 / Math.PI);
-  //   setPanelInfo(`Distance: ${distance} units \nAngle: ${angle.toFixed(1)}\u00b0`);
-  // }
+  
 
-  // }, [markers]);
+  const handleClick = (event: MouseEvent) => {
+    const intersection = getIntersection(event.clientX, event.clientY);
+    if (!intersection) {
+      clear();
+      setPanelInfo('Select a point.');
+      return;
+    }
 
-  useEffect(() => {
-    console.log({ currentMarker, markerPairs });
-  }, [currentMarker, markerPairs]);
+    const movedPoint = intersection.point.clone().add(intersection.normal.clone().multiplyScalar(0.01));
 
-  function computeScale(camera: THREE.Camera, position: THREE.Vector3) {
-    const distance = camera.position.distanceTo(position);
-    return 34 / distance;
-  }
+    const markerData = {
+      point: movedPoint,
+      normal: intersection.normal,
+    };
+    console.log('Adding marker');
+    addMarker(markerData);
+  };
 
   return (
     <>
       {hoverMarker && (
         <Marker position={hoverMarker.point} normal={hoverMarker.normal} radius={markerRadius} lookAtNormal={true} />
       )}
-      {currentMarker && <Marker position={currentMarker.point} normal={currentMarker.normal} radius={markerRadius} />}
-      {currentMarker && hoverMarker && (
+
+      {currentAngleGroup && currentAngleGroup.length > 0 && (
+        <Marker position={currentAngleGroup[0].point} normal={currentAngleGroup[0].normal} radius={markerRadius} />
+      )}
+      {currentAngleGroup && currentAngleGroup.length === 2 && (
+        <>
+          {' '}
+          <Marker position={currentAngleGroup[1].point} normal={currentAngleGroup[1].normal} radius={markerRadius} />
+          <Line
+            points={[currentAngleGroup[0].point, currentAngleGroup[1].point]}
+            color='red'
+            lineWidth={1}
+            depthTest={false}
+            polygonOffset={true}
+            polygonOffsetFactor={-1}
+          />
+        </>
+      )}
+
+      {currentAngleGroup.length !== 0 && hoverMarker && (
         <Line
-          points={[currentMarker.point, hoverMarker.point]}
+          points={[currentAngleGroup[currentAngleGroup.length - 1].point, hoverMarker.point]}
           color='red'
           lineWidth={1}
           depthTest={false}
@@ -144,30 +149,49 @@ export const MeasureTool = () => {
           polygonOffsetFactor={-1}
         />
       )}
-      {markerPairs.map((pair, index) => {
-        const midPoint = pair.origin.point
-          .clone()
-          .add(pair.destination.point)
-          .multiplyScalar(0.5)
-          .add(new THREE.Vector3(0, markerRadius * 2, 0));
+
+      {angleGroup?.map((triple, index) => {
+        // const midPoint = triple.origin.point
+        //   .clone()
+        //   .add(triple.destination.point)
+        //   .multiplyScalar(0.5)
+        //   .add(new THREE.Vector3(0, markerRadius * 2, 0));
+
+        const vecA = triple.origin.point.clone().sub(triple.middle.point).normalize();
+        const vecB = triple.destination.point.clone().sub(triple.middle.point).normalize();
+        const angleRad = vecA.angleTo(vecB);
+        const angleDeg = THREE.MathUtils.radToDeg(angleRad).toFixed(2);
 
         return (
           <group key={index}>
-            <Marker position={pair.origin.point} normal={pair.origin.normal} radius={markerRadius} />
-            <Marker position={pair.destination.point} normal={pair.destination.normal} radius={markerRadius} />
+            <Marker position={triple.origin.point} normal={triple.origin.normal} radius={markerRadius} />
+            <Marker position={triple.middle.point} normal={triple.origin.normal} radius={markerRadius} />
+            <Marker position={triple.destination.point} normal={triple.destination.normal} radius={markerRadius} />
 
-            <mesh position={pair.origin.point}>
+            <mesh position={triple.origin.point}>
+              <sphereGeometry args={[markerRadius / 3, 16, 16]} />
+              <meshBasicMaterial color='red' />
+            </mesh>
+            <mesh position={triple.middle.point}>
               <sphereGeometry args={[markerRadius / 3, 16, 16]} />
               <meshBasicMaterial color='red' />
             </mesh>
 
-            <mesh position={pair.destination.point}>
+            <mesh position={triple.destination.point}>
               <sphereGeometry args={[markerRadius / 3, 16, 16]} />
               <meshBasicMaterial color='red' />
             </mesh>
 
             <Line
-              points={[pair.origin.point, pair.destination.point]}
+              points={[triple.origin.point, triple.middle.point]}
+              color='#ff0000'
+              lineWidth={1}
+              depthTest={false}
+              polygonOffset={true}
+              polygonOffsetFactor={-1}
+            />
+            <Line
+              points={[triple.middle.point, triple.destination.point]}
               color='#ff0000'
               lineWidth={1}
               depthTest={false}
@@ -175,7 +199,7 @@ export const MeasureTool = () => {
               polygonOffsetFactor={-1}
             />
             <Html
-              position={midPoint}
+              position={triple.middle.point}
               center
               // style={{
               //   transform: `scale(${computeScale(camera, midPoint)})`,
@@ -195,8 +219,7 @@ export const MeasureTool = () => {
                   whiteSpace: 'nowrap',
                 }}
               >
-                {/* what is the real metrics size, !!need calculation */}
-                {pair.origin.point.distanceTo(pair.destination.point).toFixed(3)}
+                {angleDeg}°
               </div>
             </Html>
           </group>
@@ -205,3 +228,5 @@ export const MeasureTool = () => {
     </>
   );
 };
+
+export default AngleTool;

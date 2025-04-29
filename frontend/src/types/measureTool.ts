@@ -16,3 +16,12 @@ export interface MarkerPairDataType {
   origin: IntersectionData;
   destination: IntersectionData;
 }
+
+
+export interface AngleGroupDataType {
+  origin: IntersectionData;
+  middle: IntersectionData;
+  destination: IntersectionData;
+}
+
+// todo: rename fle
