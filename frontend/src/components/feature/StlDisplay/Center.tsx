@@ -1,10 +1,10 @@
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
-import Controllers from './Controllers';
+import Controllers from './Controllers/Controllers';
 import Model from './Model';
-import ClippingPlane from './ClippingPlane';
+import ClippingPlane from './ClippingPlane/ClippingPlane';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
-import MenuBar from './MenuBar';
+import MenuBar from './MenuBar/MenuBar';
 import { useEffect, useRef, useState } from 'react';
 import { BufferGeometryUtils, STLExporter } from 'three/examples/jsm/Addons.js';
 import { axios } from '@/config/axiosConfig';
@@ -16,16 +16,17 @@ import { CSG } from 'three-csg-ts';
 import SceneSetter from './SceneSetter';
 import { useSceneStore } from '@/store/useSceneStore';
 import { convert } from '@/services/stlExporter/convert';
-import Angle from './Angle';
+import Angle from './AngleTool/Angle';
 
 import MeasureDistance from './MeasureDistance';
-import { MeasureTool } from '../MeasureTool/MeasureTool';
-import { useMeasureStore } from '@/store/useMeasureStore';
+import { MeasureTool } from './MeasureTool/MeasureTool';
 
 const Center = ({ url, id }: { url: string; id: string }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { planes, resetModel } = useStlDisplay();
+  const { planeHandler, resetModel, measureHandler } = useStlDisplay();
+  const { isActive: isMeasureActive } = measureHandler;
+  const planes = planeHandler.getPlanes();
   const meshRef = useRef<THREE.Mesh>(null);
   const [saving, setSaving] = useState(false);
 
@@ -34,8 +35,6 @@ const Center = ({ url, id }: { url: string; id: string }) => {
   }, [url]); // eslint-disable-line react-hooks/exhaustive-deps
   const queryClient = useQueryClient();
 
- const {activeMeasure} = useMeasureStore()
-  
   const applyClippingPlanes = (geometry: THREE.BufferGeometry, planes: THREE.Plane[]) => {
     const positions = geometry.attributes.position.array;
     const newPositions = [];
@@ -131,7 +130,6 @@ const Center = ({ url, id }: { url: string; id: string }) => {
           await save(id);
         }}
         saving={isLoading}
-
       />
       {/* <Canvas style={{ height: '80vh', maxWidth: '80vh', width: 'auto', background: '#f7f7f7', marginInline: 'auto' }}> */}
       <Canvas style={{ width: 'auto', height: '90vh', background: '#f7f7f7', marginInline: 'auto' }}>
@@ -142,7 +140,7 @@ const Center = ({ url, id }: { url: string; id: string }) => {
           <ClippingPlane key={planeObj.id} {...planeObj} />
         ))}
         <Angle />
-       {activeMeasure && <MeasureTool />}
+        {isMeasureActive && <MeasureTool />}
         {/* {measureActive && <MeasureDistance />} */}
       </Canvas>
       {/* <MeasureDistance /> */}

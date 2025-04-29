@@ -11,3 +11,8 @@ export interface IntersectionData {
   point: THREE.Vector3;
   normal: THREE.Vector3;
 }
+
+export interface MarkerPairDataType {
+  origin: IntersectionData;
+  destination: IntersectionData;
+}

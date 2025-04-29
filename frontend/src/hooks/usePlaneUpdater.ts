@@ -3,7 +3,9 @@ import * as THREE from 'three';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 
 export const usePlaneUpdater = (plane: THREE.Plane, id: string) => {
-  const { setPlanes } = useStlDisplay(); // Get context function
+  const {
+    planeHandler: { setPlanes },
+  } = useStlDisplay(); // Get context function
 
   const updatePlane = useCallback(
     (planeRef: THREE.Mesh | null) => {

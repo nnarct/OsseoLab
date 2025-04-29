@@ -5,7 +5,8 @@ import type { PlaneDataType } from '@/types/stlDisplay';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 
 const PlaneListItem = ({ plane, idx }: { plane: PlaneDataType; idx: number }) => {
-  const { removePlane, setActivePlaneId, activePlaneId, updatePlaneProperty } = useStlDisplay();
+  const { planeHandler } = useStlDisplay();
+  const { remove: removePlane, setActivePlaneId, activePlaneId, updateProperty: updatePlaneProperty } = planeHandler;
 
   return (
     <List.Item

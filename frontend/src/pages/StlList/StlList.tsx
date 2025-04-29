@@ -1,17 +1,15 @@
 import type { STLDataType } from '@/types/stlDisplay';
-import StlUploader from '@/components/feature/StlList/UploadForm/StlUploader';
-import StlDisplay from '@/components/feature/StlList/StlDisplay/StlDisplay';
-import { Card, Input, Typography } from 'antd';
-import { useEffect, useRef, useState } from 'react';
+import StlUploader from '@/components/feature/StlList/StlUploader';
+import { Card, Input, } from 'antd';
+import { useEffect, useState } from 'react';
 
-import StlTable from '@/components/feature/StlList/StlList/StlTable';
+import StlTable from '@/components/feature/StlList/StlTable';
 import { useGetStlList } from '@/services/admin/stl.service';
 
 // const DEMO_STL = 'http://localhost:5002/stl_files/d0bc50ed-6143-489f-ac3c-f8323d2fe86c';
 
 const StlList = () => {
   const { data } = useGetStlList();
-  const stlDisplayRef = useRef<HTMLDivElement | null>(null);
   const [stls, setStls] = useState<STLDataType[]>([]);
   // const [selectedStl, setSelectedStl] = useState<string | null>('');
   // const [selectedStlId, setSelectedStlId] = useState<string>('');

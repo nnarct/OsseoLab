@@ -1,50 +1,105 @@
+import { OrbitControls } from '@react-three/drei';
 import type { PlaneDataType, TransformControlsMode } from '@/types/stlDisplay';
 import { createContext, ReactNode, useCallback, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { v4 as uuid } from 'uuid';
+import type { IntersectionData, MarkerPairDataType } from '@/types/measureTool';
 
+interface SceneHandlerRefType {
+  camera?: THREE.PerspectiveCamera;
+  controls?: OrbitControls;
+}
 interface StlDisplayContextType {
-  planes: PlaneDataType[];
-  setPlanes: React.Dispatch<React.SetStateAction<PlaneDataType[]>>;
+  tool: {
+    current: string | null;
+    select: {
+      measure: () => void;
+      angle: () => void;
+      plane: () => void;
+    };
+    clear: () => void;
+    toggleTool: (toolName: 'angle' | 'measure' | 'plane') => void;
+  };
 
-  activePlaneId: string | null;
-  setActivePlaneId: React.Dispatch<React.SetStateAction<string | null>>;
+  angleHandler: {
+    isActive: boolean;
+    // toggle: () => void;
+    // add: () => void;
+    // clear: () => void;
+  };
 
-  addPlane: () => void;
-  removePlane: (id: string) => void;
-  handleCuttingPlaneSelect: (index: number, value: string | undefined) => void;
-
-  updatePlaneProperty: (
-    id: string,
-    property: Partial<{ mode: TransformControlsMode; frontColor: string; backColor: string; opacity: number }>
-  ) => void;
-
-  applyCut: () => void;
-  unapplyCut: () => void;
-
-  sceneHandlerRef: React.MutableRefObject<{
+  planeHandler: {
+    isCut: boolean;
+    isActive: boolean;
+    activePlaneId: string | null;
+    // selectedCutPlanes: (string | undefined)[];
+    add: () => void;
+    clear: () => void;
     applyCut: () => void;
-  } | null>;
-  selectedCutPlanes: (string | undefined)[];
+    unapplyCut: () => void;
+    getPlanes: () => PlaneDataType[];
+    setPlanes: React.Dispatch<React.SetStateAction<PlaneDataType[]>>;
+    remove: (id: string) => void;
+    setActivePlaneId: (id: string | null) => void;
+    // handleCuttingPlaneSelect: (index: number, value: string | undefined) => void;
+    updateProperty: (
+      id: string,
+      property: Partial<{ mode: TransformControlsMode; frontColor: string; backColor: string; opacity: number }>
+    ) => void;
+  };
 
-  apply: boolean;
+  measureHandler: {
+    isActive: boolean;
+    currentMarker: IntersectionData | null;
+    markerPairs: MarkerPairDataType[];
+    panelInfo: string | null;
+    addMarker: (marker: IntersectionData) => void;
+    removePair: (index: number) => void;
+    setPanelInfo: (info: string | null) => void;
+    clear: () => void;
+  };
 
+  sceneHandlerRef: React.MutableRefObject<SceneHandlerRefType | null>;
   resetModel: () => void;
-
-  toggleAngleActive: () => void;
-  isAngleActive: boolean;
 }
 
 const StlDisplayContext = createContext<StlDisplayContextType | undefined>(undefined);
 
+const allFeatures = [null, 'plane', 'angle', 'measure'];
 export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
+  const [currentTool, setCurrentTool] = useState<string | null>(allFeatures[0]);
+
   const [planes, setPlanes] = useState<PlaneDataType[]>([]);
   const [activePlaneId, setActivePlaneId] = useState<string | null>(null);
-  const [selectedCutPlanes, setSelectedCutPlanes] = useState<(string | undefined)[]>([undefined, undefined]);
-  const sceneHandlerRef = useRef<{ applyCut: () => void } | null>(null);
-  const [apply, setApply] = useState<boolean>(false);
-  const [isAngleActive, setIsAngleActive] = useState<boolean>(false);
-  const toggleAngleActive = () => setIsAngleActive(!isAngleActive);
+  // const [selectedCutPlanes, setSelectedCutPlanes] = useState<(string | undefined)[]>([undefined, undefined]);
+  const sceneHandlerRef = useRef<SceneHandlerRefType | null>(null);
+  const [isCut, setApply] = useState<boolean>(false);
+
+  const [panelInfo, setPanelInfo] = useState<string | null>('Select a point.');
+  const [currentMarker, setCurrentMarker] = useState<IntersectionData | null>(null);
+  const [markerPairs, setMarkerPairs] = useState<MarkerPairDataType[]>([]);
+  const addMarker = (marker: IntersectionData) => {
+    if (currentMarker) {
+      const newPair: MarkerPairDataType = {
+        origin: currentMarker,
+        destination: marker,
+      };
+      setMarkerPairs((prev) => [...prev, newPair]);
+      setCurrentMarker(null);
+      return;
+    }
+    setCurrentMarker(marker);
+  };
+
+  const removePair = (index: number) => {
+    setMarkerPairs((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const clearMarkers = () => {
+    setMarkerPairs([]);
+    setCurrentMarker(null);
+  };
+
   const addPlane = useCallback(() => {
     const id = uuid();
     const newPlane = {
@@ -61,18 +116,18 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
     setActivePlaneId(id);
   }, []);
 
-  const handleCuttingPlaneSelect = (index: number, value: string | undefined) => {
-    setSelectedCutPlanes((prev) => {
-      const updated = [...prev];
-      updated[index] = value;
+  // const handleCuttingPlaneSelect = (index: number, value: string | undefined) => {
+  //   setSelectedCutPlanes((prev) => {
+  //     const updated = [...prev];
+  //     updated[index] = value;
 
-      if (index === 0 && updated[1] === value) {
-        updated[1] = undefined;
-      }
+  //     if (index === 0 && updated[1] === value) {
+  //       updated[1] = undefined;
+  //     }
 
-      return updated;
-    });
-  };
+  //     return updated;
+  //   });
+  // };
 
   const removePlane = useCallback((id: string) => {
     setPlanes((prevPlanes) => prevPlanes.filter((plane) => plane.id !== id));
@@ -90,39 +145,117 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const applyCut = () => {
-    // sceneHandlerRef.current?.applyCut();
     setApply(true);
   };
 
   const unapplyCut = () => {
-    // sceneHandlerRef.current?.applyCut();
     setApply(false);
+  };
+
+  const faceFront = () => {
+    if (sceneHandlerRef.current) {
+      const camera = sceneHandlerRef.current.camera;
+      const controls = sceneHandlerRef.current.controls;
+      if (camera && controls) {
+        camera.position.set(0, 0, 60);
+        controls.target.set(0, 0, 0);
+        controls.autoRotate = false;
+        controls.update();
+      }
+    }
+  };
+
+  const faceTop = () => {
+    if (sceneHandlerRef.current) {
+      const camera = sceneHandlerRef.current.camera;
+      const controls = sceneHandlerRef.current.controls;
+      if (camera && controls) {
+        camera.position.set(0, 60, 0); // กล้องลอยจากข้างบน
+        controls.target.set(0, 0, 0);
+        controls.autoRotate = false;
+        controls.update();
+      }
+    }
+  };
+
+  const faceLeft = () => {
+    if (sceneHandlerRef.current) {
+      const camera = sceneHandlerRef.current.camera;
+      const controls = sceneHandlerRef.current.controls;
+      if (camera && controls) {
+        camera.position.set(-60, 0, 0); // กล้องจากด้านซ้าย
+        controls.target.set(0, 0, 0);
+        controls.autoRotate = false;
+        controls.update();
+      }
+    }
   };
 
   const resetModel = () => {
     setPlanes([]);
+    setCurrentTool(null);
+    setCurrentMarker(null);
+    setMarkerPairs([]);
+    setPanelInfo('Select a point.');
     unapplyCut();
+    faceFront();
+  };
+
+  const toggleTool = (toolName: 'angle' | 'measure' | 'plane') => {
+    if (currentTool === toolName) {
+      setCurrentTool(null);
+    } else {
+      setCurrentTool(toolName);
+    }
   };
 
   return (
     <StlDisplayContext.Provider
       value={{
-        applyCut,
-        unapplyCut,
-        planes,
-        activePlaneId,
-        setActivePlaneId,
-        addPlane,
-        removePlane,
-        handleCuttingPlaneSelect,
-        updatePlaneProperty,
-        selectedCutPlanes,
+        tool: {
+          current: currentTool,
+          select: {
+            measure: () => setCurrentTool('measure'),
+            angle: () => setCurrentTool('angle'),
+            plane: () => setCurrentTool('plane'),
+          },
+          clear: () => setCurrentTool(null),
+          toggleTool,
+        },
+        angleHandler: {
+          isActive: currentTool === 'angle',
+          // add: () => {}, // placeholder if needed
+          // clear: () => setCurrentTool(null), // clear example
+        },
+
+        planeHandler: {
+          isActive: currentTool === 'plane',
+          activePlaneId,
+          setActivePlaneId,
+          // handleCuttingPlaneSelect,
+          getPlanes: () => planes,
+          setPlanes,
+          // selectedCutPlanes,
+          add: addPlane,
+          isCut,
+          clear: () => setPlanes([]),
+          remove: removePlane,
+          applyCut,
+          unapplyCut,
+          updateProperty: updatePlaneProperty,
+        },
+        measureHandler: {
+          isActive: currentTool === 'measure',
+          currentMarker,
+          markerPairs,
+          panelInfo,
+          addMarker,
+          removePair,
+          setPanelInfo,
+          clear: clearMarkers,
+        },
         sceneHandlerRef,
-        apply,
-        setPlanes,
         resetModel,
-        toggleAngleActive,
-        isAngleActive,
       }}
     >
       {children}

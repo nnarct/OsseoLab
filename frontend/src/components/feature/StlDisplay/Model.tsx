@@ -19,8 +19,9 @@ const Model = ({
   >;
 }) => {
   const { camera, gl } = useThree();
-  const { planes, apply } = useStlDisplay();
-
+  const { planeHandler } = useStlDisplay();
+  const { isCut } = planeHandler
+  const planes = planeHandler.getPlanes();
   const geometry = useLoader(STLLoader, url) as THREE.BufferGeometry;
 
   // const meshRef = useRef<THREE.Mesh>(null);
@@ -31,12 +32,12 @@ const Model = ({
   }, [geometry, camera, gl, meshRef]);
 
   useEffect(() => {
-    if (materialRef.current && planes.length > 0 && apply) {
+    if (materialRef.current && planes.length > 0 && isCut) {
       materialRef.current.clippingPlanes = planes.map((item) => item.plane);
-    } else if (materialRef.current && !apply) {
+    } else if (materialRef.current && !isCut) {
       materialRef.current.clippingPlanes = null;
     }
-  }, [apply, planes]);
+  }, [planes, isCut]);
 
   return (
     <mesh ref={meshRef} geometry={geometry}>

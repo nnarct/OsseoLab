@@ -3,7 +3,9 @@ import { useStlDisplay } from '@/hooks/useStlDisplay';
 import PlaneListItem from './PlaneListItem';
 
 const PlaneList = () => {
-  const { planes } = useStlDisplay();
+  const { planeHandler } = useStlDisplay();
+  const { getPlanes } = planeHandler;
+  const planes = getPlanes();
 
   return (
     <>

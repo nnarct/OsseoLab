@@ -13,7 +13,8 @@ export default function AngleMeasure() {
 
   const [angle, setAngle] = useState<number | null>(null);
   const [labelPos, setLabelPos] = useState<THREE.Vector3 | null>(null);
-  const { isAngleActive } = useStlDisplay();
+  const { angleHandler } = useStlDisplay();
+  const isAngleActive = angleHandler.isActive;
 
   useEffect(() => {
     const canvas = gl.domElement;

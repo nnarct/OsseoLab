@@ -24,9 +24,9 @@ const ClippingPlane = ({
   opacity?: number;
 }) => {
   const planeRef = useRef<THREE.Mesh>(null);
-  const { activePlaneId } = useStlDisplay();
+  const { planeHandler } = useStlDisplay();
   const updatePlane = usePlaneUpdater(plane, id);
-  const isActive = id === activePlaneId;
+  const isActive = id === planeHandler.activePlaneId;
 
   const { transformRef, camera, domElement } = useTransformControls(isActive, planeRef, () =>
     updatePlane(planeRef.current)

@@ -5,7 +5,8 @@ import { useStlDisplay } from '@/hooks/useStlDisplay';
 import type { PlaneDataType } from '@/types/stlDisplay';
 
 const PlaneSettings = ({ plane }: { plane: PlaneDataType }) => {
-  const { updatePlaneProperty } = useStlDisplay();
+  const {  planeHandler } = useStlDisplay();
+  const { updateProperty: updatePlaneProperty } = planeHandler;
   return (
     <Dropdown
       placement='bottomRight'

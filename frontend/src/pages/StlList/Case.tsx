@@ -1,4 +1,4 @@
-import StlDisplay from '@/components/feature/StlList/StlDisplay/StlDisplay';
+import StlDisplay from '@/components/feature/StlDisplay/StlDisplay';
 import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout, Button } from 'antd';
