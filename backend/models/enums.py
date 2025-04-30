@@ -8,3 +8,8 @@ class Role(str, Enum):  # Subclass both str and Enum
     @classmethod
     def has_value(cls, value):
         return value in cls._value2member_map_
+
+class GenderEnum(Enum):
+    male = "male"
+    female = "female"
+    other = "other"

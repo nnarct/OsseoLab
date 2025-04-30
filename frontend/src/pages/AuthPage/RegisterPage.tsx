@@ -18,7 +18,7 @@ const RegisterPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   if (user) return <Navigate to={'/'} />;
-  
+
   const goLogin = () => navigate('/login');
 
   const onSubmit = async (values: RegisterFormDataType) => {
@@ -29,7 +29,7 @@ const RegisterPage = () => {
       goLogin();
     } catch (error) {
       if (error instanceof AxiosError) {
-        messageApi.warning(error.response?.data.error);
+        messageApi.warning(error.response?.data.error || error.message);
       } else {
         messageApi.error('Something went wrong');
       }

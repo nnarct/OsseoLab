@@ -1,7 +1,14 @@
 # models/__init__.py
 
-from .User import User
-from .UserSTL import UserSTL
-from .STL import STL
-from .Doctor import Doctor
-from .Tech import Tech
+# from .v1.User import User
+# from .v1.UserSTL import UserSTL
+# from .v1.STL import STL
+# from .v1.Doctor import Doctor
+# from .v1.Tech import Tech
+from .users import User
+from .doctors import Doctor
+from .technicians import Technician
+from .cases import Case
+from .case_files import CaseFile
+from .case_surgeons import CaseSurgeon
+from .profile_pic_files import ProfilePicFile

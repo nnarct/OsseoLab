@@ -5,6 +5,7 @@ from routes import register_routes
 from handlers.jwt_handler import configure_jwt
 from handlers.errors_handler import register_error_handlers
 from middlewares.cors_middleware import add_cors_headers
+import models  # triggers import of all model classes
 
 
 def create_app(config_class=Config):

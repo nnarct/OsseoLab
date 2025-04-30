@@ -4,19 +4,26 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
 from services.authService import get_user_role
 
-from models.Doctor import Doctor
-from models.Tech import Tech
-from models.User import User
+from models.doctors import Doctor
+from models.technicians import Technician
+from models.users import User
 from models.enums import Role
 from config.extensions import db
 
 auth_bp = Blueprint("auth", __name__)
 
 
+@auth_bp.route("/health", methods=["GET"])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({"statusCode": 200, "message": "Server is running"}), 200
+
+
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    """Handles user registration"""
+    print("Frontend Request to Register")
     data = request.json
+    print(data)
     firstname = data.get("firstname")
     lastname = data.get("lastname")
     email = data.get("email")
@@ -28,14 +35,16 @@ def register():
 
     if not Role.has_value(role):
         return jsonify({"statusCode": 400, "error": f"Invalid role. Choose from {', '.join(Role)}"}), 400
-
-    existing_user = User.query.filter_by(email=email).first()
-    if existing_user:
-        return jsonify({"statusCode": 409, "error": "Email is already registered"}), 409
-
-    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+    try:
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            return jsonify({"statusCode": 409, "error": "Email is already registered"}), 409
+    except Exception as e:
+        return jsonify({"statusCode": 500, "error": "Internal Server Error", "message": str(e)}), 500
 
     try:
+        hashed_password = generate_password_hash(
+            password, method='pbkdf2:sha256')
         new_user = User(
             firstname=firstname,
             lastname=lastname,
@@ -52,7 +61,8 @@ def register():
             db.session.add(new_doctor)
 
         if role == Role.TECH:
-            new_tech = Tech(user_id=new_user.id, department=None)
+            # new_tech = Technician(user_id=new_user.id, department=None)
+            new_tech = Technician(user_id=new_user.id)
             db.session.add(new_tech)
 
         db.session.commit()
