@@ -1,8 +1,8 @@
 import MenuButton from './MenuButton';
-import { FaFloppyDisk } from 'react-icons/fa6';
+import { PiFloppyDiskBackDuotone } from "react-icons/pi";
 
 const SaveButton = () => {
-  return <MenuButton icon={<FaFloppyDisk />} tooltip='Save Model' text='Save'/>
+  return <MenuButton icon={<PiFloppyDiskBackDuotone />} tooltip='Save Model' text='Save'/>
 };
 
 export default SaveButton;

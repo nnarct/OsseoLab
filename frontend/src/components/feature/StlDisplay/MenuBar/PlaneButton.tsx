@@ -7,10 +7,9 @@ import { useCallback } from 'react';
 
 const PlaneButton = () => {
   const {
-    planeHandler: { add: addPlane, setIsPlaneActive, getPlanes, isCut, isActive, applyCut, unapplyCut },
+    planeHandler: { add: addPlane, getPlanes, isCut, isActive, applyCut, unapplyCut },
     tool,
   } = useStlDisplay();
-  const { toggleTool, clear: clearTool } = tool;
   const planes = getPlanes();
 
   const handleAddPlane = useCallback(() => {
@@ -20,16 +19,10 @@ const PlaneButton = () => {
 
   const handleCutToggle = useCallback(() => (isCut ? unapplyCut() : applyCut()), [isCut, unapplyCut, applyCut]);
 
-  const handleInactivatePlane = useCallback(() => {
-    setIsPlaneActive(false);
-    clearTool();
-  }, [clearTool, setIsPlaneActive]);
-
-  const handleActivatePlane = useCallback(() => {
-    setIsPlaneActive(true);
-    toggleTool('plane');
-  }, [setIsPlaneActive, toggleTool]);
-
+  const handleCancel = useCallback(() => {
+    tool.clear();
+  }, [tool]);
+  
   return (
     <>
       <Dropdown
@@ -41,14 +34,12 @@ const PlaneButton = () => {
                 label: 'Create Plane',
                 onClick: handleAddPlane,
               },
-              ...(planes.length > 0
-                ? [
-                    {
-                      key: 'activePlane',
-                      label: isActive ? 'Hide Plane' : `Show Plane (${planes.length})`,
-                      onClick: isActive ? handleInactivatePlane : handleActivatePlane,
-                    },
-                  ]
+              ...(isActive
+                ? [{
+                    key: 'cancel',
+                    label: 'Cancel',
+                    onClick: handleCancel,
+                  }]
                 : []),
             ]}
           />

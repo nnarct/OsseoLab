@@ -44,7 +44,7 @@ const ClippingPlane = ({
           domElement={domElement}
         />
       )}
-      <mesh ref={planeRef}>
+      <mesh ref={planeRef} userData={{ type: 'clippingPlane' }}>
         <planeGeometry args={[50, 50]} />
         <primitive object={material} />
       </mesh>

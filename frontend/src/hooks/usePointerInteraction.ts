@@ -12,10 +12,6 @@ export default function usePointerInteraction(
 ) {
   const mouseDownPosition = useRef<{ x: number; y: number } | null>(null);
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
-  // const {angleHandler, measureHandler , scene} = useStlDisplay();
-  // const {clear} = toolType === 'measure' ? measureHandler : angleHandler;
-  // const setPanelInfo = toolType === 'measure' ? measureHandler.setPanelInfo : angleHandler.setPanelInfo;
-  // const addMarker = toolType === 'measure' ? measureHandler.addMarker : angleHandler.addMarker;
 
   const getIntersection = useCallback(
     (x: number, y: number): IntersectionData | null => {
@@ -29,6 +25,7 @@ export default function usePointerInteraction(
       const intersects = raycaster.intersectObjects(scene.children, true);
 
       for (const intersect of intersects) {
+        if (intersect.object.userData.type !== 'stlModel') continue;
         if (intersect.face && intersect.object) {
           const normalMatrix = new THREE.Matrix3().getNormalMatrix(intersect.object.matrixWorld);
           const worldNormal = intersect.face.normal.clone().applyMatrix3(normalMatrix).normalize();

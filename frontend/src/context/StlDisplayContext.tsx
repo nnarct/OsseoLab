@@ -1,8 +1,9 @@
 import type { PlaneDataType, TransformControlsMode } from '@/types/stlDisplay';
-import { createContext, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { createContext, ReactNode, useCallback, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { v4 as uuid } from 'uuid';
 import type { IntersectionData, MarkerPairDataType, AngleGroupDataType } from '@/types/measureTool';
+import { OrbitControls } from 'three/examples/jsm/Addons.js';
 
 interface SceneHandlerRefType {
   camera?: THREE.PerspectiveCamera;
@@ -32,6 +33,8 @@ interface StlDisplayContextType {
     panelInfo: string | null;
     setPanelInfo: (info: string | null) => void;
     clear: () => void;
+    toggleAngleVisibility: (id: string) => void;
+    removeAngleGroupById: (id: string) => void;
   };
 
   planeHandler: {
@@ -52,6 +55,8 @@ interface StlDisplayContextType {
       id: string,
       property: Partial<{ mode: TransformControlsMode; frontColor: string; backColor: string; opacity: number }>
     ) => void;
+    togglePlaneVisibility: (id: string) => void;
+    removePlaneById: (id: string) => void;
   };
 
   measureHandler: {
@@ -63,10 +68,13 @@ interface StlDisplayContextType {
     removePair: (index: number) => void;
     setPanelInfo: (info: string | null) => void;
     clear: () => void;
+    togglePairVisibility: (id: string) => void;
+    removePairById: (id: string) => void;
   };
 
   sceneHandlerRef: React.MutableRefObject<SceneHandlerRefType | null>;
   resetModel: () => void;
+  faceFront: () => void;
 }
 
 const StlDisplayContext = createContext<StlDisplayContextType | undefined>(undefined);
@@ -117,10 +125,12 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
       const angleRad = vecA.angleTo(vecB);
       const angleDeg = THREE.MathUtils.radToDeg(angleRad);
       const newAngleGroup: AngleGroupDataType = {
+        id: uuid(),
         origin: currentAngleGroup[0],
         middle: currentAngleGroup[1],
         destination: markerData,
         angleDeg,
+        show: true,
       };
       setAngleGroup((prev) => (prev ? [...prev, newAngleGroup] : [newAngleGroup]));
       setCurrentAngleGroup([]);
@@ -132,9 +142,11 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
   const addMarker = (marker: IntersectionData) => {
     if (currentMarker) {
       const newPair: MarkerPairDataType = {
+        id: uuid(),
         origin: currentMarker,
         destination: marker,
         distance: currentMarker.point.distanceTo(marker.point),
+        show: true,
       };
       setMarkerPairs((prev) => [...prev, newPair]);
       setCurrentMarker(null);
@@ -152,6 +164,16 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
     setCurrentMarker(null);
   };
 
+  const togglePairVisibility = (id: string) =>
+    setMarkerPairs((prev) => prev.map((pair) => (pair.id === id ? { ...pair, show: !pair.show } : pair)));
+
+  const removePairById = (id: string) => setMarkerPairs((prev) => prev.filter((pair) => pair.id !== id));
+
+  const toggleAngleVisibility = (id: string) =>
+    setAngleGroup((prev) => prev.map((group) => (group.id === id ? { ...group, show: !group.show } : group)));
+
+  const removeAngleGroupById = (id: string) => setAngleGroup((prev) => prev.filter((group) => group.id !== id));
+
   const addPlane = useCallback(() => {
     const id = uuid();
     const newPlane = {
@@ -162,11 +184,13 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
       frontColor: '#00ff00',
       backColor: '#ff0000',
       opacity: 0.5,
+      show: true,
+      number: planes[planes.length - 1]?.number + 1 || 1,
     };
 
     setPlanes((prevPlanes) => [...prevPlanes, newPlane]);
     setActivePlaneId(id);
-  }, []);
+  }, [planes]);
 
   // const handleCuttingPlaneSelect = (index: number, value: string | undefined) => {
   //   setSelectedCutPlanes((prev) => {
@@ -195,6 +219,11 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
     },
     []
   );
+
+  const togglePlaneVisibility = (id: string) =>
+    setPlanes((prevPlanes) => prevPlanes.map((plane) => (plane.id === id ? { ...plane, show: !plane.show } : plane)));
+
+  const deletePlane = (id: string) => setPlanes((prevPlanes) => prevPlanes.filter((plane) => plane.id !== id));
 
   const applyCut = () => {
     setApply(true);
@@ -248,7 +277,7 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
     setCurrentTool(null);
     setCurrentMarker(null);
     setMarkerPairs([]);
-    setPanelInfo('Select a point.');
+    setAngleGroup([]);
     unapplyCut();
     faceFront();
   };
@@ -286,6 +315,8 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
           clear: clearAngle,
           panelInfo: panelAngleInfo,
           setPanelInfo: setAnglePanelInfo,
+          toggleAngleVisibility,
+          removeAngleGroupById,
           // add: () => {}, // placeholder if needed
           // clear: () => setCurrentTool(null), // clear example
         },
@@ -305,6 +336,8 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
           applyCut,
           unapplyCut,
           updateProperty: updatePlaneProperty,
+          togglePlaneVisibility,
+          removePlaneById: deletePlane,
         },
         measureHandler: {
           isActive: currentTool === 'measure',
@@ -315,9 +348,12 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
           removePair,
           setPanelInfo,
           clear: clearMarkers,
+          togglePairVisibility,
+          removePairById,
         },
         sceneHandlerRef,
         resetModel,
+        faceFront,
       }}
     >
       {children}

@@ -10,7 +10,7 @@ const MeasureLineGroup = () => {
   return (
     <>
       {markerPairs.map((pair, index) => {
-        return <MeasureLine pair={pair} key={index} markerRadius={markerRadius} />;
+        if (pair.show) return <MeasureLine pair={pair} key={index} markerRadius={markerRadius} />;
       })}
     </>
   );

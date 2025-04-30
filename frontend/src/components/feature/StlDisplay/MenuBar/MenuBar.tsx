@@ -11,6 +11,9 @@ import SaveButton from './SaveButton';
 import PlaneButton from './PlaneButton';
 import MeasureButton from './MeasureButton';
 import AngleButton from './AngleButton';
+import ItemListPanel from '../ItemList/ItemListPanel';
+import ResetModelButton from './ResetModelButton';
+import FaceFrontButton from './FaceFrontButton';
 // interface MenuBarProps {
 //   onSave: () => void;
 //   saving: boolean;
@@ -57,11 +60,23 @@ const MenuBar = () => {
 
   return (
     <>
-      <div className='flex gap-3 p-3'>
+      <div
+        className='flex gap-3 p-3'
+        style={{
+          background: '#fff',
+          borderBottom: '1px solid rgba(5, 5, 5, 0.05)',
+          position: 'sticky',
+          top: 73,
+          zIndex: 1000,
+        }}
+      >
+        <FaceFrontButton />
         <PlaneButton />
         <MeasureButton />
         <AngleButton />
         <SaveButton />
+        <ItemListPanel />
+        <ResetModelButton />
       </div>
       {/* {isMeasureActive && (
         <>

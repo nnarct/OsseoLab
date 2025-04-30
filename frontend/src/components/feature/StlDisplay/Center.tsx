@@ -2,7 +2,6 @@ import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import Controllers from './Controllers/Controllers';
 import Model from './Model';
-import ClippingPlane from './ClippingPlane/ClippingPlane';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 import MenuBar from './MenuBar/MenuBar';
 import { useEffect, useRef, useState } from 'react';
@@ -19,20 +18,16 @@ import { MeasureTool } from './MeasureTool/MeasureTool';
 import AngleTool from './AngleTool/AngleTool';
 import MeasureLineGroup from './MeasureTool/MeasureLineGroup';
 import AngleLineGroup from './AngleTool/AngleLineGroup';
+import ClippingPlaneList from './ClippingPlane/ClippingPlaneList';
 // import AngleTool from './AngleTool/Angle';
 
 const Center = ({ url, id }: { url: string; id: string }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const {
-    planeHandler: { getPlanes, isActive: isPlaneActive },
-    angleHandler,
-    resetModel,
-    measureHandler,
-  } = useStlDisplay();
+  const { angleHandler, resetModel, measureHandler } = useStlDisplay();
   const { isActive: isMeasureActive } = measureHandler;
   const { isActive: isAngleActive } = angleHandler;
-  const planes = getPlanes();
+
   const meshRef = useRef<THREE.Mesh>(null);
   const [saving, setSaving] = useState(false);
 
@@ -142,9 +137,9 @@ const Center = ({ url, id }: { url: string; id: string }) => {
         <SceneSetter />
         <Controllers />
         <Model url={url} meshRef={meshRef} />
-        {isPlaneActive && planes.map((planeObj) => <ClippingPlane key={planeObj.id} {...planeObj} />)}
-        {/* <Angle/> */}
 
+        {/* <Angle/> */}
+        <ClippingPlaneList />
         {isAngleActive && <AngleTool />}
         {isMeasureActive && <MeasureTool />}
         <MeasureLineGroup />

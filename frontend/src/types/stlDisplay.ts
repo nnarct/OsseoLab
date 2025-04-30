@@ -10,6 +10,8 @@ export interface PlaneDataType {
   frontColor: string;
   backColor: string;
   opacity: number;
+  show: boolean;
+  number: number;
 }
 
 export type STLDataType = {

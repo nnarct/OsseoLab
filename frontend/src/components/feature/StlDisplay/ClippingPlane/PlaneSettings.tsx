@@ -5,7 +5,7 @@ import { useStlDisplay } from '@/hooks/useStlDisplay';
 import type { PlaneDataType } from '@/types/stlDisplay';
 
 const PlaneSettings = ({ plane }: { plane: PlaneDataType }) => {
-  const {  planeHandler } = useStlDisplay();
+  const { planeHandler } = useStlDisplay();
   const { updateProperty: updatePlaneProperty } = planeHandler;
   return (
     <Dropdown
@@ -42,7 +42,7 @@ const PlaneSettings = ({ plane }: { plane: PlaneDataType }) => {
       }
       trigger={['click']}
     >
-      <Button icon={<RiEqualizer3Line />} />
+      <Button size='small' type='text' icon={<RiEqualizer3Line />} />
     </Dropdown>
   );
 };

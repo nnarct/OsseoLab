@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { useState } from 'react';
 import { useThree } from '@react-three/fiber';
 import { Line } from '@react-three/drei';

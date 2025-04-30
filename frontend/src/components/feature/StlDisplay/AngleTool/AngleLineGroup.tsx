@@ -10,7 +10,7 @@ const AngleLineGroup = () => {
   return (
     <>
       {angleGroup?.map((triple, index) => {
-        return <AngleLine key={index} triple={triple} markerRadius={markerRadius} />;
+        if (triple.show) return <AngleLine key={index} triple={triple} markerRadius={markerRadius} />;
       })}
     </>
   );

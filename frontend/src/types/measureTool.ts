@@ -13,16 +13,20 @@ export interface IntersectionData {
 }
 
 export interface MarkerPairDataType {
+  id: string;
   origin: IntersectionData;
   destination: IntersectionData;
   distance: number;
+  show: boolean;
 }
 
 export interface AngleGroupDataType {
+  id: string;
   origin: IntersectionData;
   middle: IntersectionData;
   destination: IntersectionData;
   angleDeg: number;
+  show: boolean;
 }
 
 // todo: rename fle

@@ -40,7 +40,7 @@ const Model = ({
   }, [planes, isCut]);
 
   return (
-    <mesh ref={meshRef} geometry={geometry}>
+    <mesh ref={meshRef} geometry={geometry} userData={{ type: 'stlModel' }}>
       <meshStandardMaterial
         ref={materialRef}
         color='#E8D7C0'
