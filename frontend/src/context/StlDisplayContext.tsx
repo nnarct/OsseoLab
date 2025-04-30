@@ -1,5 +1,5 @@
 import type { PlaneDataType, TransformControlsMode } from '@/types/stlDisplay';
-import { createContext, ReactNode, useCallback, useRef, useState } from 'react';
+import { createContext, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { v4 as uuid } from 'uuid';
 import type { IntersectionData, MarkerPairDataType, AngleGroupDataType } from '@/types/measureTool';
@@ -255,8 +255,10 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
 
   const toggleTool = (toolName: 'angle' | 'measure' | 'plane') => {
     if (currentTool === toolName) {
+      console.log('clearing tool:', toolName);
       setCurrentTool(null);
     } else {
+      console.log('selecting tool:', toolName);
       setCurrentTool(toolName);
     }
   };

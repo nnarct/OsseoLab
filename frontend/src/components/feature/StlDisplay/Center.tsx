@@ -24,10 +24,15 @@ import AngleLineGroup from './AngleTool/AngleLineGroup';
 const Center = ({ url, id }: { url: string; id: string }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { planeHandler, angleHandler, resetModel, measureHandler } = useStlDisplay();
+  const {
+    planeHandler: { getPlanes, isActive: isPlaneActive },
+    angleHandler,
+    resetModel,
+    measureHandler,
+  } = useStlDisplay();
   const { isActive: isMeasureActive } = measureHandler;
   const { isActive: isAngleActive } = angleHandler;
-  const planes = planeHandler.getPlanes();
+  const planes = getPlanes();
   const meshRef = useRef<THREE.Mesh>(null);
   const [saving, setSaving] = useState(false);
 
@@ -137,9 +142,7 @@ const Center = ({ url, id }: { url: string; id: string }) => {
         <SceneSetter />
         <Controllers />
         <Model url={url} meshRef={meshRef} />
-        {planes.map((planeObj) => (
-          <ClippingPlane key={planeObj.id} {...planeObj} />
-        ))}
+        {isPlaneActive && planes.map((planeObj) => <ClippingPlane key={planeObj.id} {...planeObj} />)}
         {/* <Angle/> */}
 
         {isAngleActive && <AngleTool />}

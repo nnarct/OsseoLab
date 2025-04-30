@@ -4,12 +4,12 @@ import PlaneListItem from './PlaneListItem';
 
 const PlaneList = () => {
   const { planeHandler } = useStlDisplay();
-  const { getPlanes } = planeHandler;
+  const { getPlanes, isActive } = planeHandler;
   const planes = getPlanes();
 
   return (
     <>
-      {planes.length > 0 && (
+      {isActive && planes.length > 0 && (
         <div className='px-3'>
           <List header='Plane List' bordered className='bg-white'>
             {planes.map((plane, idx) => (
