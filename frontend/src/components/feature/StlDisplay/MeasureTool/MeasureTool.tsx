@@ -5,123 +5,39 @@ import { Line, Html } from '@react-three/drei';
 import type { IntersectionData } from '@/types/measureTool';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 
-import  Marker  from './Marker';
+import Marker from './Marker';
+import MeasureLine from './MeasureLine';
+import usePointerInteraction from '@/hooks/usePointerInteraction';
 
 export const MeasureTool = () => {
-  const { camera, gl, scene } = useThree();
+  const { camera,scene, gl } = useThree();
   // const { markerPairs, setMarkerPairs, addMarker, currentMarker } = useMeasureStore();
-  const { measureHandler } = useStlDisplay();
-  const { markerPairs, clear, addMarker, currentMarker, setPanelInfo } = measureHandler;
+  const {
+    
+    measureHandler: { addMarker, currentMarker },
+
+    tool: { markerRadius },
+  } = useStlDisplay();
   const [hoverMarker, setHoverMarker] = useState<IntersectionData | null>(null);
-  const [markerRadius, setMarkerRadius] = useState<number>(1.0);
-  const [mouseDownPosition, setMouseDownPosition] = useState<{ x: number; y: number } | null>(null);
 
-  useEffect(() => {
-    const box = new THREE.Box3().setFromObject(scene);
-    const sphere = box.getBoundingSphere(new THREE.Sphere());
-    if (sphere.radius > 0) {
-      setMarkerRadius(sphere.radius / 100.0);
-    }
+  // const handleClick = (intersection: IntersectionData | null) => {
+  //   if (!intersection) {
+  //     clear();
+  //     setPanelInfo('Select a point.');
+  //     return;
+  //   }
 
-    // 🆕 New: Log size for scaleFactor estimation
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    console.log('🔎 Model size:', size); // Example: size.x (width), size.y (height), size.z (depth)
-  }, [scene]);
+  //   const movedPoint = intersection.point.clone().add(intersection.normal.clone().multiplyScalar(0.01));
 
-  const handleClick = (event: MouseEvent) => {
-    const intersection = getIntersection(event.clientX, event.clientY);
-    if (!intersection) {
-      clear();
-      setPanelInfo('Select a point.');
-      return;
-    }
+  //   const markerData = {
+  //     point: movedPoint,
+  //     normal: intersection.normal,
+  //   };
 
-    const movedPoint = intersection.point.clone().add(intersection.normal.clone().multiplyScalar(0.01));
+  //   addMarker(markerData);
+  // };
 
-    const markerData = {
-      point: movedPoint,
-      normal: intersection.normal,
-    };
-
-    addMarker(markerData);
-  };
-
-  const getIntersection = (x: number, y: number): IntersectionData | null => {
-    const mouse = new THREE.Vector2();
-    const canvas = gl.domElement;
-    const rect = canvas.getBoundingClientRect();
-
-    mouse.x = ((x - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((y - rect.top) / rect.height) * 2 + 1;
-
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
-
-    const intersects = raycaster.intersectObjects(scene.children, true);
-
-    //!! fix: extreme rerender
-    console.log('Intersects:', intersects); // ← add this
-
-    for (const intersect of intersects) {
-      if (intersect.face && intersect.object) {
-        const normalMatrix = new THREE.Matrix3().getNormalMatrix(intersect.object.matrixWorld);
-        const worldNormal = intersect.face.normal.clone().applyMatrix3(normalMatrix).normalize();
-        const point = intersect.point.clone().add(worldNormal.clone().multiplyScalar(0.01));
-        return { point, normal: worldNormal };
-      }
-    }
-    return null;
-  };
-
-  const handleMouseMove = (event: MouseEvent) => {
-    const intersection = getIntersection(event.clientX, event.clientY);
-    if (intersection) {
-      setHoverMarker(intersection);
-    }
-  };
-
-  useEffect(() => {
-    const handleMouseDown = (event: MouseEvent) => {
-      setMouseDownPosition({ x: event.clientX, y: event.clientY });
-    };
-
-    const handleMouseUp = (event: MouseEvent) => {
-      if (!mouseDownPosition) return;
-
-      const dx = event.clientX - mouseDownPosition.x;
-      const dy = event.clientY - mouseDownPosition.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (distance < 5) {
-        handleClick(event); // คลิกจริง
-      }
-      setMouseDownPosition(null);
-    };
-
-    gl.domElement.addEventListener('mousedown', handleMouseDown);
-    gl.domElement.addEventListener('mouseup', handleMouseUp);
-    gl.domElement.addEventListener('mousemove', handleMouseMove);
-
-    return () => {
-      gl.domElement.removeEventListener('mousedown', handleMouseDown);
-      gl.domElement.removeEventListener('mouseup', handleMouseUp);
-      gl.domElement.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, [mouseDownPosition]);
-
-  // useEffect(() => {
-  // if (markers.length === 2) {
-  //   const distance = markers[0].point.distanceTo(markers[1].point).toFixed(3);
-  //   const angle = markers[0].normal.angleTo(markers[1].normal) * (180 / Math.PI);
-  //   setPanelInfo(`Distance: ${distance} units \nAngle: ${angle.toFixed(1)}\u00b0`);
-  // }
-
-  // }, [markers]);
-
-  useEffect(() => {
-    console.log({ currentMarker, markerPairs });
-  }, [currentMarker, markerPairs]);
+  usePointerInteraction(camera, scene, gl, setHoverMarker,  addMarker);
 
   function computeScale(camera: THREE.Camera, position: THREE.Vector3) {
     const distance = camera.position.distanceTo(position);
@@ -144,64 +60,9 @@ export const MeasureTool = () => {
           polygonOffsetFactor={-1}
         />
       )}
-      {markerPairs.map((pair, index) => {
-        const midPoint = pair.origin.point
-          .clone()
-          .add(pair.destination.point)
-          .multiplyScalar(0.5)
-          .add(new THREE.Vector3(0, markerRadius * 2, 0));
-
-        return (
-          <group key={index}>
-            <Marker position={pair.origin.point} normal={pair.origin.normal} radius={markerRadius} />
-            <Marker position={pair.destination.point} normal={pair.destination.normal} radius={markerRadius} />
-
-            <mesh position={pair.origin.point}>
-              <sphereGeometry args={[markerRadius / 3, 16, 16]} />
-              <meshBasicMaterial color='red' />
-            </mesh>
-
-            <mesh position={pair.destination.point}>
-              <sphereGeometry args={[markerRadius / 3, 16, 16]} />
-              <meshBasicMaterial color='red' />
-            </mesh>
-
-            <Line
-              points={[pair.origin.point, pair.destination.point]}
-              color='#ff0000'
-              lineWidth={1}
-              depthTest={false}
-              polygonOffset={true}
-              polygonOffsetFactor={-1}
-            />
-            <Html
-              position={midPoint}
-              center
-              // style={{
-              //   transform: `scale(${computeScale(camera, midPoint)})`,
-              //   transformOrigin: 'center center',
-              // }}
-            >
-              <div
-                style={{
-                  // width: '50vw',
-                  padding: '0.5rem',
-                  borderRadius: '0.5rem',
-                  backgroundColor: '#ff6f00',
-                  color: 'white',
-                  // fontWeight: 'bold',
-                  fontSize: '1rem',
-                  boxShadow: '0 0 4px rgba(0,0,0,0.3)',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {/* what is the real metrics size, !!need calculation */}
-                {pair.origin.point.distanceTo(pair.destination.point).toFixed(3)}
-              </div>
-            </Html>
-          </group>
-        );
-      })}
+      {/* {markerPairs.map((pair, index) => {
+        return <MeasureLine pair={pair} key={index} markerRadius={markerRadius} />;
+      })} */}
     </>
   );
 };

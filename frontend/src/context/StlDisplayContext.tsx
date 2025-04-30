@@ -1,9 +1,10 @@
 import { OrbitControls } from '@react-three/drei';
 import type { PlaneDataType, TransformControlsMode } from '@/types/stlDisplay';
-import { createContext, ReactNode, useCallback, useRef, useState } from 'react';
+import { createContext, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { v4 as uuid } from 'uuid';
 import type { IntersectionData, MarkerPairDataType, AngleGroupDataType } from '@/types/measureTool';
+import { useThree } from '@react-three/fiber';
 
 interface SceneHandlerRefType {
   camera?: THREE.PerspectiveCamera;
@@ -19,6 +20,8 @@ interface StlDisplayContextType {
     };
     clear: () => void;
     toggleTool: (toolName: 'angle' | 'measure' | 'plane') => void;
+    markerRadius: number;
+    setMarkerRadius: React.Dispatch<React.SetStateAction<number>>;
   };
 
   angleHandler: {
@@ -27,6 +30,8 @@ interface StlDisplayContextType {
     angleGroup: AngleGroupDataType[];
     currentAngleGroup: IntersectionData[];
     addMarker: (markerData: IntersectionData) => void;
+    panelInfo: string | null;
+    setPanelInfo: (info: string | null) => void;
     clear: () => void;
   };
 
@@ -81,9 +86,12 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
   const [currentMarker, setCurrentMarker] = useState<IntersectionData | null>(null);
   const [markerPairs, setMarkerPairs] = useState<MarkerPairDataType[]>([]);
 
+  const [markerRadius, setMarkerRadius] = useState<number>(1.0);
+
   // Angle
   const [angleGroup, setAngleGroup] = useState<AngleGroupDataType[]>([]);
   const [currentAngleGroup, setCurrentAngleGroup] = useState<IntersectionData[]>([]);
+  const [panelAngleInfo, setAnglePanelInfo] = useState<string | null>('Select a point.');
 
   const clearAngle = () => {
     setAngleGroup([]);
@@ -105,10 +113,15 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
       console.log('Adding destination');
       setCurrentAngleGroup((prev) => [...(prev || []), markerData]);
       setPanelInfo('Select the first point.');
-      const newAngleGroup = {
+      const vecA = currentAngleGroup[0].point.clone().sub(currentAngleGroup[1].point).normalize();
+      const vecB = markerData.point.clone().sub(currentAngleGroup[1].point).normalize();
+      const angleRad = vecA.angleTo(vecB);
+      const angleDeg = THREE.MathUtils.radToDeg(angleRad);
+      const newAngleGroup: AngleGroupDataType = {
         origin: currentAngleGroup[0],
         middle: currentAngleGroup[1],
         destination: markerData,
+        angleDeg,
       };
       setAngleGroup((prev) => (prev ? [...prev, newAngleGroup] : [newAngleGroup]));
       setCurrentAngleGroup([]);
@@ -122,6 +135,7 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
       const newPair: MarkerPairDataType = {
         origin: currentMarker,
         destination: marker,
+        distance: currentMarker.point.distanceTo(marker.point),
       };
       setMarkerPairs((prev) => [...prev, newPair]);
       setCurrentMarker(null);
@@ -260,6 +274,8 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
           },
           clear: () => setCurrentTool(null),
           toggleTool,
+          markerRadius,
+          setMarkerRadius,
         },
         angleHandler: {
           isActive: currentTool === 'angle',
@@ -267,6 +283,8 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
           currentAngleGroup,
           addMarker: addAngleMarker,
           clear: clearAngle,
+          panelInfo: panelAngleInfo,
+          setPanelInfo: setAnglePanelInfo,
           // add: () => {}, // placeholder if needed
           // clear: () => setCurrentTool(null), // clear example
         },

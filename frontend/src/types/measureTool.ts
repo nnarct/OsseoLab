@@ -15,13 +15,14 @@ export interface IntersectionData {
 export interface MarkerPairDataType {
   origin: IntersectionData;
   destination: IntersectionData;
+  distance: number;
 }
-
 
 export interface AngleGroupDataType {
   origin: IntersectionData;
   middle: IntersectionData;
   destination: IntersectionData;
+  angleDeg: number;
 }
 
 // todo: rename fle

@@ -21,6 +21,8 @@ import { convert } from '@/services/stlExporter/convert';
 import MeasureDistance from './MeasureDistance';
 import { MeasureTool } from './MeasureTool/MeasureTool';
 import AngleTool from './AngleTool/AngleTool';
+import MeasureLineGroup from './MeasureTool/MeasureLineGroup';
+import AngleLineGroup from './AngleTool/AngleLineGroup';
 // import AngleTool from './AngleTool/Angle';
 
 const Center = ({ url, id }: { url: string; id: string }) => {
@@ -146,6 +148,8 @@ const Center = ({ url, id }: { url: string; id: string }) => {
 
         {isAngleActive && <AngleTool />}
         {isMeasureActive && <MeasureTool />}
+        <MeasureLineGroup/>
+        <AngleLineGroup/>
         {/* {measureActive && <MeasureDistance />} */}
       </Canvas>
       {/* <MeasureDistance /> */}
