@@ -69,7 +69,7 @@ const AppLayout = () => {
             />
           </div>
           <SidebarMenu />
-          <SidebarUserInfo collapsed={collapsed} />
+          <SidebarUserInfo collapsed={collapsed} setCollapsed={setCollapsed} />
         </div>
       </Sider>
       <Layout>

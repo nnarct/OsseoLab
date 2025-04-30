@@ -1,4 +1,3 @@
-
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
@@ -35,3 +34,22 @@ class User(db.Model):
         'Technician', back_populates='user', uselist=False)
     profile_pic = relationship(
         'ProfilePicFile', back_populates='user',  foreign_keys='ProfilePicFile.user_id')
+
+    def to_dict(self, exclude: set[str] = None):
+        data = {
+            "id": str(self.id),
+            "firstname": self.firstname,
+            "lastname": self.lastname,
+            "username": self.username,
+            "email": self.email,
+            "dob": self.dob.isoformat() if self.dob else None,
+            "role": self.role,
+            "gender": self.gender.name if self.gender else None,
+            "country": self.country,
+            "created_at": self.created_at.isoformat(),
+            "last_updated": self.last_updated.isoformat(),
+            "profile_image": str(self.profile_image) if self.profile_image else None
+        }
+        if exclude:
+            return {k: v for k, v in data.items() if k not in exclude}
+        return data

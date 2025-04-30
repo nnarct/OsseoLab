@@ -17,6 +17,7 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  setAccessToken: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,7 +42,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (accessToken) {
-      localStorage.setItem('accessToken', accessToken);
+      try {
+        const decoded: { userData: User } = jwtDecode(accessToken);
+        localStorage.setItem('accessToken', accessToken);
+        setRole(decoded.userData.role);
+        setUser(decoded.userData);
+      } catch (error) {
+        console.error('Invalid token:', error);
+      }
     } else {
       localStorage.removeItem('accessToken');
     }
@@ -91,7 +99,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('accessToken');
   };
 
-  return <AuthContext.Provider value={{ role, accessToken, user, login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ role, accessToken, setAccessToken, user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export { AuthContext };

@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import { UserRole } from '@/types/user';
+import path from 'path';
 
 const StlList = lazy(() => import('@/pages/StlList/StlList'));
 const DoctorList = lazy(() => import('@/components/feature/UserList/DoctorList'));
@@ -7,7 +8,7 @@ const AdminList = lazy(() => import('@/components/feature/UserList/AdminList'));
 const UserList = lazy(() => import('@/components/feature/UserList/UserList'));
 const TechnicianList = lazy(() => import('@/components/feature/UserList/TechnicianList'));
 const Case = lazy(() => import('@/pages/StlList/Case'));
-
+const ProfilePage = lazy(() => import('@/pages/AuthPage/ProfilePage'));
 // { id: 'homepage', name: 'Homepage', path: '/', element: <Homepage /> },
 
 const adminRoutes = [
@@ -64,7 +65,14 @@ const adminRoutes = [
   },
 ];
 
-const routesConfig = adminRoutes;
+const profileRoute = {
+  id: 'profile',
+  name: 'Profile',
+  path: '/profile',
+  element: <ProfilePage/>,
+  requiredRole: [UserRole.Admin, UserRole.Technician, UserRole.Doctor],
+};
+const routesConfig = [...adminRoutes, profileRoute];
 
 // {
 //   id: 'admin',

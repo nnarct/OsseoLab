@@ -1,4 +1,6 @@
 import { axios } from '@/config/axiosConfig';
+import { useAuth } from '@/hooks/useAuth';
+import { access } from 'fs';
 
 export const fetchUsers = async () => {
   try {
@@ -26,4 +28,28 @@ export const fetchDoctors = async () => {
   const response = await axios.get('/user/doctor/list');
   console.log({ fetchDoctors: response });
   return response.data.data;
+};
+
+export const fetchCurrentUser = async (): Promise<User> => {
+  const response = await axios.get(`/user/me`);
+  return response.data.data;
+};
+
+export const updateCurrentUser = async (data: any) => {
+  const response = await axios.put(`/user/me`, data);
+  return { data: response.data.data, accessToken: response.data.accessToken };
+};
+
+type User = {
+  country: string | undefined;
+  dob: string | undefined;
+  email: string;
+  firstname: string;
+  gender: string | undefined;
+  id: string;
+  lastname: string;
+  profile_image: string | undefined;
+  role: string;
+  username: string | undefined;
+  // !! todo: for got mobile number
 };

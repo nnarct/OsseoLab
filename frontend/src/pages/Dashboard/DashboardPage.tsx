@@ -19,10 +19,14 @@ const DashboardCard = ({ title, count, link }: { title: string; count: number; l
 };
 
 const DashboardPage = () => {
-  const { data, isLoading } = useGetAdminDashboardData();
+  const { data, isLoading, isError } = useGetAdminDashboardData();
   if (isLoading) {
     return <Spin />;
   }
+  if (!data || isError) {
+    return <div>Error loading data</div>;
+  }
+
   return (
     <>
       <Typography.Title level={3}>Dashboard</Typography.Title>
