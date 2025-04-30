@@ -1,27 +1,23 @@
-import * as THREE from 'three';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useThree } from '@react-three/fiber';
-import { Line, Html } from '@react-three/drei';
+import { Line } from '@react-three/drei';
 import type { IntersectionData } from '@/types/measureTool';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 
 import Marker from '@/components/feature/StlDisplay/MeasureTool/Marker';
-import AngleLine from './AngleLine';
 import usePointerInteraction from '@/hooks/usePointerInteraction';
 
 const AngleTool = () => {
-  const { camera, scene,gl } = useThree();
+  const { camera, scene, gl } = useThree();
 
   // const [markerRadius, setMarkerRadius] = useState<number>(1.0);
   const [hoverMarker, setHoverMarker] = useState<IntersectionData | null>(null);
   const {
-    
-    angleHandler: { currentAngleGroup,  addMarker, },
-
+    angleHandler: { currentAngleGroup, addMarker },
     tool: { markerRadius },
   } = useStlDisplay();
 
-  usePointerInteraction(camera, scene, gl, setHoverMarker, addMarker );
+  usePointerInteraction(camera, scene, gl, setHoverMarker, addMarker);
 
   return (
     <>
@@ -56,16 +52,6 @@ const AngleTool = () => {
           polygonOffsetFactor={-1}
         />
       )}
-
-      {/* {angleGroup?.map((triple, index) => {
-        // const midPoint = triple.origin.point
-        //   .clone()
-        //   .add(triple.destination.point)
-        //   .multiplyScalar(0.5)
-        //   .add(new THREE.Vector3(0, markerRadius * 2, 0));
-
-        return <AngleLine key={index} triple={triple} markerRadius={markerRadius} />;
-      })} */}
     </>
   );
 };

@@ -1,9 +1,9 @@
-import { CONVERT_TYPE } from '../../StoreContext';
+// import { CONVERT_TYPE } from '../../StoreContext';
 import { toRenderable } from './toRenderable';
 import { Scene } from 'three';
 
-import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter';
-import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
+// import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter';
+// import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter';
 // import { ColladaExporter } from "three/examples/jsm/exporters/ColladaExporter"
 // import { DRACOExporter } from "three/examples/jsm/exporters/DRACOExporter"
@@ -14,7 +14,7 @@ import { STLExporter } from 'three/examples/jsm/exporters/STLExporter';
 
 export const convert = (scene: Scene): Promise<string> => {
   const copyScene = toRenderable(scene);
-  return new Promise((res, rej) => {
+  return new Promise((res) => {
     const stl = new STLExporter().parse(copyScene);
     res(stl);
     return;

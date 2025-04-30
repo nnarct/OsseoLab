@@ -1,21 +1,18 @@
 import * as THREE from 'three';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useThree } from '@react-three/fiber';
-import { Line, Html } from '@react-three/drei';
+import { Line } from '@react-three/drei';
 import type { IntersectionData } from '@/types/measureTool';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 
 import Marker from './Marker';
-import MeasureLine from './MeasureLine';
 import usePointerInteraction from '@/hooks/usePointerInteraction';
 
 export const MeasureTool = () => {
-  const { camera,scene, gl } = useThree();
+  const { camera, scene, gl } = useThree();
   // const { markerPairs, setMarkerPairs, addMarker, currentMarker } = useMeasureStore();
   const {
-    
     measureHandler: { addMarker, currentMarker },
-
     tool: { markerRadius },
   } = useStlDisplay();
   const [hoverMarker, setHoverMarker] = useState<IntersectionData | null>(null);
@@ -37,12 +34,7 @@ export const MeasureTool = () => {
   //   addMarker(markerData);
   // };
 
-  usePointerInteraction(camera, scene, gl, setHoverMarker,  addMarker);
-
-  function computeScale(camera: THREE.Camera, position: THREE.Vector3) {
-    const distance = camera.position.distanceTo(position);
-    return 34 / distance;
-  }
+  usePointerInteraction(camera, scene, gl, setHoverMarker, addMarker);
 
   return (
     <>
@@ -60,9 +52,6 @@ export const MeasureTool = () => {
           polygonOffsetFactor={-1}
         />
       )}
-      {/* {markerPairs.map((pair, index) => {
-        return <MeasureLine pair={pair} key={index} markerRadius={markerRadius} />;
-      })} */}
     </>
   );
 };

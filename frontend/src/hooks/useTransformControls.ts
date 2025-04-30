@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { TransformControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 
 export const useTransformControls = (

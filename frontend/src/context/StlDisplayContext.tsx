@@ -1,15 +1,14 @@
-import { OrbitControls } from '@react-three/drei';
 import type { PlaneDataType, TransformControlsMode } from '@/types/stlDisplay';
-import { createContext, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { createContext, ReactNode, useCallback, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { v4 as uuid } from 'uuid';
 import type { IntersectionData, MarkerPairDataType, AngleGroupDataType } from '@/types/measureTool';
-import { useThree } from '@react-three/fiber';
 
 interface SceneHandlerRefType {
   camera?: THREE.PerspectiveCamera;
   controls?: OrbitControls;
 }
+
 interface StlDisplayContextType {
   tool: {
     current: string | null;
@@ -218,31 +217,31 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const faceTop = () => {
-    if (sceneHandlerRef.current) {
-      const camera = sceneHandlerRef.current.camera;
-      const controls = sceneHandlerRef.current.controls;
-      if (camera && controls) {
-        camera.position.set(0, 60, 0); // กล้องลอยจากข้างบน
-        controls.target.set(0, 0, 0);
-        controls.autoRotate = false;
-        controls.update();
-      }
-    }
-  };
+  // const faceTop = () => {
+  //   if (sceneHandlerRef.current) {
+  //     const camera = sceneHandlerRef.current.camera;
+  //     const controls = sceneHandlerRef.current.controls;
+  //     if (camera && controls) {
+  //       camera.position.set(0, 60, 0); // กล้องลอยจากข้างบน
+  //       controls.target.set(0, 0, 0);
+  //       controls.autoRotate = false;
+  //       controls.update();
+  //     }
+  //   }
+  // };
 
-  const faceLeft = () => {
-    if (sceneHandlerRef.current) {
-      const camera = sceneHandlerRef.current.camera;
-      const controls = sceneHandlerRef.current.controls;
-      if (camera && controls) {
-        camera.position.set(-60, 0, 0); // กล้องจากด้านซ้าย
-        controls.target.set(0, 0, 0);
-        controls.autoRotate = false;
-        controls.update();
-      }
-    }
-  };
+  // const faceLeft = () => {
+  //   if (sceneHandlerRef.current) {
+  //     const camera = sceneHandlerRef.current.camera;
+  //     const controls = sceneHandlerRef.current.controls;
+  //     if (camera && controls) {
+  //       camera.position.set(-60, 0, 0); // กล้องจากด้านซ้าย
+  //       controls.target.set(0, 0, 0);
+  //       controls.autoRotate = false;
+  //       controls.update();
+  //     }
+  //   }
+  // };
 
   const resetModel = () => {
     setPlanes([]);

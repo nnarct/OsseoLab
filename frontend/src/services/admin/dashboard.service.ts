@@ -1,5 +1,4 @@
 import { fetchAdminDashboardData } from '@/api/dashboard.api';
-import { getStlList } from '@/api/stl.api';
 import { ADMIN_DASHBOARD_QUERY_KEY } from '@/constants/queryKey';
 import { useQuery } from '@tanstack/react-query';
 

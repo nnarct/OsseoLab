@@ -1,17 +1,8 @@
 import { AngleGroupDataType } from '@/types/measureTool';
-import * as THREE from 'three';
 import { Line, Html } from '@react-three/drei';
 import Marker from '../MeasureTool/Marker';
 
-const AngleLine = ({
-  triple,
-
-  markerRadius,
-}: {
-  triple: AngleGroupDataType;
-
-  markerRadius: number;
-}) => {
+const AngleLine = ({ triple, markerRadius }: { triple: AngleGroupDataType; markerRadius: number }) => {
   return (
     <group>
       <Marker position={triple.origin.point} normal={triple.origin.normal} radius={markerRadius} />

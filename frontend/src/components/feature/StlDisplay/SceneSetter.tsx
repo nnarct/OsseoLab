@@ -7,7 +7,7 @@ import * as THREE from 'three';
 const SceneSetter = () => {
   const { scene } = useThree();
   const setScene = useSceneStore((state) => state.setScene);
-const { setMarkerRadius } = useStlDisplay().tool;
+  const { setMarkerRadius } = useStlDisplay().tool;
   useEffect(() => {
     setScene(scene);
   }, [scene, setScene]);
@@ -17,7 +17,7 @@ const { setMarkerRadius } = useStlDisplay().tool;
     if (sphere.radius > 0) {
       setMarkerRadius(sphere.radius / 100.0);
     }
-  }, [scene]);
+  }, [scene, setMarkerRadius]);
   return null;
 };
 

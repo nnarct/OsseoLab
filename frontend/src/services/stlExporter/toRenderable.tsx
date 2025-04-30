@@ -1,5 +1,5 @@
-import * as THREE from "three";
-import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import * as THREE from 'three';
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 const isMesh = (obj: THREE.Object3D): obj is THREE.Mesh => {
   return obj instanceof THREE.Mesh;
@@ -60,7 +60,7 @@ export const toRenderable = (scene: THREE.Scene): THREE.Scene => {
       return;
     }
 
-    let matrix = obj.matrixWorld.clone();
+    const matrix = obj.matrixWorld.clone();
     if (obj.parent && obj.parent.type === 'Scene') {
       matrix.identity();
     }

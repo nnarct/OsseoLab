@@ -6,19 +6,15 @@ import ClippingPlane from './ClippingPlane/ClippingPlane';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 import MenuBar from './MenuBar/MenuBar';
 import { useEffect, useRef, useState } from 'react';
-import { BufferGeometryUtils, STLExporter } from 'three/examples/jsm/Addons.js';
 import { axios } from '@/config/axiosConfig';
 import { useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
-import { initializeSTLModel } from '@/utils/stlUtils';
 import { STL_LIST_QUERY_KEY } from '@/constants/queryKey';
-import { CSG } from 'three-csg-ts';
 import SceneSetter from './SceneSetter';
 import { useSceneStore } from '@/store/useSceneStore';
 import { convert } from '@/services/stlExporter/convert';
 // import Angle from './AngleTool/Angle';
 
-import MeasureDistance from './MeasureDistance';
 import { MeasureTool } from './MeasureTool/MeasureTool';
 import AngleTool from './AngleTool/AngleTool';
 import MeasureLineGroup from './MeasureTool/MeasureLineGroup';
@@ -28,7 +24,7 @@ import AngleLineGroup from './AngleTool/AngleLineGroup';
 const Center = ({ url, id }: { url: string; id: string }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { planeHandler, angleHandler,resetModel, measureHandler } = useStlDisplay();
+  const { planeHandler, angleHandler, resetModel, measureHandler } = useStlDisplay();
   const { isActive: isMeasureActive } = measureHandler;
   const { isActive: isAngleActive } = angleHandler;
   const planes = planeHandler.getPlanes();
@@ -144,12 +140,12 @@ const Center = ({ url, id }: { url: string; id: string }) => {
         {planes.map((planeObj) => (
           <ClippingPlane key={planeObj.id} {...planeObj} />
         ))}
-{/* <Angle/> */}
+        {/* <Angle/> */}
 
         {isAngleActive && <AngleTool />}
         {isMeasureActive && <MeasureTool />}
-        <MeasureLineGroup/>
-        <AngleLineGroup/>
+        <MeasureLineGroup />
+        <AngleLineGroup />
         {/* {measureActive && <MeasureDistance />} */}
       </Canvas>
       {/* <MeasureDistance /> */}
