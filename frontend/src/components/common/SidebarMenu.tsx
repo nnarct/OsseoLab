@@ -60,7 +60,7 @@ const SidebarMenu = () => {
     },
   ];
 
-  const menuItems = { admin: adminMenu, tech: techMenu, doctor: doctorMenu };
+  const menuItems = { admin: adminMenu, technician: techMenu, doctor: doctorMenu };
 
   // Set selected key based on the current location
   useEffect(() => {
