@@ -44,12 +44,12 @@ class User(db.Model):
             "username": self.username,
             "email": self.email,
             "phone": self.phone,
-            "dob": int(self.dob.strftime('%s')) if self.dob else None,
+            "dob": int(self.dob.timestamp()) if self.dob else None,
             "role": self.role.value if isinstance(self.role, Enum) else self.role,
             "gender": self.gender.name if self.gender else None,
             "country": self.country,
-            "created_at": self.created_at.strftime('%s'),
-            "last_updated": self.last_updated.strftime('%s'),
+            "created_at": int(self.created_at.timestamp()),
+            "last_updated": int(self.last_updated.timestamp()),
             "profile_image": str(self.profile_image) if self.profile_image else None
         }
         if exclude:
