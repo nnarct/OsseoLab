@@ -6,7 +6,7 @@ from sqlalchemy import Column, String, DateTime, ForeignKey, Enum as PgEnum, Tex
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 from config.extensions import db
-from .enums import GenderEnum
+from .enums import GenderEnum, RoleEnum
 
 
 class User(db.Model):
@@ -19,7 +19,7 @@ class User(db.Model):
     phone = Column(String(20), nullable=True)
     password = Column(String(255))
     dob = Column(Date, nullable=True)
-    role = Column(String(255))
+    role = Column(PgEnum(RoleEnum))
     gender = Column(PgEnum(GenderEnum), nullable=True)
     country = Column(String(255), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False,
@@ -45,7 +45,7 @@ class User(db.Model):
             "email": self.email,
             "phone": self.phone,
             "dob": int(self.dob.strftime('%s')) if self.dob else None,
-            "role": self.role,
+            "role": self.role.value if isinstance(self.role, Enum) else self.role,
             "gender": self.gender.name if self.gender else None,
             "country": self.country,
             "created_at": self.created_at.strftime('%s'),

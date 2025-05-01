@@ -1,9 +1,9 @@
 from enum import Enum
 
-class Role(str, Enum):  # Subclass both str and Enum
-    ADMIN = "admin"
-    TECH = "tech"
-    DOCTOR = "doctor"
+class RoleEnum(Enum):
+    admin = "admin"
+    doctor = "doctor"
+    technician = "technician"
 
     @classmethod
     def has_value(cls, value):

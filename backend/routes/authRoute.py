@@ -3,11 +3,13 @@ from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
 from services.authService import get_user_role
+# Add user existence check endpoint
+from flask_jwt_extended import get_jwt, jwt_required
 
 from models.doctors import Doctor
 from models.technicians import Technician
 from models.users import User
-from models.enums import Role
+from models.enums import RoleEnum
 from config.extensions import db
 
 auth_bp = Blueprint("auth", __name__)
@@ -23,7 +25,6 @@ def health_check():
 def register():
     print("Frontend Request to Register")
     data = request.json
-    print(data)
     firstname = data.get("firstname")
     lastname = data.get("lastname")
     username = data.get("username")
@@ -31,11 +32,11 @@ def register():
     password = data.get("password")
     role = data.get("role")
 
-    if not firstname or not lastname or not username or  not email or not password or not role:
+    if not firstname or not lastname or not username or not email or not password or not role:
         return jsonify({"statusCode": 400, "error": "Invalid Body", "message": "Missing required fields"}), 400
 
-    if not Role.has_value(role):
-        return jsonify({"statusCode": 400, "error": f"Invalid role. Choose from {', '.join(Role)}"}), 400
+    if not RoleEnum.has_value(role):
+        return jsonify({"statusCode": 400, "error": f"Invalid role. Choose from {', '.join(RoleEnum)}"}), 400
     try:
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
@@ -58,11 +59,11 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        if role == Role.DOCTOR:
+        if role == RoleEnum.doctor.value:
             new_doctor = Doctor(user_id=new_user.id, hospital=None)
             db.session.add(new_doctor)
 
-        if role == Role.TECH:
+        if role == RoleEnum.technician.value:
             # new_tech = Technician(user_id=new_user.id, department=None)
             new_tech = Technician(user_id=new_user.id)
             db.session.add(new_tech)
@@ -74,7 +75,7 @@ def register():
             "message": "User registered successfully",
             "data": {
                 "id": new_user.id,
-                "role": new_user.role
+                "role": new_user.role.value
             }
         }), 201
 
@@ -109,7 +110,7 @@ def login():
 
         user_data = {
             "id": user.id,
-            "role": user.role,
+            "role": user.role.value,
             "firstname": user.firstname,
             "lastname": user.lastname,
             "email": user.email
@@ -149,7 +150,7 @@ def get_role():
             "statusCode": 200,
             "message": f"You have permission of {role}",
             "data": {
-                "role": role
+                "role": role.value,
             }
         }), 200
     except Exception as e:

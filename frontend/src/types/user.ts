@@ -1,7 +1,7 @@
 import { Dayjs } from 'dayjs';
 
 export enum UserRole {
-  Technician = 'tech',
+  Technician = 'technician',
   Doctor = 'doctor',
   Admin = 'admin',
 }

@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from models.users import User
-# from models.enums import Role
+from models.enums import RoleEnum
 # from config.extensions import db
-# from services.authService import admin_required
+from services.authService import admin_required
 # from werkzeug.exceptions import HTTPException
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")
@@ -58,15 +58,15 @@ user_bp = Blueprint("user", __name__, url_prefix="/user")
 # # ✅ 4. List all doctors (Only ADMIN)
 
 
-# @user_bp.route("/doctor/list", methods=["GET"])
-# @jwt_required()
-# @admin_required
-# def list_doctors():
-#     doctors = User.query.filter_by(role=Role.DOCTOR).all()
-#     return jsonify({
-#         "statusCode": 200,
-#         "data": [user.to_dict() for user in doctors]
-#     }), 200
+@user_bp.route("/doctor/list", methods=["GET"])
+@jwt_required()
+@admin_required
+def list_doctors():
+    doctors = User.query.filter_by(role=RoleEnum.doctor.value).all()
+    return jsonify({
+        "statusCode": 200,
+        "data": [user.to_dict() for user in doctors]
+    }), 200
 
 @user_bp.route("/me", methods=["GET"])
 @jwt_required()
@@ -91,7 +91,7 @@ def update_current_user():
 
     data = request.get_json()
     print(data)
-    restricted_fields = {"id", "username", "password",
+    restricted_fields = {"id", "password",
                          "email", "role", "profile_pic_image"}
 
     for key, value in data.items():
@@ -105,7 +105,7 @@ def update_current_user():
     db.session.commit()
     user_data = {
         "id": user.id,
-        "role": user.role,
+        "role": user.role.value,
         "firstname": user.firstname,
         "lastname": user.lastname,
         "email": user.email
