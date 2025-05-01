@@ -8,11 +8,7 @@ const UserList = () => {
   const roleColumn = { key: 'role', dataIndex: 'role', title: 'Role' };
   const columns =
     userColumns && userColumns.length > 1
-      ? [
-          ...userColumns.slice(0, userColumns.length - 1),
-          roleColumn,
-          userColumns[userColumns.length - 1],
-        ]
+      ? [...userColumns.slice(0, userColumns.length - 1), roleColumn, userColumns[userColumns.length - 1]]
       : [...(userColumns ?? []), roleColumn];
   return (
     <Card title='User List'>
@@ -24,9 +20,18 @@ const UserList = () => {
 export default UserList;
 
 export interface UserListDataType {
-  email: string;
-  firstname: string;
+  order: number;
   id: string;
-  lastname: string;
   role: UserRole;
+  firstname: string;
+  lastname: string;
+  username: string;
+  email: string;
+  phone: string | null;
+  dob: number | string | null;
+  gender: 'male' | 'female' | 'other';
+  profile_image: string | null;
+  country: string | null;
+  created_at: number | string;
+  last_updated: number | string;
 }
