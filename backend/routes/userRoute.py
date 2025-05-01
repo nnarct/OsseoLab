@@ -77,7 +77,7 @@ def get_current_user():
         return jsonify({"statusCode": 404, "error": "User not found"}), 404
     return jsonify({
         "statusCode": 200,
-        "data": user.to_dict(exclude={"created_at", "last_updated"})
+        "data": user.to_dict()
     }), 200
 
 
@@ -91,7 +91,7 @@ def update_current_user():
 
     data = request.get_json()
     print(data)
-    restricted_fields = {"id", "username",
+    restricted_fields = {"id", "username", "password",
                          "email", "role", "profile_pic_image"}
 
     for key, value in data.items():
@@ -101,7 +101,7 @@ def update_current_user():
             setattr(user, key, value)
 
     from config.extensions import db
-    
+
     db.session.commit()
     user_data = {
         "id": user.id,
@@ -110,7 +110,7 @@ def update_current_user():
         "lastname": user.lastname,
         "email": user.email
     }
-    
+
     access_token = create_access_token(identity=user.id,
                                        additional_claims={"userData": user_data},)
 
