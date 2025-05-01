@@ -40,13 +40,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return null;
   });
 
+  const logout = () => {
+    setAccessToken(null);
+    setRole(null);
+    setUser(null);
+    localStorage.removeItem('role');
+    localStorage.removeItem('user');
+    localStorage.removeItem('accessToken');
+  };
+
   useEffect(() => {
     if (accessToken) {
       try {
-        const decoded: { userData: User } = jwtDecode(accessToken);
+        const decodedToken: { exp?: number | undefined; userData: User } = jwtDecode(accessToken);
+        const currentTime = Date.now() / 1000;
+        if (decodedToken.exp && decodedToken.exp < currentTime) {
+          logout();
+          return;
+        }
+
         localStorage.setItem('accessToken', accessToken);
-        setRole(decoded.userData.role);
-        setUser(decoded.userData);
+        setRole(decodedToken.userData.role);
+        setUser(decodedToken.userData);
       } catch (error) {
         console.error('Invalid token:', error);
       }
@@ -88,15 +103,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error('Login error:', error);
       throw error;
     }
-  };
-
-  const logout = () => {
-    setAccessToken(null);
-    setRole(null);
-    setUser(null);
-    localStorage.removeItem('role');
-    localStorage.removeItem('user');
-    localStorage.removeItem('accessToken');
   };
 
   return (
