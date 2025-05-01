@@ -58,6 +58,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           logout();
           return;
         }
+        axios.get('/auth/exist').catch((err) => {
+          if (err.response?.status === 404 || err.response?.status === 403) {
+            console.warn('User no longer exists, logging out.');
+            logout();
+          }
+        });
 
         localStorage.setItem('accessToken', accessToken);
         setRole(decodedToken.userData.role);
@@ -67,6 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     } else {
       localStorage.removeItem('accessToken');
+      logout();
     }
   }, [accessToken]);
 

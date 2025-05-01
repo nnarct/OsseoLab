@@ -159,3 +159,31 @@ def get_role():
             "message": "Internal Server Error",
             "error": str(e)
         }), 500
+
+
+@auth_bp.route("/auth/exist", methods=["GET"])
+@jwt_required()
+def check_user_exists():
+    try:
+        claims = get_jwt()
+        user_data = claims.get("userData")
+        user_id = user_data.get("id")
+
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({
+                "statusCode": 404,
+                "message": "User not found"
+            }), 404
+
+        return jsonify({
+            "statusCode": 200,
+            "message": "User exists"
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "statusCode": 500,
+            "message": "Error verifying user existence",
+            "error": str(e)
+        }), 500
