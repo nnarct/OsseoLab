@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Spin } from 'antd';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/context/AuthContext';
 
 import AppLayout from '@/components/common/Layout';
@@ -11,7 +11,7 @@ import routesConfig from '@/config/routesConfig';
 import LoginPage from '@/pages/AuthPage/LoginPage';
 import RegisterPage from '@/pages/AuthPage/RegisterPage';
 import Homepage from '@/pages/Homepage/Homepage';
-const queryClient = new QueryClient();
+import { queryClient } from '@/config/queryClient';
 
 const App = () => {
   return (
