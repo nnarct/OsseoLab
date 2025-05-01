@@ -1,3 +1,4 @@
+import CustomHeader from '@/components/common/CustomHeader';
 import { COUNTRIES } from '@/constants/country';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentUser, useUpdateCurrentUser } from '@/services/user/user.service';
@@ -35,7 +36,7 @@ const ProfilePage = () => {
   const onFinish = async (values: FormUserProfile) => {
     // Set a timer to delay showing the spinner for 1 second
     submitTimerRef.current = setTimeout(() => setIsSubmitting(true), 1000);
-    if (values.dob && (typeof values.dob !== 'string')) {
+    if (values.dob && typeof values.dob !== 'string') {
       values.dob = values.dob.format('YYYY-MM-DD');
     }
     try {
@@ -68,18 +69,9 @@ const ProfilePage = () => {
   return (
     <>
       {contextHolder}
-      <Layout.Header
-        className='flex items-center'
-        style={{
-          background: 'white',
-          height: '73px',
-          padding: '0 24px',
-          borderBottom: '1px solid rgba(5, 5, 5, 0.05)',
-          borderLeft: '1px solid rgba(5, 5, 5, 0.05)',
-        }}
-      >
+      <CustomHeader>
         <h1 className='text-2xl font-bold'>Profile Page</h1>
-      </Layout.Header>
+      </CustomHeader>
       <Layout.Content className='p-4'>
         <Card title={'Profile Information'}>
           <div className='mb-6 flex flex-col items-center justify-center gap-4 font-bold'>
