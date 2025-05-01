@@ -69,6 +69,13 @@ const RegisterPage = () => {
               <Input placeholder='Enter your last name' />
             </Item>
             <Item
+              name='username'
+              label={<div className='font-medium'>Username</div>}
+              rules={[{ required: true, message: 'Please input your username!' }]}
+            >
+              <Input placeholder='Enter your username' />
+            </Item>
+            <Item
               name='email'
               label={<div className='font-medium'>Email</div>}
               rules={[{ required: true, message: 'Please input your email!' }]}
@@ -119,6 +126,7 @@ export default RegisterPage;
 interface RegisterFormDataType {
   firstname: string;
   lastname: string;
+  username: string;
   email: string;
   password: string;
   role: UserRole;

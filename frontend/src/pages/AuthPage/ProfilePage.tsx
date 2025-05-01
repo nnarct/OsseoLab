@@ -22,6 +22,7 @@ const ProfilePage = () => {
     if (data) {
       form.setFieldsValue({
         firstname: data.firstname,
+        username: data.username,
         lastname: data.lastname,
         phone: data.phone,
         dob: data.dob ? dayjs.unix(data.dob) : undefined,

@@ -26,11 +26,12 @@ def register():
     print(data)
     firstname = data.get("firstname")
     lastname = data.get("lastname")
+    username = data.get("username")
     email = data.get("email")
     password = data.get("password")
     role = data.get("role")
 
-    if not firstname or not lastname or not email or not password or not role:
+    if not firstname or not lastname or not username or  not email or not password or not role:
         return jsonify({"statusCode": 400, "error": "Invalid Body", "message": "Missing required fields"}), 400
 
     if not Role.has_value(role):
@@ -48,6 +49,7 @@ def register():
         new_user = User(
             firstname=firstname,
             lastname=lastname,
+            username=username,
             email=email,
             password=hashed_password,
             role=role
