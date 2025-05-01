@@ -16,6 +16,7 @@ class User(db.Model):
     lastname = Column(String(255))
     username = Column(String(255), nullable=True)
     email = Column(String(255))
+    phone = Column(String(20), nullable=True)
     password = Column(String(255))
     dob = Column(Date, nullable=True)
     role = Column(String(255))
@@ -42,12 +43,13 @@ class User(db.Model):
             "lastname": self.lastname,
             "username": self.username,
             "email": self.email,
-            "dob": self.dob.isoformat() if self.dob else None,
+            "phone": self.phone,
+            "dob": int(self.dob.strftime('%s')) if self.dob else None,
             "role": self.role,
             "gender": self.gender.name if self.gender else None,
             "country": self.country,
-            "created_at": self.created_at.isoformat(),
-            "last_updated": self.last_updated.isoformat(),
+            "created_at": self.created_at.strftime('%s'),
+            "last_updated": self.last_updated.strftime('%s'),
             "profile_image": str(self.profile_image) if self.profile_image else None
         }
         if exclude:
