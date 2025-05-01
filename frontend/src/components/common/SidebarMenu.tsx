@@ -1,7 +1,7 @@
-  import { Menu } from 'antd';
+import { Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { FaUserFriends, FaRegImages, FaChartBar } from 'react-icons/fa';
+import { FaUserFriends, FaRegImages, FaChartBar, FaListUl, FaPlusCircle, FaRegFolderOpen } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 
 const SidebarMenu = () => {
@@ -29,6 +29,15 @@ const SidebarMenu = () => {
         { key: '/admin/list', label: 'Admin List', onClick: () => navigate('/admin/list') },
         { key: '/technician/list', label: 'Technician List', onClick: () => navigate('/technician/list') },
         { key: '/doctor/list', label: 'Doctor List', onClick: () => navigate('/doctor/list') },
+      ],
+    },
+    {
+      key: 'case',
+      label: 'Cases',
+      icon: <FaRegFolderOpen />,
+      children: [
+        { key: '/case/list', icon: <FaListUl />, label: 'Case List', onClick: () => navigate('/case/list') },
+        { key: '/case/create', icon: <FaPlusCircle />, label: 'Create Case', onClick: () => navigate('/case/create') },
       ],
     },
   ];

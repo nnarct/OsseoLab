@@ -14,12 +14,14 @@ import Homepage from '@/pages/Homepage/Homepage';
 import { queryClient } from '@/config/queryClient';
 import { UserRole } from '@/types/user';
 
+const ProfilePage = lazy(() => import('@/pages/AuthPage/ProfilePage'));
 const DoctorList = lazy(() => import('@/components/feature/UserList/DoctorList'));
 const AdminList = lazy(() => import('@/components/feature/UserList/AdminList'));
 const UserList = lazy(() => import('@/components/feature/UserList/UserList'));
 const TechnicianList = lazy(() => import('@/components/feature/UserList/TechnicianList'));
 const Case = lazy(() => import('@/pages/StlList/Case'));
-const ProfilePage = lazy(() => import('@/pages/AuthPage/ProfilePage'));
+const CaseList = lazy(() => import('@/pages/Case/CaseList'));
+const CaseCreateForm = lazy(() => import('@/pages/Case/CaseCreateForm'));
 
 const createRoleRoute = (path: string, roles: string[], element: JSX.Element) => (
   <Route path={path} element={<ProtectedRoute requiredRole={roles} />}>
@@ -44,6 +46,8 @@ const App = () => {
                 {createRoleRoute('/technician/list', [UserRole.Admin], <TechnicianList />)}
                 {createRoleRoute('/doctor/list', [UserRole.Admin], <DoctorList />)}
                 {createRoleRoute('/case', [UserRole.Admin, UserRole.Technician, UserRole.Doctor], <Case />)}
+                {createRoleRoute('/case/list', [UserRole.Admin, UserRole.Technician, UserRole.Doctor], <CaseList />)}
+                {createRoleRoute('/case/create', [UserRole.Admin, UserRole.Technician], <CaseCreateForm />)}
                 {createRoleRoute('/profile', [UserRole.Admin, UserRole.Technician, UserRole.Doctor], <ProfilePage />)}
               </Route>
               {/* </Route> */}
