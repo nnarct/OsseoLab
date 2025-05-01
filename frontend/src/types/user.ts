@@ -31,3 +31,15 @@ export interface FormUserProfile {
   gender: 'male' | 'female' | 'other';
   country: string | null;
 }
+
+export interface CreateDoctorFormData {
+  firstname: string;
+  lastname: string;
+  username: string;
+  email: string;
+  phone: string | null;
+  country: string | null;
+  gender: 'male' | 'female' | 'other' | null;
+  dob: Dayjs | string | null;
+  password: string;
+}
