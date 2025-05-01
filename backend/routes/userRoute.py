@@ -1,3 +1,4 @@
+import datetime
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from models.users import User
@@ -62,11 +63,16 @@ user_bp = Blueprint("user", __name__, url_prefix="/user")
 @jwt_required()
 @admin_required
 def list_doctors():
-    doctors = User.query.filter_by(role=RoleEnum.doctor.value).all()
+    doctors = User.query.filter_by(role=RoleEnum.doctor.value).order_by(
+        User.created_at.asc()).all()
     return jsonify({
         "statusCode": 200,
-        "data": [user.to_dict() for user in doctors]
+        "data": [
+            {**user.to_dict(), "order": index + 1}
+            for index, user in enumerate(doctors)
+        ]
     }), 200
+
 
 @user_bp.route("/me", methods=["GET"])
 @jwt_required()
@@ -110,9 +116,13 @@ def update_current_user():
         "lastname": user.lastname,
         "email": user.email
     }
+    expires = datetime.timedelta(weeks=4)
 
     access_token = create_access_token(identity=user.id,
-                                       additional_claims={"userData": user_data},)
+                                       additional_claims={
+                                           "userData": user_data},
+                                       expires_delta=expires
+                                       )
 
     return jsonify({
         "statusCode": 200,
