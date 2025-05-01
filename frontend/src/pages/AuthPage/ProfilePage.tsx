@@ -16,7 +16,7 @@ const ProfilePage = () => {
 
   const { setAccessToken } = useAuth();
   const { data, isLoading, isError } = useCurrentUser();
-  
+
   // Update form fields when data changes
   useEffect(() => {
     if (data) {
@@ -26,7 +26,7 @@ const ProfilePage = () => {
         lastname: data.lastname,
         phone: data.phone,
         dob: data.dob ? dayjs.unix(data.dob) : undefined,
-        gender: data.gender || 'female',
+        gender: data.gender,
         country: data.country,
       });
     }
@@ -146,7 +146,7 @@ const ProfilePage = () => {
               <Input placeholder='Enter your username' type='text' />
             </Form.Item>
             {/* gender select */}
-            <Form.Item label='Gender' name='gender' initialValue={data.gender || 'female'}>
+            <Form.Item label='Gender' name='gender' initialValue={data.gender}>
               <Select
                 placeholder='Select your gender'
                 options={[
