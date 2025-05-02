@@ -1,3 +1,5 @@
+import os
+# from config.constants import UPLOAD_FOLDER
 from services.url_secure_service import generate_secure_url_case_file
 from models.case_files import CaseFile
 from flask import Blueprint, jsonify
@@ -15,6 +17,7 @@ from config.extensions import db
 
 case_bp = Blueprint("case", __name__)
 
+UPLOAD_FOLDER = os.getenv("CASE_FILE_UPLOAD_FOLDER")
 
 @case_bp.route("/case/list", methods=["GET"])
 @jwt_required()
@@ -158,3 +161,33 @@ def get_case_options():
         return jsonify({"statusCode": 200, "data": result}), 200
     except Exception as e:
         return jsonify({"statusCode": 500, "message": "Failed to fetch case options", "error": str(e)}), 500
+
+
+# Route for deleting a case and all related data
+@case_bp.route("/case/<case_id>", methods=["DELETE"])
+@jwt_required()
+@admin_required
+def delete_case(case_id):
+    try:
+        case = Case.query.get(case_id)
+        if not case:
+            return jsonify({"statusCode": 404, "message": "Case not found"}), 404
+
+        # Delete related case surgeons
+        CaseSurgeon.query.filter_by(case_id=case_id).delete()
+
+        # Delete related case files and their disk files
+        case_files = CaseFile.query.filter_by(case_id=case_id).all()
+        for file in case_files:
+            filepath = os.path.join(UPLOAD_FOLDER, file.filepath)
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            db.session.delete(file)
+
+        db.session.delete(case)
+        db.session.commit()
+
+        return jsonify({"statusCode": 200, "message": "Case and all related data deleted"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"statusCode": 500, "message": "Failed to delete case", "error": str(e)}), 500

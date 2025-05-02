@@ -1,14 +1,18 @@
 import { useState, useMemo } from 'react';
-import { Card, Layout, Table, Input, type TableProps, Button } from 'antd';
+import { Card, Layout, Table, Input, type TableProps, Button, message, Modal } from 'antd';
 import CustomHeader from '@/components/common/CustomHeader';
 import { useNavigate } from 'react-router-dom';
 import { MdFormatListBulletedAdd } from 'react-icons/md';
 import { useGetCaseList } from '@/services/case/case.service';
 import { CaseSummary } from '@/api/case.api';
+import { FaRegTrashAlt } from 'react-icons/fa';
+import { deleteCaseById } from '@/api/case.api';
+import queryClient from '@/config/queryClient';
 
 const CaseList = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [messageApi, msgContextHolder] = message.useMessage();
   const { data: cases, isLoading: loading } = useGetCaseList();
   const filteredCases = useMemo(() => {
     return (
@@ -96,10 +100,43 @@ const CaseList = () => {
         </Button>
       ),
     },
+    {
+      width: '0',
+      align: 'center',
+      title: 'Delete',
+      dataIndex: 'id',
+      key: 'id',
+      render: (id) => (
+        <Button
+          danger
+          icon={<FaRegTrashAlt />}
+          onClick={() => {
+            Modal.confirm({
+              centered: true,
+              title: 'Are you sure you want to delete this case?',
+              content: 'This action will permanently delete the case and all associated files and surgeons.',
+              okText: 'Delete',
+              okType: 'danger',
+              cancelText: 'Cancel',
+              onOk: async () => {
+                try {
+                  await deleteCaseById(id);
+                  messageApi.success('Case deleted');
+                  queryClient.invalidateQueries({ queryKey: ['case-list'] });
+                } catch {
+                  messageApi.error('Failed to delete case');
+                }
+              },
+            });
+          }}
+        />
+      ),
+    },
   ];
 
   return (
     <>
+      {msgContextHolder}
       <CustomHeader>
         <h1 className='text-2xl font-bold'>Case List</h1>
       </CustomHeader>

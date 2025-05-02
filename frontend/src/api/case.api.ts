@@ -61,3 +61,12 @@ interface CaseData {
   surgeon: Surgeon;
   files: CaseFile[];
 }
+
+export const deleteCaseById = async (caseId: string): Promise<void> => {
+  try {
+    await axios.delete(`/case/${caseId}`);
+  } catch (error) {
+    console.error('Failed to delete case:', error);
+    throw error;
+  }
+};
