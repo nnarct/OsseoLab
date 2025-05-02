@@ -15,6 +15,7 @@ class CaseSurgeon(db.Model):
         'doctors.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False,
                            default=lambda: datetime.now(timezone.utc))
+    active = Column(db.Boolean, nullable=False, default=True)
 
     case = relationship('Case', back_populates='surgeons')
     surgeon = relationship('Doctor', back_populates='case_links')

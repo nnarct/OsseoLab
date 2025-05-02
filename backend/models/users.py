@@ -44,7 +44,7 @@ class User(db.Model):
             "username": self.username,
             "email": self.email,
             "phone": self.phone,
-            "dob": int(self.dob.timestamp()) if self.dob else None,
+            "dob": int(datetime.combine(self.dob, datetime.min.time()).timestamp()) if self.dob else None,
             "role": self.role.value if isinstance(self.role, Enum) else self.role,
             "gender": self.gender.name if self.gender else None,
             "country": self.country,
