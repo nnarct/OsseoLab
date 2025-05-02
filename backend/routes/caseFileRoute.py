@@ -1,4 +1,5 @@
 import os
+from constants.paths import UPLOAD_FOLDER
 from services.url_secure_service import generate_secure_url_case_file
 from flask import Blueprint, request, jsonify, send_from_directory
 from config.extensions import db
@@ -7,7 +8,6 @@ from models.case_files import CaseFile
 from itsdangerous import URLSafeTimedSerializer
 
 case_file_bp = Blueprint("case_file", __name__)
-UPLOAD_FOLDER = '/file/case_files'
 SECRET_KEY = os.getenv("STL_SECRET_KEY")
 serializer = URLSafeTimedSerializer(SECRET_KEY)
 
@@ -24,7 +24,6 @@ def upload_stl():
         if file.filename == "":
             return jsonify({"statusCode": 400, "error": "No selected file"}), 400
 
-        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
         unique_filename = f"{uuid.uuid4()}_{file.filename}"
         file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
@@ -75,8 +74,7 @@ def serve_case_file(token):
             return jsonify({"statusCode": 404, "error": "File not found"}), 404
 
         relative_path = case_file_entry.filepath.lstrip("/")
-        upload_folder = UPLOAD_FOLDER
-        return send_from_directory(upload_folder, relative_path)
+        return send_from_directory(UPLOAD_FOLDER, relative_path)
     except Exception as e:
         return jsonify({"statusCode": 500, "error": "Internal Server Error", "message": str(e)}), 500
 

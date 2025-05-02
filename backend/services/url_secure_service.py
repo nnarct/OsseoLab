@@ -5,7 +5,7 @@ from itsdangerous import URLSafeTimedSerializer
 
 SECRET_KEY = os.getenv("STL_SECRET_KEY")
 BASE_URL = os.getenv("BASE_URL")
-FOLDER = os.getenv("CASE_FILE_UPLOAD_FOLDER")
+from constants.paths import UPLOAD_FOLDER as FOLDER
 
 serializer = URLSafeTimedSerializer(SECRET_KEY)
 

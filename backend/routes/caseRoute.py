@@ -1,5 +1,5 @@
 import os
-# from config.constants import UPLOAD_FOLDER
+from constants.paths import UPLOAD_FOLDER
 from services.url_secure_service import generate_secure_url_case_file
 from models.case_files import CaseFile
 from flask import Blueprint, jsonify
