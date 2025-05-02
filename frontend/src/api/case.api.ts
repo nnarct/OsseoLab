@@ -45,23 +45,6 @@ export interface Surgeon {
   lastname: string;
 }
 
-interface CaseData {
-  id: string;
-  case_number: number;
-  created_at: number;
-  last_updated: number;
-  patient_name: string;
-  patient_gender: string | null;
-  patient_dob: number | null;
-  patient_age: number | null;
-  scan_type: string | null;
-  surgery_date: number;
-  additional_note: string | null;
-  problem_description: string | null;
-  surgeon: Surgeon;
-  files: CaseFile[];
-}
-
 export const deleteCaseById = async (caseId: string): Promise<void> => {
   try {
     await axios.delete(`/case/${caseId}`);
@@ -70,3 +53,30 @@ export const deleteCaseById = async (caseId: string): Promise<void> => {
     throw error;
   }
 };
+interface CaseData {
+  additional_note: string | null;
+  anticipated_ship_date: number | null;
+  case_code: string | null;
+  case_number: number;
+  created_at: number;
+  created_by: {
+    id: string;
+    username: string;
+    firstname: string;
+    lastname: string;
+  };
+  files: CaseFile[];
+  id: string;
+  last_updated: number;
+  patient_age: string | number | null;
+  patient_dob: number | null;
+  patient_gender: 'male' | 'female' | 'other' | null;
+  patient_name: string;
+  priority: string | null;
+  problem_description: string | null;
+  product: string | null;
+  scan_type: string | null;
+  status: string | null;
+  surgeon: Surgeon;
+  surgery_date: number;
+}

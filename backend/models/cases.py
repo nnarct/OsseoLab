@@ -17,6 +17,12 @@ class Case(db.Model):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     case_number = Column(db.Integer, autoincrement=True,
                          unique=True, nullable=True)
+    case_code = Column(String(255), nullable=True)
+    status = Column(String(255), nullable=True)
+    priority = Column(String(255), nullable=True)
+    created_by = Column(UUID(as_uuid=True), ForeignKey('user.id'), nullable=False)
+    product = Column(String(255), nullable=True)
+    anticipated_ship_date = Column(Date, nullable=True)
     surgeon_id = Column(UUID(as_uuid=True), ForeignKey('doctors.id'))
     patient_name = Column(String(255))
     patient_gender = Column(PgEnum(GenderEnum), nullable=True)
@@ -33,11 +39,23 @@ class Case(db.Model):
     surgeon = relationship('Doctor', back_populates='cases')
     files = relationship('CaseFile', back_populates='case')
     surgeons = relationship('CaseSurgeon', back_populates='case')
+    creator = relationship('User', back_populates='created_cases')
 
     def to_dict(self, exclude: set[str] = None, include: set[str] = None):
         data = {
             "id": str(self.id),
             "case_number": self.case_number,
+            "case_code": self.case_code,
+            "status": self.status,
+            "priority": self.priority,
+            "created_by": {
+                "id": str(self.creator.id),
+                "username": self.creator.username,
+                "firstname": self.creator.firstname,
+                "lastname": self.creator.lastname,
+            } if self.creator else None,
+            "product": self.product,
+            "anticipated_ship_date": int(self.anticipated_ship_date.strftime("%s")) if self.anticipated_ship_date else None,
             "surgeon": {
                 "id": str(self.surgeon.id),
                 "firstname": self.surgeon.user.firstname,
