@@ -3,8 +3,10 @@ from constants.paths import UPLOAD_FOLDER
 from services.url_secure_service import generate_secure_url_case_file
 from models.case_files import CaseFile
 from flask import Blueprint, jsonify
-from flask_jwt_extended import jwt_required
-from services.authService import admin_required
+from flask_jwt_extended import jwt_required, get_jwt
+from services.authService import admin_required, roles_required
+from services.authService import get_current_user
+from models.enums import RoleEnum
 from models.cases import Case
 from models.doctors import Doctor
 
@@ -19,12 +21,25 @@ case_bp = Blueprint("case", __name__)
 
 UPLOAD_FOLDER = os.getenv("CASE_FILE_UPLOAD_FOLDER")
 
+
 @case_bp.route("/case/list", methods=["GET"])
 @jwt_required()
-@admin_required
+@roles_required(RoleEnum.admin.value, RoleEnum.doctor.value)
 def list_cases():
     try:
-        cases = Case.query.order_by(Case.created_at.asc()).all()
+        user = get_current_user()
+
+        if user.role == RoleEnum.admin:
+            cases = Case.query.order_by(Case.created_at.asc()).all()
+        elif user.role == RoleEnum.doctor:
+            doctor = Doctor.query.filter_by(user_id=user.id).first()
+            if not doctor:
+                return jsonify({"statusCode": 404, "message": "Doctor profile not found"}), 404
+            cases = Case.query.filter_by(surgeon_id=doctor.id).order_by(
+                Case.created_at.asc()).all()
+        else:
+            return jsonify({"statusCode": 403, "message": "Forbidden"}), 403
+
         case_list = []
         for index, case in enumerate(cases, start=1):
             surgeon = case.surgeon
@@ -51,10 +66,11 @@ def list_cases():
 # Route for creating a new case
 @case_bp.route("/case/create", methods=["POST"])
 @jwt_required()
-@admin_required
+@roles_required('admin', 'technician')
 def create_case():
     try:
         data = request.get_json()
+        created_by = get_jwt()["userData"]["id"]
 
         new_case = Case(
             surgeon_id=data.get("surgeon_id"),
@@ -67,7 +83,14 @@ def create_case():
             patient_dob=datetime.fromisoformat(
                 data["patient_dob"]) if data.get("patient_dob") else None,
             additional_note=data.get("additional_note"),
-            problem_description=data.get("problem_description")
+            problem_description=data.get("problem_description"),
+            case_code=data.get("case_code"),
+            status=data.get("status"),
+            priority=data.get("priority"),
+            created_by=created_by,
+            product=data.get("product"),
+            anticipated_ship_date=datetime.fromisoformat(data["anticipated_ship_date"]).date(
+            ) if data.get("anticipated_ship_date") else None,
         )
 
         db.session.add(new_case)
@@ -84,14 +107,15 @@ def create_case():
 
 @case_bp.route("/case/<case_id>", methods=["GET"])
 @jwt_required()
-@admin_required
+@roles_required("admin", "doctor")
 def get_case_by_id(case_id):
     try:
         case = Case.query.get(case_id)
         if not case:
             return jsonify({"statusCode": 404, "message": "Case not found"}), 404
 
-        files = CaseFile.query.filter_by(case_id=case_id).order_by(CaseFile.created_at).all()
+        files = CaseFile.query.filter_by(
+            case_id=case_id).order_by(CaseFile.created_at).all()
         file_list = [
             {
                 "id": str(f.id),
@@ -134,6 +158,12 @@ def update_case(case_id):
         case.scan_type = data.get("scan_type")
         case.additional_note = data.get("additional_note")
         case.problem_description = data.get("problem_description")
+        case.case_code = data.get("case_code")
+        case.status = data.get("status")
+        case.priority = data.get("priority")
+        case.product = data.get("product")
+        case.anticipated_ship_date = datetime.fromisoformat(
+            data["anticipated_ship_date"]).date() if data.get("anticipated_ship_date") else None
         print(data)
 
         db.session.commit()

@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import request, jsonify, abort
 from werkzeug.exceptions import HTTPException
-from flask_jwt_extended import get_jwt, verify_jwt_in_request
+from flask_jwt_extended import get_jwt, verify_jwt_in_request, get_jwt_identity
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from models.enums import RoleEnum
 from models.users import User
@@ -57,6 +57,35 @@ def doctor_required(f):
     return decorated_function
 
 
+# New decorator for allowing multiple roles
+def roles_required(*allowed_roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            try:
+                claims = get_jwt()
+                user_data = claims.get('userData')
+                user_id = user_data.get('id')
+                user_role = user_data.get('role')
+            except Exception:
+                abort(401, description="Invalid or missing token.")
+
+            if user_role not in allowed_roles:
+                abort(403, description="Access denied. Role not permitted.")
+
+            try:
+                user = User.query.get(user_id)
+            except Exception:
+                abort(500, description="Database error while verifying user.")
+
+            if not user:
+                abort(403, description="User not found.")
+
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+
 def get_user_role():
     try:
         claims = get_jwt()
@@ -69,3 +98,7 @@ def get_user_role():
     except Exception:
         pass
     return "visitor"
+
+def get_current_user():
+    user_id = get_jwt_identity()
+    return User.query.get(user_id)
