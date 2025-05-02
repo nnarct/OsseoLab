@@ -2,6 +2,7 @@ import { createContext, useState, ReactNode, useEffect } from 'react';
 import { UserRole } from '@/types/user';
 import axios from '@/config/axiosConfig';
 import { jwtDecode } from 'jwt-decode';
+import { userData } from 'three/src/nodes/TSL.js';
 
 interface User {
   id: string;
@@ -17,7 +18,7 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  setAccessToken: React.Dispatch<React.SetStateAction<string | null>>;
+  setAccessToken: (token: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -112,8 +113,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const addAccessToken = (token: string) => {
+    localStorage.setItem('accessToken', token);
+    setAccessToken(accessToken);
+  };
+
   return (
-    <AuthContext.Provider value={{ role, accessToken, setAccessToken, user, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        role,
+        accessToken,
+        setAccessToken: addAccessToken,
+        user,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
