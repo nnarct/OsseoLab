@@ -2,7 +2,7 @@ import { useGetDoctors } from '@/services/admin/user.service';
 import { Card, Table, Input, Layout } from 'antd';
 import { useState, useMemo } from 'react';
 import { userColumns } from '@/components/feature/UserList/userColumns';
-import CreateDoctorModal from './CreateTechnicianModal';
+import CreateDoctorModal from './CreateDoctorModal';
 import CustomHeader from '@/components/common/CustomHeader';
 
 const DoctorList = () => {
@@ -31,7 +31,7 @@ const DoctorList = () => {
       </CustomHeader>
       <Layout.Content className='p-4'>
         <Card title='Surgeon List'>
-          <div className='flex w-full items-center justify-between pb-4 gap-x-4'>
+          <div className='flex w-full items-center justify-between gap-x-4 pb-4'>
             <Input.Search
               placeholder='Search by name, username, email, or mobile'
               allowClear
