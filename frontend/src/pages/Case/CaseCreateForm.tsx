@@ -1,9 +1,11 @@
 import { Form, Input, Button, DatePicker, Select, message, Card, Layout, Switch } from 'antd';
 import { axios } from '@/config/axiosConfig';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import dayjs from 'dayjs';
 import CustomHeader from '@/components/common/CustomHeader';
 import { useNavigate } from 'react-router-dom';
+import { useDoctorSelectOptions } from '@/services/doctor/doctor.service';
+import { DoctorSelectOption } from '@/api/doctor.api';
 
 const { TextArea } = Input;
 
@@ -11,38 +13,33 @@ const CaseCreateForm = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [useAgeInput, setUseAgeInput] = useState(true);
-  const [surgeons, setSurgeons] = useState([]);
   const [messageApi, contextHolder] = message.useMessage();
-  useEffect(() => {
-    axios.get('/doctor/select-options').then((res) => {
-      setSurgeons(
-        res.data.data.map((doc: any) => ({
-          label: `${doc.firstname} ${doc.lastname}`,
-          value: doc.id,
-        }))
-      );
-    });
-  }, []);
+  const { data: surgeons } = useDoctorSelectOptions();
+
+  const surgeonOptions = (surgeons || []).map((doc: DoctorSelectOption) => ({
+    label: `${doc.firstname} ${doc.lastname}`,
+    value: doc.id,
+  }));
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
       if (!useAgeInput && values.patient_dob) {
-        const age = parseInt(values.patient_dob, 10);
-        const dob = dayjs().subtract(age, 'year');
-        values.patient_dob = dob.toISOString();
+        values.patient_dob = dayjs(values.patient_dob).hour(12).minute(0).second(0).toISOString();
       } else {
-        values.patient_dob = values.patient_dob?.toISOString() || null;
+        values.patient_dob = dayjs(values.patient_dob).hour(12).minute(0).second(0).toString();
       }
       delete values.patient_dob;
       const payload = {
         ...values,
-        surgery_date: values.surgery_date?.toISOString() || null,
+        surgery_date: values.surgery_date
+          ? dayjs(values.surgery_date).hour(12).minute(0).second(0).toISOString()
+          : null,
       };
       console.log({ payload });
       const res = await axios.post('/case/create', payload);
       messageApi.success('Case created successfully');
-      console.log({ res });
+
       navigate('/case/list');
       // form.resetFields();
     } catch (error) {
@@ -61,7 +58,7 @@ const CaseCreateForm = () => {
         <Card title='Case Information'>
           <Form size='small' form={form} layout='vertical' onFinish={handleSubmit} className='grid grid-cols-2 gap-x-4'>
             <Form.Item name='surgeon_id' label='Surgeon' rules={[{ required: true }]}>
-              <Select placeholder='Select a surgeon' options={surgeons} />
+              <Select placeholder='Select a surgeon' options={surgeonOptions} />
             </Form.Item>
             <Form.Item name='patient_name' label='Patient Name' rules={[{ required: true }]}>
               <Input placeholder='Enter patient name' />
