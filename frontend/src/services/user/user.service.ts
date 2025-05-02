@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { fetchCurrentUser, updateCurrentUser, createDoctorUser, createTechUser, createAdminUser } from '@/api/user.api';
 import {
+  ADMIN_USERS_QUERY_KEY,
   ADMINS_QUERY_KEY,
   CURRENT_USER_QUERY_KEY,
   DOCTORS_QUERY_KEY,
@@ -73,13 +74,13 @@ export const useCreateUser = () => {
 
       if (role === 'admin') {
         await createAdminUser(rest);
-        queryClient.invalidateQueries({ queryKey: [ADMINS_QUERY_KEY] });
+        queryClient.invalidateQueries({ queryKey: ADMIN_USERS_QUERY_KEY });
       } else if (role === 'doctor') {
         await createDoctorUser(rest as CreateDoctorFormData);
-        queryClient.invalidateQueries({ queryKey: [DOCTORS_QUERY_KEY] });
+        queryClient.invalidateQueries({ queryKey: ADMIN_USERS_QUERY_KEY });
       } else if (role === 'technician') {
         await createTechUser(rest as CreateTechFormData);
-        queryClient.invalidateQueries({ queryKey: [TECHNICIANS_QUERY_KEY] });
+        queryClient.invalidateQueries({ queryKey: ADMIN_USERS_QUERY_KEY });
       }
     },
   });
