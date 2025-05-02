@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { useState } from 'react';
 import { FaUserPlus } from 'react-icons/fa';
 import { useCreateUser } from '@/services/user/user.service';
+import { AxiosError } from 'axios';
 
 const CreateUserModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -35,7 +36,7 @@ const CreateUserModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) 
       if (!hasValidationError) {
         notificationApi.error({
           message: 'Failed to create user',
-          description: error instanceof Error ? error.message : 'An unknown error occurred',
+          description: error instanceof AxiosError ? error.response?.data.message : 'An unknown error occurred',
           placement: 'top',
         });
       }
@@ -58,7 +59,11 @@ const CreateUserModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) 
         confirmLoading={isPending}
       >
         <Form form={form} layout='vertical' className='grid grid-cols-2 gap-x-4'>
-          <Form.Item name='firstname' label='First Name' rules={[{ required: true, message: 'First name is required' }]}>
+          <Form.Item
+            name='firstname'
+            label='First Name'
+            rules={[{ required: true, message: 'First name is required' }]}
+          >
             <Input placeholder='Enter user first name' allowClear />
           </Form.Item>
           <Form.Item name='lastname' label='Last Name' rules={[{ required: true, message: 'Last name is required' }]}>
@@ -70,7 +75,11 @@ const CreateUserModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) 
           <Form.Item name='email' label='Email' rules={[{ required: true, message: 'Email is required' }]}>
             <Input placeholder='Enter user email address' type='email' />
           </Form.Item>
-          <Form.Item name='phone' label='Mobile Number' rules={[{ pattern: /^[0-9]{10}$/, message: 'Please enter a valid mobile number' }]}>
+          <Form.Item
+            name='phone'
+            label='Mobile Number'
+            rules={[{ pattern: /^[0-9]{10}$/, message: 'Please enter a valid mobile number' }]}
+          >
             <Input max={10} placeholder='Enter user mobile number' type='text' allowClear />
           </Form.Item>
           <Form.Item name='role' label='Role' rules={[{ required: true, message: 'Role is required' }]}>
@@ -97,7 +106,14 @@ const CreateUserModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) 
             />
           </Form.Item>
           <Form.Item name='dob' label='Date of Birth'>
-            <DatePicker maxDate={dayjs()} format='DD-MM-YYYY' className='w-full' placeholder='Enter user date of birth' type='text' allowClear />
+            <DatePicker
+              maxDate={dayjs()}
+              format='DD-MM-YYYY'
+              className='w-full'
+              placeholder='Enter user date of birth'
+              type='text'
+              allowClear
+            />
           </Form.Item>
           <Form.Item name='password' label='Password' rules={[{ required: true, message: 'Password is required' }]}>
             <Input.Password placeholder='Enter user password' />
