@@ -209,11 +209,12 @@ def delete_user(user_id):
         if user.doctor_profile:
             doctor = user.doctor_profile
             doctor_id = doctor.id
-            doctor_case_surgeon = CaseSurgeon.query.filter_by(surgeon_id=doctor_id).delete()
+            doctor_case_surgeon = CaseSurgeon.query.filter_by(
+                surgeon_id=doctor_id).delete()
 
             doctor_cases = Case.query.filter_by(surgeon_id=doctor_id).all()
             for case in doctor_cases:
-            #    Delete case surgeons
+                #    Delete case surgeons
                 CaseSurgeon.query.filter_by(case_id=case.id).delete()
 
             # Delete case files from DB and disk
@@ -236,7 +237,3 @@ def delete_user(user_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"statusCode": 500, "message": "Failed to delete user", "error": str(e)}), 500
-
-@user_bp.route("/u", methods=["GET"])
-def c():
-    return jsonify({"statusCode": 200, "message": UPLOAD_FOLDER}), 200
