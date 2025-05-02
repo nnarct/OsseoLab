@@ -4,8 +4,9 @@ import CaseDetail from '@/components/feature/Case/CaseDetail';
 import { Divider, Layout } from 'antd';
 import { useParams } from 'react-router-dom';
 
-const CaseDetailPage = () => {
+const CaseDetailPageAdmin = () => {
   const { id } = useParams();
+
   if (!id) return 'Case id is missing';
 
   return (
@@ -22,4 +23,4 @@ const CaseDetailPage = () => {
   );
 };
 
-export default CaseDetailPage;
+export default CaseDetailPageAdmin;

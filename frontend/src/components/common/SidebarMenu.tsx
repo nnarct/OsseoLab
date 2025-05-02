@@ -58,6 +58,7 @@ const SidebarMenu = () => {
       icon: <FaRegImages />,
       onClick: () => navigate('/'),
     },
+    { key: '/case/list', icon: <FaRegFolderOpen />, label: 'Case List', onClick: () => navigate('/case/list') },
   ];
 
   const menuItems = { admin: adminMenu, technician: techMenu, doctor: doctorMenu };

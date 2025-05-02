@@ -12,9 +12,10 @@ const { TextArea } = Input;
 const CaseCreateForm = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [useAgeInput, setUseAgeInput] = useState(true);
+  // const [useAgeInput, setUseAgeInput] = useState(true);
   const [messageApi, contextHolder] = message.useMessage();
   const { data: surgeons } = useDoctorSelectOptions();
+  const [useDobInput, setUseDobInput] = useState(true);
 
   const surgeonOptions = (surgeons || []).map((doc: DoctorSelectOption) => ({
     label: `${doc.firstname} ${doc.lastname}`,
@@ -23,21 +24,24 @@ const CaseCreateForm = () => {
 
   const handleSubmit = async () => {
     try {
-      const values = await form.validateFields();
-      if (!useAgeInput && values.patient_dob) {
+      const values = await form.getFieldsValue();
+
+      if (useDobInput && values.patient_dob) {
         values.patient_dob = dayjs(values.patient_dob).hour(12).minute(0).second(0).toISOString();
-      } else {
-        values.patient_dob = dayjs(values.patient_dob).hour(12).minute(0).second(0).toString();
+      } else if (values.patient_ag) {
+        values.patient_dob = dayjs().subtract(Number(values.patient_age), 'year').format('YYYY-MM-DD');
       }
-      delete values.patient_dob;
+
       const payload = {
         ...values,
         surgery_date: values.surgery_date
           ? dayjs(values.surgery_date).hour(12).minute(0).second(0).toISOString()
           : null,
+        anticipated_ship_date: values.anticipated_ship_date
+          ? dayjs(values.surgery_date).hour(12).minute(0).second(0).toISOString()
+          : null,
       };
-      console.log({ payload });
-      const res = await axios.post('/case/create', payload);
+      await axios.post('/case/create', payload);
       messageApi.success('Case created successfully');
 
       navigate('/case/list');
@@ -56,41 +60,16 @@ const CaseCreateForm = () => {
       </CustomHeader>
       <Layout.Content className='p-4'>
         <Card title='Case Information'>
-          <Form size='small' form={form} layout='vertical' onFinish={handleSubmit} className='grid grid-cols-2 gap-x-4'>
+          <Form form={form} layout='vertical' onFinish={handleSubmit} className='grid grid-cols-2 gap-x-4'>
             <Form.Item name='surgeon_id' label='Surgeon' rules={[{ required: true }]}>
               <Select placeholder='Select a surgeon' options={surgeonOptions} />
             </Form.Item>
-            <Form.Item name='patient_name' label='Patient Name' rules={[{ required: true }]}>
+            <Form.Item label='Patient Name' name='patient_name' rules={[{ required: true }]}>
               <Input placeholder='Enter patient name' />
             </Form.Item>
-
-            <Form.Item name='surgery_date' label='Surgery Date' rules={[{ required: true }]}>
-              <DatePicker className='w-full' placeholder='Select surgery date' format='DD-MM-YYYY' />
-            </Form.Item>
-            <Form.Item name='scan_type' label='Scan Type'>
-              <Input placeholder='Enter scan type' />
-            </Form.Item>
-
-            <Form.Item
-              label={
-                <div className='flex items-center gap-x-2'>
-                  Patient Age
-                  <Switch checked={useAgeInput} onChange={setUseAgeInput} />
-                  Date of Birth
-                </div>
-              }
-              name='patient_dob'
-            >
-              {useAgeInput ? (
-                <DatePicker className='w-full' placeholder='Select patient DOB' />
-              ) : (
-                <Input type='number' min={0} placeholder='Enter patient age' />
-              )}
-            </Form.Item>
-
-            <Form.Item name='patient_gender' label='Patient Gender'>
+            <Form.Item label='Patient Gender' name='patient_gender'>
               <Select
-                placeholder='Select gender'
+                placeholder='Select Patient gender'
                 options={[
                   { label: 'Female', value: 'female' },
                   { label: 'Male', value: 'male' },
@@ -98,11 +77,65 @@ const CaseCreateForm = () => {
                 ]}
               />
             </Form.Item>
+            <Form.Item
+              style={{ margin: '0' }}
+              label={
+                <div className='flex items-center gap-x-2'>
+                  Patient Age
+                  <Switch size='small' checked={useDobInput} onChange={(checked) => setUseDobInput(checked)} />
+                  Date of Birth
+                </div>
+              }
+            >
+              {useDobInput ? (
+                <Form.Item name='patient_dob'>
+                  <DatePicker className='w-full' placeholder='Select patient DOB' format='DD-MM-YYYY' />
+                </Form.Item>
+              ) : (
+                <Form.Item name='patient_age'>
+                  <Input type='number' min={0} placeholder='Enter patient age' allowClear />
+                </Form.Item>
+              )}
+            </Form.Item>
+            <Form.Item label='Surgery Date' name='surgery_date' rules={[{ required: true }]}>
+              <DatePicker className='w-full' placeholder='Select surgery date' format='DD-MM-YYYY' />
+            </Form.Item>
+            <Form.Item name='scan_type' label='Scan Type'>
+              <Input placeholder='Enter scan type' allowClear />
+            </Form.Item>
+            <Form.Item label='Anticipated ship date' name='anticipated_ship_date'>
+              <DatePicker className='w-full' placeholder='Select Anticipated ship date' format='DD-MM-YYYY' />
+            </Form.Item>
+            <Form.Item label='Product / Service' name='product'>
+              <Input placeholder={'Enter product'} allowClear />
+            </Form.Item>
+            <Form.Item label='Priority' name='priority'>
+              <Select
+                placeholder={'Select priority'}
+                options={[
+                  { label: 'Low', value: 'low' },
+                  { label: 'Medium', value: 'medium' },
+                  { label: 'High', value: 'high' },
+                ]}
+              />
+            </Form.Item>{' '}
+            <Form.Item label='Status' name='status'>
+              <Select
+                placeholder={'Select status'}
+                options={[
+                  { label: 'Case creation', value: 'creation' },
+                  { label: 'Planning & Design', value: 'planing' },
+                  { label: 'Device Design', value: 'device-design' },
+                  { label: 'Design Confirmation', value: 'design-confirmation' },
+                  // { label: 'Case Complete', value: 'complete' },
+                ]}
+              />
+            </Form.Item>
             <Form.Item name='problem_description' label='Problem Description'>
-              <TextArea rows={3} placeholder='Describe the patient problem' />
+              <TextArea rows={3} placeholder='Describe the patient problem' allowClear />
             </Form.Item>
             <Form.Item name='additional_note' label='Additional Note'>
-              <TextArea rows={3} placeholder='Enter any additional notes' />
+              <TextArea rows={3} placeholder='Enter any additional notes' allowClear />
             </Form.Item>
             <div className='col-span-2 flex items-center justify-center gap-x-4'>
               <Button onClick={() => navigate('/case/list')} className='w-22' size='middle'>

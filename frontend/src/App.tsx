@@ -19,7 +19,7 @@ const AdminList = lazy(() => import('@/components/feature/UserList/AdminList'));
 const UserList = lazy(() => import('@/components/feature/UserList/UserList'));
 const TechnicianList = lazy(() => import('@/components/feature/UserList/TechnicianList'));
 // const Case = lazy(() => import('@/pages/StlList/Case'));
-const CaseDetailPage = lazy(() => import('@/pages/Case/CaseDetailPage'));
+const CaseDetailPage = lazy(() => import('@/pages/Case/CaseDetailPage/CaseDetailPage'));
 const CaseList = lazy(() => import('@/pages/Case/CaseList'));
 const CaseCreateForm = lazy(() => import('@/pages/Case/CaseCreateForm'));
 const CaseModelViewer = lazy(() => import('@/pages/Case/CaseModelViewer'));
@@ -52,6 +52,7 @@ const App = () => {
                   <CaseDetailPage />
                 )}
                 {createRoleRoute('/case/list', [UserRole.Admin, UserRole.Technician, UserRole.Doctor], <CaseList />)}
+                {createRoleRoute('/case/list', [UserRole.Doctor], <CaseList />)}
                 {createRoleRoute('/case/create', [UserRole.Admin, UserRole.Technician], <CaseCreateForm />)}
                 {createRoleRoute(
                   '/case/:caseId/file/:id',
