@@ -6,7 +6,6 @@ import { AuthProvider } from '@/context/AuthContext';
 
 import AppLayout from '@/components/common/Layout';
 import ProtectedRoute from '@/components/common/ProtectedRoute';
-import routesConfig from '@/config/routesConfig';
 
 import LoginPage from '@/pages/AuthPage/LoginPage';
 import RegisterPage from '@/pages/AuthPage/RegisterPage';
@@ -19,9 +18,11 @@ const DoctorList = lazy(() => import('@/components/feature/UserList/DoctorList')
 const AdminList = lazy(() => import('@/components/feature/UserList/AdminList'));
 const UserList = lazy(() => import('@/components/feature/UserList/UserList'));
 const TechnicianList = lazy(() => import('@/components/feature/UserList/TechnicianList'));
-const Case = lazy(() => import('@/pages/StlList/Case'));
+// const Case = lazy(() => import('@/pages/StlList/Case'));
+const CaseDetailPage = lazy(() => import('@/pages/Case/CaseDetailPage'));
 const CaseList = lazy(() => import('@/pages/Case/CaseList'));
 const CaseCreateForm = lazy(() => import('@/pages/Case/CaseCreateForm'));
+const CaseModelViewer = lazy(() => import('@/pages/Case/CaseModelViewer'));
 
 const createRoleRoute = (path: string, roles: string[], element: JSX.Element) => (
   <Route path={path} element={<ProtectedRoute requiredRole={roles} />}>
@@ -45,9 +46,18 @@ const App = () => {
                 {createRoleRoute('/admin/list', [UserRole.Admin], <AdminList />)}
                 {createRoleRoute('/technician/list', [UserRole.Admin], <TechnicianList />)}
                 {createRoleRoute('/doctor/list', [UserRole.Admin], <DoctorList />)}
-                {createRoleRoute('/case', [UserRole.Admin, UserRole.Technician, UserRole.Doctor], <Case />)}
+                {createRoleRoute(
+                  '/case/:id',
+                  [UserRole.Admin, UserRole.Technician, UserRole.Doctor],
+                  <CaseDetailPage />
+                )}
                 {createRoleRoute('/case/list', [UserRole.Admin, UserRole.Technician, UserRole.Doctor], <CaseList />)}
                 {createRoleRoute('/case/create', [UserRole.Admin, UserRole.Technician], <CaseCreateForm />)}
+                {createRoleRoute(
+                  '/case/:caseId/file/:id',
+                  [UserRole.Admin, UserRole.Technician, UserRole.Doctor],
+                  <CaseModelViewer />
+                )}
                 {createRoleRoute('/profile', [UserRole.Admin, UserRole.Technician, UserRole.Doctor], <ProfilePage />)}
               </Route>
               {/* </Route> */}
