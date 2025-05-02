@@ -1,5 +1,5 @@
 import { axios } from '@/config/axiosConfig';
-import type { CreateDoctorFormData, FormUserProfile, UserProfile } from '@/types/user';
+import type { CreateAdminFormData, CreateDoctorFormData, CreateTechFormData, FormUserProfile, UserProfile } from '@/types/user';
 
 // ---------- Fetch Lists ----------
 export const fetchUsers = async () => {
@@ -24,7 +24,7 @@ export const fetchAdmins = async () => {
 
 export const fetchTechnicians = async () => {
   try {
-    const { data } = await axios.get('/user/technicians/list');
+    const { data } = await axios.get('/user/technician/list');
     return data.data;
   } catch (error) {
     console.error('Error fetching technicians:', error);
@@ -76,6 +76,31 @@ export const createDoctorUser = async (data: CreateDoctorFormData) => {
     return response.data;
   } catch (error) {
     console.error('Error creating doctor:', error);
+    throw error;
+  }
+};
+export const createTechUser = async (data: CreateTechFormData) => {
+  try {
+    const response = await axios.post('/admin/create/technician', {
+      ...data,
+      role: 'technician',
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating technician:', error);
+    throw error;
+  }
+};
+
+export const createAdminUser = async (data: CreateAdminFormData) => {
+  try {
+    const response = await axios.post('/admin/create/admin', {
+      ...data,
+      role: 'admin',
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating admin:', error);
     throw error;
   }
 };

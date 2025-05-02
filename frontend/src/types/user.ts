@@ -43,3 +43,38 @@ export interface CreateDoctorFormData {
   dob: Dayjs | string | null;
   password: string;
 }
+export interface CreateTechFormData {
+  firstname: string;
+  lastname: string;
+  username: string;
+  email: string;
+  phone: string | null;
+  country: string | null;
+  gender: 'male' | 'female' | 'other' | null;
+  dob: Dayjs | string | null;
+  password: string;
+}
+export interface CreateAdminFormData {
+  firstname: string;
+  lastname: string;
+  username: string;
+  email: string;
+  phone: string | null;
+  country: string | null;
+  gender: 'male' | 'female' | 'other' | null;
+  dob: Dayjs | string | null;
+  password: string;
+}
+
+export interface CreateUserFormData {
+  firstname: string;
+  lastname: string;
+  username: string;
+  email: string;
+  phone: string | null;
+  country: string | null;
+  gender: 'male' | 'female' | 'other' | null;
+  dob: Dayjs | string | null;
+  password: string;
+  role: UserRole
+}

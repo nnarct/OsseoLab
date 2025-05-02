@@ -54,8 +54,56 @@ def admin_create_doctor():
 
         if data["role"] == RoleEnum.doctor.value:
             db.session.add(Doctor(user_id=new_user.id))
-        elif data["role"] == RoleEnum.technician.value:
-            db.session.add(Technician(user_id=new_user.id))
+
+        db.session.commit()
+
+        return jsonify({"statusCode": 201, "message": "User created successfully", "data": {"id": new_user.id}}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"statusCode": 500, "message": "Failed to create user", "error": str(e)}), 500
+
+
+@create_user_bp.route("/admin/create/admin", methods=["POST"])
+@jwt_required()
+@admin_required
+def admin_create_admin():
+    data = request.json
+    required_fields = ["firstname", "lastname",
+                       "username", "email", "password", "role"]
+    if not all(data.get(field) for field in required_fields):
+        return jsonify({"statusCode": 400, "message": "Missing required fields"}), 400
+
+    if not RoleEnum.admin.value == data["role"]:
+        return jsonify({"statusCode": 400, "message": "Invalid role"}), 400
+
+    if User.query.filter_by(email=data["email"]).first():
+        return jsonify({"statusCode": 409, "message": "Email already exists"}), 409
+
+    try:
+        hashed_pw = generate_password_hash(
+            data["password"], method='pbkdf2:sha256')
+        phone = data.get("phone")
+        country = data.get("country")
+        gender = data.get("gender")
+        dob_str = data.get("dob")
+        dob = datetime.fromisoformat(dob_str) if dob_str else None
+
+        new_user = User(
+            firstname=data["firstname"],
+            lastname=data["lastname"],
+            username=data["username"],
+            email=data["email"],
+            password=hashed_pw,
+            role=RoleEnum.admin,
+            phone=phone,
+            country=country,
+            gender=gender,
+            dob=dob
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
         db.session.commit()
 
         return jsonify({"statusCode": 201, "message": "User created successfully", "data": {"id": new_user.id}}), 201

@@ -3,6 +3,7 @@ import { userColumns } from '@/components/feature/UserList/userColumns';
 import { Card, Table, Input, Layout } from 'antd';
 import { useState, useMemo } from 'react';
 import CustomHeader from '@/components/common/CustomHeader';
+import CreateAdminModal from './CreateAdminModal';
 
 const AdminList = () => {
   const { data, isLoading } = useGetAdmins();
@@ -36,7 +37,7 @@ const AdminList = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className='max-w-sm'
             />
-            {/* <CreateDoctorModal />/ */}
+            <CreateAdminModal />
           </div>
           <Table
             dataSource={filteredData}

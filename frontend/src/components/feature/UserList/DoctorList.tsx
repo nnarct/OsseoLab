@@ -2,7 +2,7 @@ import { useGetDoctors } from '@/services/admin/user.service';
 import { Card, Table, Input, Layout } from 'antd';
 import { useState, useMemo } from 'react';
 import { userColumns } from '@/components/feature/UserList/userColumns';
-import CreateDoctorModal from './CreateDoctorModal';
+import CreateDoctorModal from './CreateTechnicianModal';
 import CustomHeader from '@/components/common/CustomHeader';
 
 const DoctorList = () => {

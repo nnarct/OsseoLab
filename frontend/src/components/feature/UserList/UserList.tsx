@@ -4,6 +4,7 @@ import { Card, Input, Layout, Table } from 'antd';
 import { userColumns } from './userColumns';
 import CustomHeader from '@/components/common/CustomHeader';
 import { useMemo, useState } from 'react';
+import CreateUserModal from './CreateUserModal';
 
 const UserList = () => {
   const { data, isLoading } = useGetUsers();
@@ -60,7 +61,7 @@ const UserList = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className='max-w-sm'
             />
-            {/* <CreateUserModal /> */}
+            <CreateUserModal />
           </div>
           <Table dataSource={filteredData} columns={columns} loading={isLoading} rowKey={'id'} scroll={{ x: 'auto' }} />
         </Card>

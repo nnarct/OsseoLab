@@ -1,7 +1,18 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { fetchCurrentUser, updateCurrentUser, createDoctorUser } from '@/api/user.api';
-import { CURRENT_USER_QUERY_KEY, DOCTORS_QUERY_KEY } from '@/constants/queryKey';
-import type { CreateDoctorFormData, FormUserProfile } from '@/types/user';
+import { fetchCurrentUser, updateCurrentUser, createDoctorUser, createTechUser, createAdminUser } from '@/api/user.api';
+import {
+  ADMINS_QUERY_KEY,
+  CURRENT_USER_QUERY_KEY,
+  DOCTORS_QUERY_KEY,
+  TECHNICIANS_QUERY_KEY,
+} from '@/constants/queryKey';
+import type {
+  CreateAdminFormData,
+  CreateDoctorFormData,
+  CreateTechFormData,
+  FormUserProfile,
+  UserRole,
+} from '@/types/user';
 import queryClient from '@/config/queryClient';
 
 export const useCurrentUser = () => {
@@ -29,6 +40,47 @@ export const useCreateDoctorUser = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: DOCTORS_QUERY_KEY });
+    },
+  });
+};
+
+export const useCreateTechUser = () => {
+  return useMutation({
+    mutationFn: (data: CreateTechFormData) => {
+      return createTechUser(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: TECHNICIANS_QUERY_KEY });
+    },
+  });
+};
+
+export const useCreateAdminUser = () => {
+  return useMutation({
+    mutationFn: (data: CreateAdminFormData) => {
+      return createAdminUser(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ADMINS_QUERY_KEY });
+    },
+  });
+};
+
+export const useCreateUser = () => {
+  return useMutation({
+    mutationFn: async (data: CreateAdminFormData & { role: UserRole }) => {
+      const { role, ...rest } = data;
+
+      if (role === 'admin') {
+        await createAdminUser(rest);
+        queryClient.invalidateQueries({ queryKey: [ADMINS_QUERY_KEY] });
+      } else if (role === 'doctor') {
+        await createDoctorUser(rest as CreateDoctorFormData);
+        queryClient.invalidateQueries({ queryKey: [DOCTORS_QUERY_KEY] });
+      } else if (role === 'technician') {
+        await createTechUser(rest as CreateTechFormData);
+        queryClient.invalidateQueries({ queryKey: [TECHNICIANS_QUERY_KEY] });
+      }
     },
   });
 };

@@ -3,6 +3,7 @@ import { Card, Input, Layout, Table } from 'antd';
 import { userColumns } from '@/components/feature/UserList/userColumns';
 import { useMemo, useState } from 'react';
 import CustomHeader from '@/components/common/CustomHeader';
+import CreateTechModal from './CreateTechnicianModal';
 
 const TechnicianList = () => {
   const { data, isLoading } = useGetTechnicians();
@@ -38,7 +39,7 @@ const TechnicianList = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className='max-w-sm'
           />
-          {/* <CreateDoctorModal /> */}
+          <CreateTechModal />
         </div> <Table
             dataSource={filteredData}
             columns={userColumns}
