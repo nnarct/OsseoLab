@@ -59,6 +59,50 @@ user_bp = Blueprint("user", __name__, url_prefix="/user")
 # # ✅ 4. List all doctors (Only ADMIN)
 
 
+@user_bp.route("/list", methods=["GET"])
+@jwt_required()
+@admin_required
+def list_users():
+    users = User.query.order_by(
+        User.created_at.asc()).all()
+    return jsonify({
+        "statusCode": 200,
+        "data": [
+            {**user.to_dict(), "order": index + 1}
+            for index, user in enumerate(users)
+        ]
+    }), 200
+
+
+@user_bp.route("/admin/list", methods=["GET"])
+@jwt_required()
+@admin_required
+def list_admins():
+    admins = User.query.filter_by(role=RoleEnum.admin.value).order_by(
+        User.created_at.asc()).all()
+    return jsonify({
+        "statusCode": 200,
+        "data": [
+            {**user.to_dict(), "order": index + 1}
+            for index, user in enumerate(admins)
+        ]
+    }), 200
+    
+@user_bp.route("/technician/list", methods=["GET"])
+@jwt_required()
+@admin_required
+def list_technicians():
+    technicians = User.query.filter_by(role=RoleEnum.technician.value).order_by(
+        User.created_at.asc()).all()
+    return jsonify({
+        "statusCode": 200,
+        "data": [
+            {**user.to_dict(), "order": index + 1}
+            for index, user in enumerate(technicians)
+        ]
+    }), 200
+
+
 @user_bp.route("/doctor/list", methods=["GET"])
 @jwt_required()
 @admin_required

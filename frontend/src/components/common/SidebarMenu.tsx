@@ -14,12 +14,12 @@ const SidebarMenu = () => {
   // Define menu items
   const adminMenu = [
     { key: '/', label: 'Dashboard', icon: <FaChartBar />, onClick: () => navigate('/') },
-    {
-      key: '/stl-list',
-      label: 'STL List',
-      icon: <FaRegImages />,
-      onClick: () => navigate('/stl-list'),
-    },
+    // {
+    //   key: '/stl-list',
+    //   label: 'STL List',
+    //   icon: <FaRegImages />,
+    //   onClick: () => navigate('/stl-list'),
+    // },
     {
       key: 'userlist',
       label: 'User List',
@@ -28,7 +28,7 @@ const SidebarMenu = () => {
         { key: '/user/list', label: 'User List', onClick: () => navigate('/user/list') },
         { key: '/admin/list', label: 'Admin List', onClick: () => navigate('/admin/list') },
         { key: '/technician/list', label: 'Technician List', onClick: () => navigate('/technician/list') },
-        { key: '/doctor/list', label: 'Doctor List', onClick: () => navigate('/doctor/list') },
+        { key: '/doctor/list', label: 'Surgeons List', onClick: () => navigate('/doctor/list') },
       ],
     },
     {

@@ -24,7 +24,7 @@ export const fetchAdmins = async () => {
 
 export const fetchTechnicians = async () => {
   try {
-    const { data } = await axios.get('/user/tech/list');
+    const { data } = await axios.get('/user/technicians/list');
     return data.data;
   } catch (error) {
     console.error('Error fetching technicians:', error);
