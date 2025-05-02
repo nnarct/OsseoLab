@@ -1,5 +1,11 @@
 import { axios } from '@/config/axiosConfig';
-import type { CreateAdminFormData, CreateDoctorFormData, CreateTechFormData, FormUserProfile, UserProfile } from '@/types/user';
+import type {
+  CreateAdminFormData,
+  CreateDoctorFormData,
+  CreateTechFormData,
+  FormUserProfile,
+  UserProfile,
+} from '@/types/user';
 
 // ---------- Fetch Lists ----------
 export const fetchUsers = async () => {
@@ -101,6 +107,15 @@ export const createAdminUser = async (data: CreateAdminFormData) => {
     return response.data;
   } catch (error) {
     console.error('Error creating admin:', error);
+    throw error;
+  }
+};
+
+export const deleteUserById = async (userId: string): Promise<void> => {
+  try {
+    await axios.delete(`/user/${userId}`);
+  } catch (error) {
+    console.error('Error deleting user:', error);
     throw error;
   }
 };

@@ -1,7 +1,14 @@
+from config.extensions import db
+import os
+from models.case_files import CaseFile
+from models.case_surgeons import CaseSurgeon
+from models.cases import Case
 import datetime
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from models.users import User
+from models.doctors import Doctor
+from models.technicians import Technician
 from models.enums import RoleEnum
 # from config.extensions import db
 from services.authService import admin_required
@@ -87,7 +94,8 @@ def list_admins():
             for index, user in enumerate(admins)
         ]
     }), 200
-    
+
+
 @user_bp.route("/technician/list", methods=["GET"])
 @jwt_required()
 @admin_required
@@ -179,3 +187,56 @@ def update_current_user():
         "accessToken": access_token,
         "data": user.to_dict(exclude={"created_at", "last_updated"})
     }), 200
+
+
+# Additional imports for delete_user
+UPLOAD_FOLDER = os.getenv("CASE_FILE_UPLOAD_FOLDER")
+
+
+@user_bp.route("/<user_id>", methods=["DELETE"])
+@jwt_required()
+@admin_required
+def delete_user(user_id):
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"statusCode": 404, "message": "User not found"}), 404
+
+        # If user is a doctor, delete all related cases
+        if user.technician_profile:
+            db.session.delete(user.technician_profile)
+
+        if user.doctor_profile:
+            doctor = user.doctor_profile
+            doctor_id = doctor.id
+            doctor_case_surgeon = CaseSurgeon.query.filter_by(surgeon_id=doctor_id).delete()
+
+            doctor_cases = Case.query.filter_by(surgeon_id=doctor_id).all()
+            for case in doctor_cases:
+            #    Delete case surgeons
+                CaseSurgeon.query.filter_by(case_id=case.id).delete()
+
+            # Delete case files from DB and disk
+                case_files = CaseFile.query.filter_by(case_id=case.id).all()
+                for f in case_files:
+                    filepath = os.path.join(UPLOAD_FOLDER, f.filepath)
+                    if os.path.exists(filepath):
+                        os.remove(filepath)
+                    db.session.delete(f)
+
+                db.session.delete(case)
+
+            db.session.delete(doctor)
+
+        db.session.delete(user)
+        db.session.commit()
+
+        return jsonify({"statusCode": 200, "message": "User and related data deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"statusCode": 500, "message": "Failed to delete user", "error": str(e)}), 500
+
+@user_bp.route("/u", methods=["GET"])
+def c():
+    return jsonify({"statusCode": 200, "message": UPLOAD_FOLDER}), 200

@@ -1,10 +1,15 @@
 import { useGetUsers } from '@/services/admin/user.service';
 import { UserRole } from '@/types/user';
-import { Card, Input, Layout, Table } from 'antd';
+import { Button, Card, Input, Layout, Table } from 'antd';
 import { userColumns } from './userColumns';
 import CustomHeader from '@/components/common/CustomHeader';
 import { useMemo, useState } from 'react';
 import CreateUserModal from './CreateUserModal';
+import { Modal, message } from 'antd';
+import { deleteUserById } from '@/api/user.api';
+import queryClient from '@/config/queryClient';
+import { FaRegTrashAlt } from 'react-icons/fa';
+import { ADMIN_USERS_QUERY_KEY } from '@/constants/queryKey';
 
 const UserList = () => {
   const { data, isLoading } = useGetUsers();
@@ -27,10 +32,42 @@ const UserList = () => {
       }
     },
   };
+  const delColumn = {
+    width: '0',
+    align: 'center',
+    title: 'Delete',
+    dataIndex: 'id',
+    key: 'id',
+    render: (id: string) => (
+      <Button
+        danger
+        icon={<FaRegTrashAlt />}
+        onClick={() => {
+          Modal.confirm({
+            title: 'Are you sure you want to delete this user?',
+            content: 'This action will permanently delete the user and all related data.',
+            okText: 'Delete',
+            okType: 'danger',
+            cancelText: 'Cancel',
+            onOk: async () => {
+              try {
+                await deleteUserById(id);
+                message.success('User deleted');
+                queryClient.invalidateQueries({ queryKey: [ADMIN_USERS_QUERY_KEY] });
+              } catch {
+                message.error('Failed to delete user');
+              }
+            },
+          });
+        }}
+      />
+    ),
+  };
+  // add delete column
   const columns =
     userColumns && userColumns.length > 1
-      ? [...userColumns.slice(0, userColumns.length - 1), roleColumn, userColumns[userColumns.length - 1]]
-      : [...(userColumns ?? []), roleColumn];
+      ? [...userColumns.slice(0, userColumns.length - 1), roleColumn, delColumn, userColumns[userColumns.length - 1]]
+      : [...(userColumns ?? []), roleColumn, delColumn];
 
   const filteredData = useMemo(() => {
     if (!data) return [];
