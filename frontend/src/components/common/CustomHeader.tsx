@@ -7,7 +7,7 @@ type HeaderWithBackProps = Props & { backTo?: To | number };
 
 const CustomHeader = ({ children, backTo, ...rest }: HeaderWithBackProps) => {
   if (backTo) {
-    return <HeaderWithBack backTo={backTo as To} />;
+    return <HeaderWithBack backTo={backTo as To}>{children}</HeaderWithBack>;
   }
 
   return (
@@ -55,11 +55,11 @@ const HeaderWithBack = ({ children, backTo, ...rest }: HeaderWithBackProps) => {
         onClick={() => navigate(backTo as To)}
         type='text'
         icon={<IoIosArrowBack />}
-        style={{ padding: '0 16px 0 0' }}
+        style={{ padding: '0 16px 0 0', marginRight: '16px' }}
       >
         Back
       </Button>
-      {children}
+      <>{children}</>
     </Layout.Header>
   );
 };
