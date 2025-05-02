@@ -87,44 +87,6 @@
 #         return jsonify({"statusCode": 500, "error": "Internal Server Error", "details": str(e)}), 500
 
 
-# @stl_bp.route("/upload", methods=["POST"])
-# def upload_stl():
-#     try:
-#         if "file" not in request.files or "nickname" not in request.form:
-#             return jsonify({"error": "Missing file or nickname"}), 400
-
-#         file = request.files["file"]
-#         nickname = request.form["nickname"].strip()
-
-#         if file.filename == "":
-#             return jsonify({"statusCode": 400, "error": "No selected file"}), 400
-
-#         os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-#         unique_filename = f"{uuid.uuid4()}_{file.filename}"
-#         file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
-#         file.save(file_path)
-
-#         new_stl = STL(
-#             filename=nickname,
-#             filepath=unique_filename,
-#             original_filename=file.filename,
-#         )
-#         db.session.add(new_stl)
-#         db.session.commit()
-
-#         return jsonify({
-#             "statusCode": 201,
-#             "message": "File uploaded",
-#             "data": {
-#                 "id": new_stl.id,
-#                 "nickname": nickname,
-#                 "url": generate_secure_stl_url(new_stl.id)
-#             }
-#         }), 201
-#     except Exception:
-#         return jsonify({"statusCode": 500, "error": "Internal Server Error"}), 500
-
 
 # @stl_bp.route("/stl/file/<string:id>", methods=["PUT", "OPTIONS"])
 # def update_stl(id):

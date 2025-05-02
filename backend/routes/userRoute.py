@@ -97,8 +97,12 @@ def update_current_user():
 
     data = request.get_json()
     print(data)
-    restricted_fields = {"id", "password",
-                         "email", "role", "profile_pic_image"}
+    restricted_fields = {
+        "id",
+        "password",
+        "email",
+        "role",
+        "profile_pic_image"}
 
     for key, value in data.items():
         if key in restricted_fields:
@@ -118,11 +122,12 @@ def update_current_user():
     }
     expires = datetime.timedelta(weeks=4)
 
-    access_token = create_access_token(identity=user.id,
-                                       additional_claims={
-                                           "userData": user_data},
-                                       expires_delta=expires
-                                       )
+    access_token = create_access_token(
+        identity=user.id,
+        additional_claims={
+            "userData": user_data},
+        expires_delta=expires
+    )
 
     return jsonify({
         "statusCode": 200,
