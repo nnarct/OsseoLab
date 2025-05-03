@@ -14,7 +14,7 @@ const CaseDetail = ({ id }: { id: string }) => {
   const [form] = Form.useForm();
   const [useDobInput, setUseDobInput] = useState(true);
   const [notificationApi, contextHolder] = notification.useNotification();
-
+const isDoctor = role ==='doctor'
   const {
     surgeon,
     patient_name,
@@ -100,44 +100,44 @@ const CaseDetail = ({ id }: { id: string }) => {
               status,
               created_by: created_by ? `${created_by.username} (${created_by.firstname} ${created_by.lastname})` : '-',
             }}
-            requiredMark={role === 'doctor' ? false : true}
+            requiredMark={isDoctor ? false : true}
           >
             <Form.Item label='Case ID' name='case_number'>
-              <Input disabled style={role === 'doctor' ? { color: 'black' } : {}} />
+              <Input disabled style={isDoctor ? { color: 'black' } : {}} />
             </Form.Item>
             <Form.Item label='Case Code' name='case_code' rules={[{ required: true }]}>
               <Input
-                placeholder={role === 'doctor' ? '-' : 'Enter case code'}
+                placeholder={isDoctor ? '-' : 'Enter case code'}
                 allowClear
-                disabled={role === 'doctor'}
-                style={role === 'doctor' ? { color: 'black' } : {}}
+                disabled={isDoctor}
+                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
             <Form.Item label='Surgeon' name='surgeon'>
               <Input
-                placeholder={role === 'doctor' ? '-' : 'Enter surgeon name'}
+                placeholder={isDoctor ? '-' : 'Enter surgeon name'}
                 disabled
-                style={role === 'doctor' ? { color: 'black' } : {}}
+                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
             <Form.Item label='Patient Name' name='patient_name' rules={[{ required: true }]}>
               <Input
-                placeholder={role === 'doctor' ? '-' : 'Enter patient name'}
-                disabled={role === 'doctor'}
-                style={role === 'doctor' ? { color: 'black' } : {}}
+                placeholder={isDoctor ? '-' : 'Enter patient name'}
+                disabled={isDoctor}
+                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
 
             <Form.Item label='Patient Gender' name='patient_gender'>
               <Select
-                placeholder={role === 'doctor' ? '-' : 'Select Patient gender'}
+                placeholder={isDoctor ? '-' : 'Select Patient gender'}
                 options={[
                   { label: 'Female', value: 'female' },
                   { label: 'Male', value: 'male' },
                   { label: 'Other', value: 'other' },
                 ]}
-                disabled={role === 'doctor'}
-                style={role === 'doctor' ? { color: 'black' } : {}}
+                disabled={isDoctor}
+                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
 
@@ -149,7 +149,7 @@ const CaseDetail = ({ id }: { id: string }) => {
                     size='small'
                     checked={useDobInput}
                     onChange={(checked) => setUseDobInput(checked)}
-                    disabled={role === 'doctor'}
+                    disabled={isDoctor}
                   />
                   Date of Birth
                 </div>
@@ -159,10 +159,10 @@ const CaseDetail = ({ id }: { id: string }) => {
                 <Form.Item name='patient_dob' noStyle>
                   <DatePicker
                     className='w-full'
-                    placeholder={role === 'doctor' ? '-' : 'Select patient DOB'}
+                    placeholder={isDoctor ? '-' : 'Select patient DOB'}
                     format='DD-MM-YYYY'
-                    disabled={role === 'doctor'}
-                    style={role === 'doctor' ? { color: 'black' } : {}}
+                    disabled={isDoctor}
+                    style={isDoctor ? { color: 'black' } : {}}
                   />
                 </Form.Item>
               ) : (
@@ -170,9 +170,9 @@ const CaseDetail = ({ id }: { id: string }) => {
                   <Input
                     type='number'
                     min={0}
-                    placeholder={role === 'doctor' ? '-' : 'Enter patient age'}
-                    disabled={role === 'doctor'}
-                    style={role === 'doctor' ? { color: 'black' } : {}}
+                    placeholder={isDoctor ? '-' : 'Enter patient age'}
+                    disabled={isDoctor}
+                    style={isDoctor ? { color: 'black' } : {}}
                   />
                 </Form.Item>
               )}
@@ -180,69 +180,69 @@ const CaseDetail = ({ id }: { id: string }) => {
             <Form.Item label='Surgery Date' name='surgery_date' rules={[{ required: true }]}>
               <DatePicker
                 className='w-full'
-                placeholder={role === 'doctor' ? '-' : 'Select surgery date'}
+                placeholder={isDoctor ? '-' : 'Select surgery date'}
                 format='DD-MM-YYYY'
-                disabled={role === 'doctor'}
-                style={role === 'doctor' ? { color: 'black' } : {}}
+                disabled={isDoctor}
+                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
             <Form.Item label='Anticipated ship date' name='anticipated_ship_date'>
               <DatePicker
                 className='w-full'
-                placeholder={role === 'doctor' ? '-' : 'Select Anticipated ship date'}
+                placeholder={isDoctor ? '-' : 'Select Anticipated ship date'}
                 format='DD-MM-YYYY'
-                disabled={role === 'doctor'}
-                style={role === 'doctor' ? { color: 'black !important' } : {}}
+                disabled={isDoctor}
+                style={isDoctor ? { color: 'black !important' } : {}}
               />
             </Form.Item>
             <Form.Item label='Scan Type' name='scan_type'>
               <Input
-                placeholder={role === 'doctor' ? '-' : 'Enter scan type'}
+                placeholder={isDoctor ? '-' : 'Enter scan type'}
                 allowClear
-                disabled={role === 'doctor'}
-                style={role === 'doctor' ? { color: 'black' } : {}}
+                disabled={isDoctor}
+                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
             <Form.Item label='Product / Service' name='product'>
               <Input
-                placeholder={role === 'doctor' ? '-' : 'Enter product'}
+                placeholder={isDoctor ? '-' : 'Enter product'}
                 allowClear
-                disabled={role === 'doctor'}
-                style={role === 'doctor' ? { color: 'black' } : {}}
+                disabled={isDoctor}
+                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
             <Form.Item label='Problem Description' name='problem_description'>
               <Input.TextArea
-                placeholder={role === 'doctor' ? '-' : 'Enter problem description'}
+                placeholder={isDoctor ? '-' : 'Enter problem description'}
                 allowClear
-                disabled={role === 'doctor'}
-                style={role === 'doctor' ? { color: 'black' } : {}}
+                disabled={isDoctor}
+                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
             <Form.Item label='Additional Note' name='additional_note'>
               <Input.TextArea
-                placeholder={role === 'doctor' ? '-' : 'Enter additional note'}
+                placeholder={isDoctor ? '-' : 'Enter additional note'}
                 allowClear
-                disabled={role === 'doctor'}
-                style={role === 'doctor' ? { color: 'black' } : {}}
+                disabled={isDoctor}
+                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
 
             <Form.Item label='Priority' name='priority'>
               <Select
-                placeholder={role === 'doctor' ? '-' : 'Select priority'}
+                placeholder={isDoctor ? '-' : 'Select priority'}
                 options={[
                   { label: 'Low', value: 'low' },
                   { label: 'Medium', value: 'medium' },
                   { label: 'High', value: 'high' },
                 ]}
-                disabled={role === 'doctor'}
-                style={role === 'doctor' ? { color: 'black' } : {}}
+                disabled={isDoctor}
+                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
             <Form.Item label='Status' name='status'>
               <Select
-                placeholder={role === 'doctor' ? '-' : 'Select status'}
+                placeholder={isDoctor ? '-' : 'Select status'}
                 options={[
                   { label: 'Case creation', value: 'creation' },
                   { label: 'Planning & Design', value: 'planing' },
@@ -250,8 +250,8 @@ const CaseDetail = ({ id }: { id: string }) => {
                   { label: 'Design Confirmation', value: 'design-confirmation' },
                   // { label: 'Case Complete', value: 'complete' },
                 ]}
-                disabled={role === 'doctor'}
-                style={role === 'doctor' ? { color: 'black' } : {}}
+                disabled={isDoctor}
+                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
             <Form.Item label='Created By' name='created_by'>
