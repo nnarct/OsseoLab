@@ -1,4 +1,4 @@
-import { COUNTRIES } from '@/constants/country';
+import { COUNTRIES } from '@/constants/option';
 import type { CreateUserFormData } from '@/types/user';
 import { Button, Modal, Form, Input, Select, DatePicker, notification } from 'antd';
 import dayjs from 'dayjs';
@@ -29,7 +29,7 @@ const CreateUserModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) 
         message: 'User created successfully',
         placement: 'top',
       });
-      form.resetFields()
+      form.resetFields();
       closeModal();
     } catch (error) {
       const hasValidationError = form.getFieldsError().some((field) => field.errors.length > 0);

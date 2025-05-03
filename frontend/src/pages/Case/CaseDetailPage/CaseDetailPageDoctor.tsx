@@ -1,6 +1,5 @@
 import CustomHeader from '@/components/common/CustomHeader';
 import CaseDetail from '@/components/feature/Case/CaseDetail';
-import CaseDetailDoctor from '@/components/feature/doctor/Case/CaseDetailDoctor';
 import { Layout } from 'antd';
 import { useParams } from 'react-router-dom';
 

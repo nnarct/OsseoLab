@@ -4,10 +4,11 @@ import CustomHeader from '@/components/common/CustomHeader';
 import { useNavigate } from 'react-router-dom';
 import { MdFormatListBulletedAdd } from 'react-icons/md';
 import { useGetCaseList } from '@/services/case/case.service';
-import { CaseSummary } from '@/api/case.api';
+
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { deleteCaseById } from '@/api/case.api';
 import queryClient from '@/config/queryClient';
+import type { CaseSummary } from '@/types/case';
 
 const CaseListPageAdmin = () => {
   const navigate = useNavigate();

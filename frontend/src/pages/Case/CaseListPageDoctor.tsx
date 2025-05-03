@@ -4,7 +4,7 @@ import CustomHeader from '@/components/common/CustomHeader';
 import { useNavigate } from 'react-router-dom';
 import { MdFormatListBulletedAdd } from 'react-icons/md';
 import { useGetCaseList } from '@/services/case/case.service';
-import { CaseSummary } from '@/api/case.api';
+import type { CaseSummary } from '@/types/case';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { deleteCaseById } from '@/api/case.api';
 import queryClient from '@/config/queryClient';

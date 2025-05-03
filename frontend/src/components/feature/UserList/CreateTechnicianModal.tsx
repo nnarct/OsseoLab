@@ -1,4 +1,4 @@
-import { COUNTRIES } from '@/constants/country';
+import { COUNTRIES } from '@/constants/option';
 import type { CreateDoctorFormData } from '@/types/user';
 import { Button, Modal, Form, Input, Select, DatePicker, notification } from 'antd';
 import dayjs from 'dayjs';
