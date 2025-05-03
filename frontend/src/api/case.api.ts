@@ -30,6 +30,7 @@ export interface CaseSummary {
   patient_name: string;
   surgeon: Surgeon;
   surgery_date: number;
+  case_code: string
 }
 
 interface CaseFile {

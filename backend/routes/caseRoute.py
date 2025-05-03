@@ -52,6 +52,7 @@ def list_cases():
                 } if surgeon else None,
                 "patient_name": case.patient_name,
                 "patient_gender": case.patient_gender.name if case.patient_gender else None,
+                "case_code": case.case_code,
                 "case_number": case.case_number,
                 "surgery_date": int(case.surgery_date.strftime("%s")) if case.surgery_date else None,
                 "created_at": int(case.created_at.timestamp()),

@@ -39,6 +39,15 @@ const CaseListPageAdmin = () => {
       width: '0',
     },
     {
+      title: <div className='w-19'>Case Code</div>,
+      dataIndex: 'case_code',
+      key: 'case_code',
+      align: 'center',
+      sorter: (a, b) => a.case_code?.localeCompare(b.case_code),
+      render: (c) => c || '-',
+      width: '0',
+    },
+    {
       title: 'Surgeon',
       dataIndex: ['surgeon'],
       key: 'surgeon',
@@ -147,7 +156,7 @@ const CaseListPageAdmin = () => {
               placeholder='Search cases'
               allowClear
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='max-w-xs'
+              className='max-w-sm'
             />
             <Button type='primary' onClick={() => navigate('/case/create')} icon={<MdFormatListBulletedAdd />}>
               Create Case

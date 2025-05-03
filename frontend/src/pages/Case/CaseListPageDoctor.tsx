@@ -14,6 +14,7 @@ const CaseListPageDoctor = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [messageApi, msgContextHolder] = message.useMessage();
   const { data: cases, isLoading: loading } = useGetCaseList();
+
   const filteredCases = useMemo(() => {
     return (
       cases?.filter((item: CaseSummary) => {
@@ -32,10 +33,19 @@ const CaseListPageDoctor = () => {
     {
       title: <div className='w-14'>Case ID</div>,
       dataIndex: 'case_number',
-      key: 'order',
+      key: 'case_number',
       align: 'center',
       sorter: (a, b) => a.case_number - b.case_number,
       render: (c: number) => `CASE${String(c).padStart(3, '0')}`,
+      width: '0',
+    },
+    {
+      title: <div className='w-19'>Case Code</div>,
+      dataIndex: 'case_code',
+      key: 'case_code',
+      align: 'center',
+      sorter: (a, b) => a.case_code?.localeCompare(b.case_code),
+      render: (c) => c || '-',
       width: '0',
     },
     {
@@ -147,7 +157,7 @@ const CaseListPageDoctor = () => {
               placeholder='Search cases'
               allowClear
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='max-w-xs'
+              className='max-w-sm'
             />
             <Button type='primary' onClick={() => navigate('/case/create')} icon={<MdFormatListBulletedAdd />}>
               Create Case
