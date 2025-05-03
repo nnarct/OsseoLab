@@ -53,7 +53,7 @@ const UserList = () => {
               try {
                 await deleteUserById(id);
                 message.success('User deleted');
-                queryClient.invalidateQueries({ queryKey: [ADMIN_USERS_QUERY_KEY] });
+                queryClient.invalidateQueries({ queryKey: ADMIN_USERS_QUERY_KEY });
               } catch {
                 message.error('Failed to delete user');
               }
