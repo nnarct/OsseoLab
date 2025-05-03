@@ -1,5 +1,5 @@
 import CustomHeader from '@/components/common/CustomHeader';
-import { COUNTRIES } from '@/constants/country';
+import { COUNTRIES } from '@/constants/option';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentUser, useUpdateCurrentUser } from '@/services/user/user.service';
 import { FormUserProfile } from '@/types/user';
@@ -77,7 +77,7 @@ const ProfilePage = () => {
           <div className='mb-6 flex flex-col items-center justify-center gap-4 font-bold'>
             <Avatar
               size={96}
-              src={data.profile_pic_url || undefined}
+              src={data.profile_image || undefined}
               style={{ backgroundColor: '#87d068', fontSize: 24 }}
             >
               {data.firstname[0].toUpperCase()}

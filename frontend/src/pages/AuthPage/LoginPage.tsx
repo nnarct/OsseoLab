@@ -5,7 +5,6 @@ import {
   Card,
   Checkbox,
   ConfigProvider,
-  Flex,
   Form as AntdForm,
   Image,
   Input,
@@ -28,7 +27,6 @@ type LoginFieldType = {
 const { Item } = AntdForm;
 
 const LoginPage = () => {
-  console.log('login page');
   const navigate = useNavigate();
   const { login, user } = useAuth();
   const [messageApi, contextHolder] = message.useMessage();
@@ -55,46 +53,44 @@ const LoginPage = () => {
   return (
     <ConfigProvider theme={{ token: { colorText: '#046759' } }}>
       {contextHolder}
-      <Flex align='center' justify='center' className='bg-primary h-screen w-screen'>
-        <Card className='rounded-xl'>
-          <Image preview={false} src={LOGO} />
-          <Typography.Title level={5} className='!text-primary text-center'>
-            Login
-          </Typography.Title>
-          <Form form={form} layout='vertical' requiredMark={'optional'} onFinish={onSubmit} disabled={loading}>
-            <Item
-              name='email'
-              label={<div className='font-medium'>Email</div>}
-              rules={[{ required: true, message: 'Please input your email!' }]}
-            >
-              <Input placeholder='osseolabs@gmail.com' />
-            </Item>
-            <Item
-              name='password'
-              label={<div className='font-medium'>Password</div>}
-              rules={[{ required: true, message: 'Please input your password!' }]}
-            >
-              <Input.Password placeholder='password' />
-            </Item>
-            <Item name='remember' valuePropName='checked' className='!text-gray-400'>
-              <Checkbox>Remember me</Checkbox>
-            </Item>
+      <Card className='rounded-xl'>
+        <Image preview={false} src={LOGO} />
+        <Typography.Title level={5} className='!text-primary text-center'>
+          Login
+        </Typography.Title>
+        <Form form={form} layout='vertical' requiredMark={'optional'} onFinish={onSubmit} disabled={loading}>
+          <Item
+            name='email'
+            label={<div className='font-medium'>Email</div>}
+            rules={[{ required: true, message: 'Please input your email!' }]}
+          >
+            <Input placeholder='osseolabs@gmail.com' />
+          </Item>
+          <Item
+            name='password'
+            label={<div className='font-medium'>Password</div>}
+            rules={[{ required: true, message: 'Please input your password!' }]}
+          >
+            <Input.Password placeholder='password' />
+          </Item>
+          <Item name='remember' valuePropName='checked' className='!text-gray-400'>
+            <Checkbox>Remember me</Checkbox>
+          </Item>
 
-            <Item className='!mb-0'>
-              <Button type='primary' htmlType='submit' className='w-full'>
-                {loading ? 'Logging in...' : 'Login'}
-              </Button>
-            </Item>
-            <Divider />
-            <div className='flex justify-center gap-x-2'>
-              <Typography.Text>Don't have an account yet?</Typography.Text>
-              <Typography.Text>|</Typography.Text>
+          <Item className='!mb-0'>
+            <Button type='primary' htmlType='submit' className='w-full'>
+              {loading ? 'Logging in...' : 'Login'}
+            </Button>
+          </Item>
+          <Divider />
+          <div className='flex justify-center gap-x-2'>
+            <Typography.Text>Don't have an account yet?</Typography.Text>
+            <Typography.Text>|</Typography.Text>
 
-              <Typography.Link onClick={()=>navigate('/register')}>Register Now</Typography.Link>
-            </div>
-          </Form>
-        </Card>
-      </Flex>
+            <Typography.Link onClick={() => navigate('/register')}>Register Now</Typography.Link>
+          </div>
+        </Form>
+      </Card>
     </ConfigProvider>
   );
 };
