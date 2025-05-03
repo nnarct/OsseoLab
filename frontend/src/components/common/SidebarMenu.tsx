@@ -2,6 +2,7 @@ import { Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { FaUserFriends, FaRegImages, FaChartBar, FaListUl, FaPlusCircle, FaRegFolderOpen } from 'react-icons/fa';
+import { TfiEmail } from 'react-icons/tfi';
 import { useEffect, useState } from 'react';
 
 const SidebarMenu = () => {
@@ -38,6 +39,12 @@ const SidebarMenu = () => {
       children: [
         { key: '/case/list', icon: <FaListUl />, label: 'Case List', onClick: () => navigate('/case/list') },
         { key: '/case/create', icon: <FaPlusCircle />, label: 'Create Case', onClick: () => navigate('/case/create') },
+        {
+          key: '/case/quick-case',
+          icon: <TfiEmail />,
+          label: 'Quick Case List',
+          onClick: () => navigate('/case/quick-case'),
+        },
       ],
     },
   ];

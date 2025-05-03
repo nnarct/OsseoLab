@@ -6,6 +6,16 @@ export enum UserRole {
   Admin = 'admin',
 }
 
+export enum CaseStatus {
+  creation = 'Case Creation',
+  planning = 'Planning & Design',
+  surgeonReview = 'Surgeon Review',
+  deviceDesign = 'Device Design',
+  designConfirmation = 'Design Confirmation',
+  manufacturing = 'Manufacturing',
+  complete = 'Case Complete',
+}
+
 export interface UserProfile {
   id: string;
   firstname: string;
@@ -17,7 +27,7 @@ export interface UserProfile {
   gender: 'male' | 'female' | 'other';
   role: UserRole;
   country: string | null;
-  profile_pic_url: string | null;
+  profile_image: string | null;
   created_at: number;
   last_updated: number;
 }
@@ -76,5 +86,5 @@ export interface CreateUserFormData {
   gender: 'male' | 'female' | 'other' | null;
   dob: Dayjs | string | null;
   password: string;
-  role: UserRole
+  role: UserRole;
 }
