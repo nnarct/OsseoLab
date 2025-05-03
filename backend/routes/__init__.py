@@ -8,6 +8,7 @@ from .doctorRoute import doctor_bp
 from .caseSurgeonRoute import case_surgeon_bp
 from .caseFileRoute import case_file_bp
 from .dashboardRoute import dashboard_bp
+from .quickCaseRoute import quick_case_bp
 
 
 def register_routes(app):
@@ -20,3 +21,4 @@ def register_routes(app):
     app.register_blueprint(case_surgeon_bp)
     app.register_blueprint(case_file_bp)
     app.register_blueprint(dashboard_bp)
+    app.register_blueprint(quick_case_bp)
