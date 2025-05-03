@@ -29,6 +29,7 @@ const CreateUserModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) 
         message: 'User created successfully',
         placement: 'top',
       });
+      form.resetFields()
       closeModal();
     } catch (error) {
       const hasValidationError = form.getFieldsError().some((field) => field.errors.length > 0);
