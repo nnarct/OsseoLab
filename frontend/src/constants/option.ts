@@ -23,3 +23,17 @@ export const COUNTRIES = [
   { label: 'United States', value: 'United States' },
   { label: 'Other', value: 'Other' },
 ];
+
+export const PRODUCTS = [
+  { label: 'Dental implant', value: 'Dental implant' },
+  { label: 'Mandible reconstruction', value: 'Mandible reconstruction' },
+  { label: 'Mandible reconstruction with fibula flap', value: 'Mandible reconstruction with fibula flap' },
+  { label: 'Maxilla reconstruction', value: 'Maxilla reconstruction' },
+  { label: 'Metacarpal implant', value: 'Metacarpal implant' },
+  { label: 'Orbital floor reconstruction', value: 'Orbital floor reconstruction' },
+  { label: 'Orthognathic surgery', value: 'Orthognathic surgery' },
+  { label: 'Pedicle screw (Spine)', value: 'Pedicle screw (Spine)' },
+  { label: 'Sacral prosthesis', value: 'Sacral prosthesis' },
+  { label: 'Talus', value: 'Talus' },
+  { label: 'Virtual Planning', value: 'Virtual Planning' },
+];

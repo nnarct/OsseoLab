@@ -1,7 +1,7 @@
 import { useGetUsers } from '@/services/admin/user.service';
 import { UserRole } from '@/types/user';
 import { Button, Card, Input, Layout, Table } from 'antd';
-import { userColumns } from './userColumns';
+import { getUserColumns } from './userColumns';
 import CustomHeader from '@/components/common/CustomHeader';
 import { useMemo, useState } from 'react';
 import CreateUserModal from './CreateUserModal';
@@ -10,11 +10,14 @@ import { deleteUserById } from '@/api/user.api';
 import queryClient from '@/config/queryClient';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { ADMIN_USERS_QUERY_KEY } from '@/constants/queryKey';
+import { useNavigate } from 'react-router-dom';
 
 const UserList = () => {
   const { data, isLoading } = useGetUsers();
   const [searchTerm, setSearchTerm] = useState<string>('');
-
+  const navigate = useNavigate();
+  const userColumns = getUserColumns(navigate);
+  
   const roleColumn = {
     key: 'role',
     dataIndex: 'role',

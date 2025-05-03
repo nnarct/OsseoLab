@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { fetchCurrentUser, updateCurrentUser, createDoctorUser, createTechUser, createAdminUser } from '@/api/user.api';
+import { fetchCurrentUser, updateCurrentUser, createDoctorUser, createTechUser, createAdminUser,getUserById } from '@/api/user.api';
 import {
   ADMIN_USERS_QUERY_KEY,
   ADMINS_QUERY_KEY,
@@ -84,4 +84,9 @@ export const useCreateUser = () => {
       }
     },
   });
+};
+
+
+export const useGetUserById = (id: string) => {
+  return useQuery({ queryKey: ['user', id], queryFn: () => getUserById(id) });
 };

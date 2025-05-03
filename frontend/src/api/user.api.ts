@@ -119,3 +119,14 @@ export const deleteUserById = async (userId: string): Promise<void> => {
     throw error;
   }
 };
+
+export const getUserById = async (userId: string): Promise<UserProfile> => {
+  try {
+    const { data } = await axios.get(`/user/${userId}`);
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching user by ID:', error);
+    throw error;
+  }
+};
+

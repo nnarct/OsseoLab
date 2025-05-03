@@ -10,6 +10,9 @@ import ProtectedRoute from '@/components/common/ProtectedRoute';
 import LoginPage from '@/pages/AuthPage/LoginPage';
 import RegisterPage from '@/pages/AuthPage/RegisterPage';
 import Homepage from '@/pages/Homepage/Homepage';
+import QuickCasePage from './pages/AuthPage/QuickCasePage';
+import GuestLayout from '@/components/common/GuestLayout';
+
 import { queryClient } from '@/config/queryClient';
 import { UserRole } from '@/types/user';
 
@@ -24,11 +27,17 @@ const CaseList = lazy(() => import('@/pages/Case/CaseList'));
 const CaseCreateForm = lazy(() => import('@/pages/Case/CaseCreateForm'));
 const CaseModelViewer = lazy(() => import('@/pages/Case/CaseModelViewer'));
 
+// quick case
+const QuickCaseList = lazy(() => import('@/pages/Case/QuickCase/QuickCaseList'));
+
+const UserDetailPage = lazy(() => import('@/pages/AuthPage/UserDetailPage'));
+
 const createRoleRoute = (path: string, roles: string[], element: JSX.Element) => (
   <Route path={path} element={<ProtectedRoute requiredRole={roles} />}>
     <Route index element={element} />
   </Route>
 );
+
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
@@ -37,8 +46,11 @@ const App = () => {
           <Suspense fallback={<Spin size='large' style={{ display: 'block', margin: '20px auto' }} />}>
             <Routes>
               {/* Public Routes */}
-              <Route path='/login' element={<LoginPage />} />
-              <Route path='/register' element={<RegisterPage />} />
+              <Route element={<GuestLayout />}>
+                <Route path='/login' element={<LoginPage />} />
+                <Route path='/register' element={<RegisterPage />} />
+                <Route path='/upload' element={<QuickCasePage />} />
+              </Route>
               <Route path='/' element={<AppLayout />}>
                 <Route path='*' element={<Navigate to={'/'} />} />
                 <Route index element={<Homepage />} />
@@ -60,6 +72,10 @@ const App = () => {
                   <CaseModelViewer />
                 )}
                 {createRoleRoute('/profile', [UserRole.Admin, UserRole.Technician, UserRole.Doctor], <ProfilePage />)}
+
+                {createRoleRoute('/user/:id', [UserRole.Admin, UserRole.Technician], <UserDetailPage />)}
+
+                {createRoleRoute('/case/quick-case', [UserRole.Admin], <QuickCaseList />)}
               </Route>
               {/* </Route> */}
             </Routes>
