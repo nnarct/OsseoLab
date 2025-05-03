@@ -12,3 +12,4 @@ from .cases import Case
 from .case_files import CaseFile
 from .case_surgeons import CaseSurgeon
 from .profile_pic_files import ProfilePicFile
+from .quick_cases import QuickCase
