@@ -237,3 +237,43 @@ def delete_user(user_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"statusCode": 500, "message": "Failed to delete user", "error": str(e)}), 500
+
+
+@user_bp.route("/<user_id>", methods=["GET"])
+@jwt_required()
+@admin_required
+def get_user_by_id(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"statusCode": 404, "error": "User not found"}), 404
+    return jsonify({
+        "statusCode": 200,
+        "data": user.to_dict()
+    }), 200
+
+
+@user_bp.route("/<user_id>", methods=["PUT"])
+@jwt_required()
+@admin_required
+def update_user_by_id(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"statusCode": 404, "error": "User not found"}), 404
+
+    data = request.get_json()
+    restricted_fields = {
+        "id", "password",  "role", "profile_pic_image"
+    }
+
+    for key, value in data.items():
+        if key in restricted_fields:
+            continue
+        if hasattr(user, key):
+            setattr(user, key, value)
+
+    db.session.commit()
+    return jsonify({
+        "statusCode": 200,
+        "message": "User updated successfully",
+        "data": user.to_dict()
+    }), 200
