@@ -33,7 +33,7 @@ const CaseFilesList = ({ files, caseId, caseNumber }: { files: CaseFile[]; caseI
       dataIndex: 'filename',
       render: (filename, record) => (
         <>
-          <EditFilenameModal id={record.id} initialFilename={filename}  caseId={caseId}/>
+          <EditFilenameModal id={record.id} initialFilename={filename} caseId={caseId} />
           {filename}
         </>
       ),

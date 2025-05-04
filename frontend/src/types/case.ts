@@ -79,6 +79,7 @@ export interface QuickCaseData {
   surgery_date: number;
   additional_info?: string;
   created_at: number;
+  files?: QuickCaseFile[];
 }
 
 export interface QuickCase {
@@ -91,4 +92,14 @@ export interface QuickCase {
   surgery_date: number;
   created_at: number;
   phone: string;
+}
+
+export interface QuickCaseFile {
+  filename: string;
+  filepath: string;
+  filesize: number;
+  filetype: string;
+  id: string;
+  quick_case_id: string;
+  uploaded_at: number;
 }

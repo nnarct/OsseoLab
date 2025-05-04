@@ -1,27 +1,53 @@
 import { useState } from 'react';
-import { Card, Image, Typography, Form, Input, DatePicker, Button, Select, Divider, message } from 'antd';
+import { Card, Image, Typography, Form, Input, DatePicker, Button, Select, Divider, message, Upload } from 'antd';
+import type { UploadFile } from 'antd/es/upload/interface';
+import { AiOutlineInbox } from 'react-icons/ai';
 import LOGO from '@/assets/OsseoLabsLogo.svg';
 import { COUNTRIES, PRODUCTS } from '@/constants/option';
-import { useSubmitQuickCase } from '@/services/case/case.service';
-import { QuickCaseFormValues } from '@/types/case';
+// import { submitQuickCaseCombined } from '@/api/case.api';
 
-const QuickCasePage = () => {
-  const [isOtherProduct, setIsOtherProduct] = useState(false);
+import { Dayjs } from 'dayjs';
+import { useSubmitQuickCase } from '@/services/case/case.service';
+
+const QuickCaseSubmitPage = () => {
+  const [isOtherProduct, setIsOtherProduct] = useState<boolean>(false);
   const [form] = Form.useForm<QuickCaseFormValues>();
   const [messageApi, contextHolder] = message.useMessage();
+  // const submitQuickCase = useSubmitQuickCase();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const submitQuickCase = useSubmitQuickCase();
-
   const handleQuickCaseSubmit = async (values: QuickCaseFormValues) => {
+    setIsSubmitting(true);
     try {
       if (values.surgery_date && typeof values.surgery_date !== 'string') {
-        values.surgery_date.format('YYYY-MM-DD');
+        values.surgery_date = values.surgery_date.format('YYYY-MM-DD');
       }
-      await submitQuickCase.mutateAsync(values);
+
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        if (value && typeof value !== 'object') {
+          formData.append(key, value);
+        }
+      });
+
+      if (isOtherProduct) {
+        formData.append('other_product', values.otherProduct || '');
+      }
+
+      fileList.forEach((file) => {
+        if (file.originFileObj) formData.append('files', file.originFileObj);
+      });
+
+      await submitQuickCase.mutateAsync(formData);
       messageApi.success('Your quick case request has been submitted. We’ll contact you shortly.');
       form.resetFields();
+      setFileList([]);
     } catch (error) {
       console.error(error);
       messageApi.error('Submission failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -40,6 +66,7 @@ const QuickCasePage = () => {
           layout='vertical'
           onFinish={handleQuickCaseSubmit}
           className='grid grid-cols-2 gap-x-4'
+          disabled={isSubmitting}
         >
           <Form.Item name='firstname' label='First Name' rules={[{ required: true }]}>
             <Input placeholder='First Name' />
@@ -87,17 +114,32 @@ const QuickCasePage = () => {
           <Form.Item name='surgery_date' label='Surgery Date' rules={[{ required: true }]}>
             <DatePicker format='DD-MM-YYYY' className='w-full' type='text' allowClear />
           </Form.Item>
+          <Form.Item name='additionalInfo' label='Additional Information' className='col-span-2'>
+            <Input.TextArea rows={2} placeholder='Additional Information' />
+          </Form.Item>
           <Form.Item
-            name='additionalInfo'
-            label='Additional Information'
+            name='files'
+            label={`Upload Files ${fileList.length > 0 ? `(${fileList.length})` : ''}`}
             className='col-span-2'
             style={{ marginBottom: 0 }}
           >
-            <Input.TextArea rows={2} placeholder='Additional Information' />
+            <Upload.Dragger
+              multiple
+              fileList={fileList}
+              beforeUpload={() => false}
+              onChange={({ fileList }) => setFileList(fileList)}
+              accept='.stl,.jpg,.jpeg,.png,.pdf,.zip'
+            >
+              <p className='flex justify-center pb-2 text-2xl'>
+                <AiOutlineInbox />
+              </p>
+              {/* <p className='ant-upload-text'>Click or drag files to upload (STL, images, PDF, ZIP)</p> */}
+              <p className='ant-upload-text'>Click or drag files to upload (STL)</p>
+            </Upload.Dragger>
           </Form.Item>
           <Form.Item className='col-span-2'>
             <Divider />
-            <Button type='primary' htmlType='submit' block>
+            <Button type='primary' htmlType='submit' block loading={isSubmitting}>
               Submit
             </Button>
           </Form.Item>
@@ -107,4 +149,17 @@ const QuickCasePage = () => {
   );
 };
 
-export default QuickCasePage;
+export default QuickCaseSubmitPage;
+
+interface QuickCaseFormValues {
+  firstname: string;
+  lastname: string;
+  email: string;
+  phone: string;
+  country: string;
+  product: string;
+  otherProduct?: string;
+  anatomy: string;
+  surgery_date: Dayjs | string;
+  additionalInfo?: string;
+}

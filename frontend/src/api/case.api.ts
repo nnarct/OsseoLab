@@ -30,9 +30,11 @@ export const deleteCaseById = async (caseId: string): Promise<void> => {
   }
 };
 
-export const submitQuickCase = async (payload: QuickCaseFormValues): Promise<void> => {
+export const submitQuickCase = async (formData: FormData): Promise<void> => {
   try {
-    await axios.post('/case/quick-submit', payload);
+    await axios.post('/case/quick-submit-combined', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
   } catch (error) {
     console.error('Failed to submit quick case:', error);
     throw error;
@@ -54,6 +56,17 @@ export const deleteQuickCaseById = async (quickCaseId: string): Promise<void> =>
     await axios.delete(`/case/quick-delete/${quickCaseId}`);
   } catch (error) {
     console.error('Failed to delete quick case:', error);
+    throw error;
+  }
+};
+
+
+export const getQuickCaseById = async (id: string): Promise<QuickCaseData> => {
+  try {
+    const response = await axios.get(`/case/quick/${id}`);
+    return response.data.data;
+  } catch (error) {
+    console.error('Failed to fetch quick case by ID:', error);
     throw error;
   }
 };

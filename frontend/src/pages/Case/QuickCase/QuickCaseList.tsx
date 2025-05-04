@@ -7,6 +7,8 @@ import { useState, useMemo } from 'react';
 import { PRODUCTS } from '@/constants/option';
 import { deleteQuickCaseById } from '@/api/case.api';
 import { FaRegTrashAlt } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import queryClient from '@/config/queryClient';
 
 const QuickCaseList = () => {
   const { data = [], isLoading } = useGetQuickCaseList();
@@ -27,7 +29,9 @@ const QuickCaseList = () => {
     try {
       await deleteQuickCaseById(id);
       message.success('Quick case deleted');
+      queryClient.invalidateQueries({ queryKey: ['quick-cases'] });
     } catch (error) {
+      console.error(error);
       message.error('Failed to delete quick case');
     }
   };
@@ -72,6 +76,19 @@ const QuickCaseList = () => {
       dataIndex: 'surgery_date',
       sorter: (a, b) => a.surgery_date - b.surgery_date,
       render: (value) => new Date(value * 1000).toLocaleDateString(),
+    },
+    {
+      title: 'Actions',
+      dataIndex: 'id',
+      width: '0',
+      align: 'center',
+      render: (id) => (
+        <Button>
+          <Link to={`/case/quick-case/${id}`} type='primary'>
+            View
+          </Link>
+        </Button>
+      ),
     },
     {
       title: 'Actions',

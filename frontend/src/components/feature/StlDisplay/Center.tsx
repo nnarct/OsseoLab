@@ -4,14 +4,14 @@ import Controllers from './Controllers/Controllers';
 import Model from './Model';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 import MenuBar from './MenuBar/MenuBar';
-import { useEffect, useRef, useState } from 'react';
-import { axios } from '@/config/axiosConfig';
-import { useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
-import { STL_LIST_QUERY_KEY } from '@/constants/queryKey';
+import { Suspense, useEffect, useRef } from 'react';
+// import { axios } from '@/config/axiosConfig';
+// import { useQueryClient } from '@tanstack/react-query';
+// import { message } from 'antd';
+// import { STL_LIST_QUERY_KEY } from '@/constants/queryKey';
 import SceneSetter from './SceneSetter';
-import { useSceneStore } from '@/store/useSceneStore';
-import { convert } from '@/services/stlExporter/convert';
+// import { useSceneStore } from '@/store/useSceneStore';
+// import { convert } from '@/services/stlExporter/convert';
 // import Angle from './AngleTool/Angle';
 
 import { MeasureTool } from './MeasureTool/MeasureTool';
@@ -19,131 +19,48 @@ import AngleTool from './AngleTool/AngleTool';
 import MeasureLineGroup from './MeasureTool/MeasureLineGroup';
 import AngleLineGroup from './AngleTool/AngleLineGroup';
 import ClippingPlaneList from './ClippingPlane/ClippingPlaneList';
+import { useProgress } from '@react-three/drei';
+import Loader from './Loader';
 // import AngleTool from './AngleTool/Angle';
 
-const Center = ({ url, id }: { url: string; id: string }) => {
-  const [messageApi, contextHolder] = message.useMessage();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+const Center = ({ url, id }: { url: string; id?: string }) => {
+  // const [messageApi, contextHolder] = message.useMessage();
+  // const [isLoading, setIsLoading] = useState<boolean>(false);
   const { angleHandler, resetModel, measureHandler } = useStlDisplay();
   const { isActive: isMeasureActive } = measureHandler;
   const { isActive: isAngleActive } = angleHandler;
 
   const meshRef = useRef<THREE.Mesh>(null);
-  const [saving, setSaving] = useState(false);
+  // const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     resetModel();
   }, [url]); // eslint-disable-line react-hooks/exhaustive-deps
-  const queryClient = useQueryClient();
-
-  const applyClippingPlanes = (geometry: THREE.BufferGeometry, planes: THREE.Plane[]) => {
-    const positions = geometry.attributes.position.array;
-    const newPositions = [];
-
-    for (let i = 0; i < positions.length; i += 3) {
-      const vertex = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
-
-      let visible = true;
-      for (const plane of planes) {
-        if (plane.distanceToPoint(vertex) < 0) {
-          visible = false;
-          break;
-        }
-      }
-
-      if (visible) {
-        newPositions.push(positions[i], positions[i + 1], positions[i + 2]);
-      }
-    }
-
-    const newGeometry = new THREE.BufferGeometry();
-    newGeometry.setAttribute('position', new THREE.Float32BufferAttribute(newPositions, 3));
-
-    return newGeometry;
-  };
-
-  const putStlFile = async (formData: FormData) => {
-    try {
-      const response = await axios.put(`/stl/file/${id}`, formData);
-      console.log('File updated successfully:', response.data);
-      messageApi.success('File updated successfully');
-      queryClient.invalidateQueries({ queryKey: [STL_LIST_QUERY_KEY] });
-    } catch (error) {
-      messageApi.error('Error updating STL file');
-      console.error('Error updating STL file:', error);
-    }
-  };
-
-  const upload = async (formData: FormData, nickname: string) => {
-    try {
-      setIsLoading(true);
-      const response = await axios.post('/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      messageApi.success(`File "${nickname}" uploaded successfully!`);
-      console.log('Uploaded:', response.data);
-      queryClient.invalidateQueries({ queryKey: [STL_LIST_QUERY_KEY] });
-      messageApi.success('uploaded');
-    } catch (error) {
-      messageApi.error('Upload failed!');
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  const save = async (id: string) => {
-    const scene = useSceneStore.getState().scene;
-    if (!scene) {
-      console.error('Scene not found!');
-      return;
-    }
-
-    try {
-      const result = await convert(scene); // <- await because convert returns Promise<string>
-
-      if (!result) {
-        console.error('Convert failed.');
-        return;
-      }
-
-      // const blob = new Blob([result], { type: 'application/octet-stream' }); // .stl is usually 'application/octet-stream' or 'model/stl'
-      const blob = new Blob([result], { type: 'model/stl' }); // .stl is usually 'application/octet-stream' or 'model/stl'
-      const url = URL.createObjectURL(blob);
-
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${id}.stl`; // file will be saved as e.g., 1234.stl
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url); // clean memory
-    } catch (error) {
-      console.error('Failed to save STL:', error);
-    }
-  };
+  // const queryClient = useQueryClient();
 
   return (
     <>
-      {contextHolder}
+      {/* {contextHolder} */}
       <MenuBar
-        onSave={async () => {
-          await save(id);
-        }}
-        saving={isLoading}
+      // onSave={async () => {
+      //   await save(id);
+      // }}
+      // saving={isLoading}
       />
       {/* <Canvas style={{ height: '80vh', maxWidth: '80vh', width: 'auto', background: '#f7f7f7', marginInline: 'auto' }}> */}
       <Canvas style={{ width: 'auto', height: '90vh', background: '#f7f7f7', marginInline: 'auto' }}>
-        <SceneSetter />
-        <Controllers />
-        <Model url={url} meshRef={meshRef} />
+        <Suspense fallback={<Loader />}>
+          <SceneSetter />
+          <Controllers />
+          <Model url={url} meshRef={meshRef} />
 
-        {/* <Angle/> */}
-        <ClippingPlaneList />
-        {isAngleActive && <AngleTool />}
-        {isMeasureActive && <MeasureTool />}
-        <MeasureLineGroup />
-        <AngleLineGroup />
+          {/* <Angle/> */}
+          <ClippingPlaneList />
+          {isAngleActive && <AngleTool />}
+          {isMeasureActive && <MeasureTool />}
+          <MeasureLineGroup />
+          <AngleLineGroup />
+        </Suspense>
         {/* {measureActive && <MeasureDistance />} */}
       </Canvas>
       {/* <MeasureDistance /> */}
@@ -153,6 +70,92 @@ const Center = ({ url, id }: { url: string; id: string }) => {
 
 export default Center;
 
+// const applyClippingPlanes = (geometry: THREE.BufferGeometry, planes: THREE.Plane[]) => {
+//   const positions = geometry.attributes.position.array;
+//   const newPositions = [];
+
+//   for (let i = 0; i < positions.length; i += 3) {
+//     const vertex = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
+
+//     let visible = true;
+//     for (const plane of planes) {
+//       if (plane.distanceToPoint(vertex) < 0) {
+//         visible = false;
+//         break;
+//       }
+//     }
+
+//     if (visible) {
+//       newPositions.push(positions[i], positions[i + 1], positions[i + 2]);
+//     }
+//   }
+
+//   const newGeometry = new THREE.BufferGeometry();
+//   newGeometry.setAttribute('position', new THREE.Float32BufferAttribute(newPositions, 3));
+
+//   return newGeometry;
+// };
+
+// const putStlFile = async (formData: FormData) => {
+//   try {
+//     const response = await axios.put(`/stl/file/${id}`, formData);
+//     console.log('File updated successfully:', response.data);
+//     messageApi.success('File updated successfully');
+//     queryClient.invalidateQueries({ queryKey: [STL_LIST_QUERY_KEY] });
+//   } catch (error) {
+//     messageApi.error('Error updating STL file');
+//     console.error('Error updating STL file:', error);
+//   }
+// };
+
+// const upload = async (formData: FormData, nickname: string) => {
+//   try {
+//     setIsLoading(true);
+//     const response = await axios.post('/upload', formData, {
+//       headers: { 'Content-Type': 'multipart/form-data' },
+//     });
+
+//     messageApi.success(`File "${nickname}" uploaded successfully!`);
+//     console.log('Uploaded:', response.data);
+//     queryClient.invalidateQueries({ queryKey: [STL_LIST_QUERY_KEY] });
+//     messageApi.success('uploaded');
+//   } catch (error) {
+//     messageApi.error('Upload failed!');
+//     console.error(error);
+//   } finally {
+//     setIsLoading(false);
+//   }
+// };
+// const save = async (id: string) => {
+//   const scene = useSceneStore.getState().scene;
+//   if (!scene) {
+//     console.error('Scene not found!');
+//     return;
+//   }
+
+//   try {
+//     const result = await convert(scene); // <- await because convert returns Promise<string>
+
+//     if (!result) {
+//       console.error('Convert failed.');
+//       return;
+//     }
+
+//     // const blob = new Blob([result], { type: 'application/octet-stream' }); // .stl is usually 'application/octet-stream' or 'model/stl'
+//     const blob = new Blob([result], { type: 'model/stl' }); // .stl is usually 'application/octet-stream' or 'model/stl'
+//     const url = URL.createObjectURL(blob);
+
+//     const link = document.createElement('a');
+//     link.href = url;
+//     link.download = `${id}.stl`; // file will be saved as e.g., 1234.stl
+//     document.body.appendChild(link);
+//     link.click();
+//     document.body.removeChild(link);
+//     URL.revokeObjectURL(url); // clean memory
+//   } catch (error) {
+//     console.error('Failed to save STL:', error);
+//   }
+// };z
 // const save = async (id: string, planes: THREE.Plane[]) => {
 //   if (!meshRef.current) {
 //     console.error('No mesh available to save.');

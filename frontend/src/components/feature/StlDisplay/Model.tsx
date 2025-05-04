@@ -22,13 +22,16 @@ const Model = ({
   const { planeHandler } = useStlDisplay();
   const { isCut } = planeHandler
   const planes = planeHandler.getPlanes();
+
   const geometry = useLoader(STLLoader, url) as THREE.BufferGeometry;
 
   // const meshRef = useRef<THREE.Mesh>(null);
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
 
   useEffect(() => {
-    initializeSTLModel(geometry, camera, meshRef, gl);
+    if (geometry) {
+      initializeSTLModel(geometry, camera, meshRef, gl);
+    }
   }, [geometry, camera, gl, meshRef]);
 
   useEffect(() => {
@@ -39,6 +42,7 @@ const Model = ({
     }
   }, [planes, isCut]);
 
+  if (!geometry) return null;
   return (
     <mesh ref={meshRef} geometry={geometry} userData={{ type: 'stlModel' }}>
       <meshStandardMaterial

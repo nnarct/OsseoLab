@@ -10,7 +10,7 @@ import ProtectedRoute from '@/components/common/ProtectedRoute';
 import LoginPage from '@/pages/AuthPage/LoginPage';
 import RegisterPage from '@/pages/AuthPage/RegisterPage';
 import Homepage from '@/pages/Homepage/Homepage';
-import QuickCasePage from './pages/AuthPage/QuickCasePage';
+import QuickCaseSubmitPage from './pages/AuthPage/QuickCaseSubmitPage';
 import GuestLayout from '@/components/common/GuestLayout';
 
 import { queryClient } from '@/config/queryClient';
@@ -29,6 +29,8 @@ const CaseModelViewer = lazy(() => import('@/pages/Case/CaseModelViewer'));
 
 // quick case
 const QuickCaseList = lazy(() => import('@/pages/Case/QuickCase/QuickCaseList'));
+const QuickCaseDetail = lazy(() => import('@/pages/Case/QuickCase/QuickCaseDetail'));
+const QuickCaseModelViewer = lazy(() => import('@/pages/Case/QuickCase/QuickCaseModelViewer'));
 
 const UserDetailPage = lazy(() => import('@/pages/AuthPage/UserDetailPage'));
 
@@ -49,7 +51,7 @@ const App = () => {
               <Route element={<GuestLayout />}>
                 <Route path='/login' element={<LoginPage />} />
                 <Route path='/register' element={<RegisterPage />} />
-                <Route path='/upload' element={<QuickCasePage />} />
+                <Route path='/upload' element={<QuickCaseSubmitPage />} />
               </Route>
               <Route path='/' element={<AppLayout />}>
                 <Route path='*' element={<Navigate to={'/'} />} />
@@ -76,6 +78,8 @@ const App = () => {
                 {createRoleRoute('/user/:id', [UserRole.Admin, UserRole.Technician], <UserDetailPage />)}
 
                 {createRoleRoute('/case/quick-case', [UserRole.Admin], <QuickCaseList />)}
+                {createRoleRoute('/case/quick-case/:id', [UserRole.Admin], <QuickCaseDetail />)}
+                {createRoleRoute('/case/quick-case/:quickCaseId/:id', [UserRole.Admin], <QuickCaseModelViewer />)}
               </Route>
               {/* </Route> */}
             </Routes>
