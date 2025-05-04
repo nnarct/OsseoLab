@@ -1,5 +1,3 @@
-
-
 import os
 from itsdangerous import URLSafeTimedSerializer
 
@@ -20,3 +18,6 @@ def generate_secure_url_profile_pic(stl_id: str) -> str:
     return f"{BASE_URL}/profile-pic/{token}"
 
 
+def generate_secure_url_quick_file(file_id: str) -> str:
+    token = serializer.dumps(file_id)
+    return f"{BASE_URL}/case/quick-file/{token}"

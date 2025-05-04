@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify, send_from_directory
 from config.extensions import db
 import uuid
 from models.case_files import CaseFile
+from models.quick_case_files import QuickCaseFile
 from itsdangerous import URLSafeTimedSerializer
 
 case_file_bp = Blueprint("case_file", __name__)
@@ -70,11 +71,16 @@ def serve_case_file(token):
             return jsonify({"statusCode": 403, "error": "Invalid or expired token"}), 403
 
         case_file_entry = CaseFile.query.filter_by(id=case_file_id).first()
-        if not case_file_entry:
-            return jsonify({"statusCode": 404, "error": "File not found"}), 404
+        if case_file_entry:
+            relative_path = case_file_entry.filepath.lstrip("/")
+            return send_from_directory(UPLOAD_FOLDER, relative_path)
 
-        relative_path = case_file_entry.filepath.lstrip("/")
-        return send_from_directory(UPLOAD_FOLDER, relative_path)
+        quick_case_file_entry = QuickCaseFile.query.filter_by(id=case_file_id).first()
+        if quick_case_file_entry:
+            relative_path = quick_case_file_entry.filepath.lstrip("/")
+            return send_from_directory(UPLOAD_FOLDER, relative_path)
+
+        return jsonify({"statusCode": 404, "error": "File not found"}), 404
     except Exception as e:
         return jsonify({"statusCode": 500, "error": "Internal Server Error", "message": str(e)}), 500
 
@@ -129,4 +135,3 @@ def rename_case_file(file_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"statusCode": 500, "message": "Failed to update filename", "error": str(e)}), 500
-    
