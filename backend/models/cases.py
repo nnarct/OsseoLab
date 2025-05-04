@@ -37,7 +37,7 @@ class Case(db.Model):
         timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     surgeon = relationship('Doctor', back_populates='cases')
-    files = relationship('CaseFile', back_populates='case')
+    files = relationship('CaseFile', back_populates='case', passive_deletes=True)
     surgeons = relationship('CaseSurgeon', back_populates='case')
     creator = relationship('User', back_populates='created_cases')
 

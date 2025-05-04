@@ -11,14 +11,39 @@ from config.extensions import db
 class Doctor(db.Model):
     __tablename__ = 'doctors'
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('user.id'), nullable=False)
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey('user.id', ondelete="CASCADE"),
+        nullable=False
+    )
     hospital = Column(String(255))
+    doctor_registration_id = Column(String(255), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False,
                            default=lambda: datetime.now(timezone.utc))
     last_updated = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
                              onupdate=lambda: datetime.now(timezone.utc))
 
-    user = relationship('User', back_populates='doctor_profile')
+    user = relationship('User', back_populates='doctor_profile', passive_deletes=True)
     cases = relationship('Case', back_populates='surgeon')
     case_links = relationship('CaseSurgeon', back_populates='surgeon')
+
+    def to_dict(self, include=None, exclude=None):
+        include = set(include or [])
+        exclude = set(exclude or [])
+
+        data = {
+            "id": str(self.id),
+            "user_id": str(self.user_id),
+            "hospital": self.hospital,
+            "doctor_registration_id": self.doctor_registration_id,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "last_updated": self.last_updated.isoformat() if self.last_updated else None
+        }
+
+        if include:
+            data = {k: v for k, v in data.items() if k in include}
+        if exclude:
+            data = {k: v for k, v in data.items() if k not in exclude}
+
+        return data
 
