@@ -8,7 +8,11 @@ from models.quick_case_files import QuickCaseFile
 from datetime import datetime
 from services.url_secure_service import serializer, generate_secure_url_quick_file
 
-
+  # Notify all admins about the new quick case
+from models.users import User
+from models.notifications import Notification
+from models.enums import RoleEnum
+        
 # Helper function to get the quick case upload folder path
 def get_quick_case_upload_folder():
     return os.path.join(current_app.root_path, "uploads", "quick_cases")
@@ -46,6 +50,17 @@ def submit_quick_case_combined():
         )
 
         db.session.add(quick_case)
+        db.session.commit()
+    
+        admins = User.query.filter_by(role=RoleEnum.admin.value).all()
+        for admin in admins:
+            notif = Notification(
+                user_id=admin.id,
+                message=f"📝 New quick case submitted by {quick_case.firstname} {quick_case.lastname}",
+                related_case_id=quick_case.id,
+                case_type="quick"
+            )
+            db.session.add(notif)
         db.session.commit()
 
         # Save uploaded files
