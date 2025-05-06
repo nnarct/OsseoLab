@@ -1,12 +1,15 @@
 import CustomHeader from '@/components/common/CustomHeader';
 import AdditionalSurgeon from '@/components/feature/Case/AdditionalSurgeon';
 import CaseDetail from '@/components/feature/Case/CaseDetail';
-import EngineerList from '@/components/feature/Case/EngineerList';
+import CaseDetailDoctor from '@/components/feature/Case/CaseDetailDoctor';
+import CaseEditDoctor from '@/components/feature/Case/CaseEditDoctor';
 import { Divider, Layout } from 'antd';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-const CaseDetailPageAdmin = () => {
+const CaseDetailPageTechnician = () => {
   const { id } = useParams();
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   if (!id) return 'Case id is missing';
 
@@ -19,11 +22,9 @@ const CaseDetailPageAdmin = () => {
         <CaseDetail id={id} />
         <Divider />
         <AdditionalSurgeon caseId={id} />
-        <Divider />
-        <EngineerList caseId={id} />
       </Layout.Content>
     </>
   );
 };
 
-export default CaseDetailPageAdmin;
+export default CaseDetailPageTechnician;
