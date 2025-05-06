@@ -30,6 +30,9 @@ export interface UserProfile {
   profile_image: string | null;
   created_at: number;
   last_updated: number;
+  hospital?: string | null;
+  reference?: string | null;
+  doctor_registration_id?: string | null;
 }
 
 export interface FormUserProfile {
@@ -40,6 +43,9 @@ export interface FormUserProfile {
   username: string | null;
   gender: 'male' | 'female' | 'other';
   country: string | null;
+  hospital?: string | null;
+  reference?: string | null;
+  doctor_registration_id?: string | null;
 }
 
 export interface CreateDoctorFormData {

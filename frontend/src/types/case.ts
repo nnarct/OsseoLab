@@ -26,12 +26,12 @@ export interface CaseSummary {
 }
 
 export interface CaseFile {
-  id: string;
   filename: string;
+  id: string;
+  order: number;
+  uploaded_at: number;
   url: string;
-  created_at: number;
 }
-
 export interface Surgeon {
   id: string;
   firstname: string;
@@ -44,25 +44,20 @@ export interface CaseData {
   case_code: string | null;
   case_number: number;
   created_at: number;
-  created_by: {
-    id: string;
-    username: string;
-    firstname: string;
-    lastname: string;
-  };
+  created_by: UserData;
   files: CaseFile[];
   id: string;
   last_updated: number;
-  patient_age: string | number | null;
-  patient_dob: number | null;
-  patient_gender: 'male' | 'female' | 'other' | null;
+  patient_age: number | null;
+  patient_dob: null;
+  patient_gender: null;
   patient_name: string;
   priority: string | null;
   problem_description: string | null;
   product: string | null;
   scan_type: string | null;
   status: string | null;
-  surgeon: Surgeon;
+  surgeon: SurgeonData;
   surgery_date: number;
 }
 
@@ -102,4 +97,17 @@ export interface QuickCaseFile {
   id: string;
   quick_case_id: string;
   uploaded_at: number;
+}
+
+interface UserData {
+  firstname: string;
+  id: string;
+  lastname: string;
+  username: string;
+}
+
+interface SurgeonData {
+  id: string;
+  firstname: string;
+  lastname: string;
 }
