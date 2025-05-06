@@ -13,9 +13,9 @@ class CaseTechnician(db.Model):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     case_id = Column(UUID(as_uuid=True), ForeignKey('cases.id', ondelete="CASCADE"), nullable=False)
     technician_id = Column(UUID(as_uuid=True), ForeignKey('technicians.id', ondelete="CASCADE"), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
-    active = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    active = Column(db.Boolean, nullable=False, default=True)
 
     case = relationship('Case', back_populates='technicians', passive_deletes=True)
     technician = relationship('Technician', back_populates='case_links', passive_deletes=True)

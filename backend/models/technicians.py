@@ -21,6 +21,12 @@ class Technician(db.Model):
 
     user = relationship(
         'User', back_populates='technician_profile', passive_deletes=True)
+    case_links = db.relationship(
+        'CaseTechnician',
+        back_populates='technician',
+        passive_deletes=True,
+        cascade='all, delete-orphan'
+    )
 
     def to_dict(self, include=None, exclude=None):
         include = set(include or [])

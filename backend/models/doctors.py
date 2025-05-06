@@ -1,4 +1,3 @@
-
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
@@ -7,6 +6,7 @@ from sqlalchemy import Column, String, DateTime, ForeignKey, Enum as PgEnum, Tex
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 from config.extensions import db
+
 
 class Doctor(db.Model):
     __tablename__ = 'doctors'
@@ -18,12 +18,14 @@ class Doctor(db.Model):
     )
     hospital = Column(String(255))
     doctor_registration_id = Column(String(255), nullable=True)
+    reference = Column(String(255), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False,
                            default=lambda: datetime.now(timezone.utc))
     last_updated = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
                              onupdate=lambda: datetime.now(timezone.utc))
 
-    user = relationship('User', back_populates='doctor_profile', passive_deletes=True)
+    user = relationship(
+        'User', back_populates='doctor_profile', passive_deletes=True)
     cases = relationship('Case', back_populates='surgeon')
     case_links = relationship('CaseSurgeon', back_populates='surgeon')
 
@@ -34,10 +36,16 @@ class Doctor(db.Model):
         data = {
             "id": str(self.id),
             "user_id": str(self.user_id),
+            "firstname": self.user.firstname if self.user else None,
+            "lastname": self.user.lastname if self.user else None,
             "hospital": self.hospital,
+            "email": self.user.email if self.user else None,
+            "phone": self.user.phone if self.user else None,
+            "username": self.user.username if self.user else None,
             "doctor_registration_id": self.doctor_registration_id,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "last_updated": self.last_updated.isoformat() if self.last_updated else None
+            "reference": self.reference,
+            "created_at": int(self.created_at.timestamp()),
+            "last_updated":  int(self.last_updated.timestamp()),
         }
 
         if include:
@@ -47,3 +55,11 @@ class Doctor(db.Model):
 
         return data
 
+# In your update_current_user function, add the following logic after user updates and before committing:
+
+# if user.role == RoleEnum.doctor:
+#     doctor = Doctor.query.filter_by(user_id=user.id).first()
+#     if doctor:
+#         doctor.hospital = data.get("hospital", doctor.hospital)
+#         doctor.reference = data.get("reference", doctor.reference)
+#         doctor.doctor_registration_id = data.get("doctor_registration_id", doctor.doctor_registration_id)

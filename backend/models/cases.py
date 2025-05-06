@@ -20,7 +20,8 @@ class Case(db.Model):
     case_code = Column(String(255), nullable=True)
     status = Column(String(255), nullable=True)
     priority = Column(String(255), nullable=True)
-    created_by = Column(UUID(as_uuid=True), ForeignKey('user.id'), nullable=False)
+    created_by = Column(UUID(as_uuid=True),
+                        ForeignKey('user.id'), nullable=False)
     product = Column(String(255), nullable=True)
     anticipated_ship_date = Column(Date, nullable=True)
     surgeon_id = Column(UUID(as_uuid=True), ForeignKey('doctors.id'))
@@ -37,9 +38,16 @@ class Case(db.Model):
         timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     surgeon = relationship('Doctor', back_populates='cases')
-    files = relationship('CaseFile', back_populates='case', passive_deletes=True)
+    files = relationship('CaseFile', back_populates='case',
+                         passive_deletes=True)
     surgeons = relationship('CaseSurgeon', back_populates='case')
     creator = relationship('User', back_populates='created_cases')
+    technicians = db.relationship(
+        'CaseTechnician',
+        back_populates='case',
+        passive_deletes=True,
+        cascade='all, delete-orphan'
+    )
 
     def to_dict(self, exclude: set[str] = None, include: set[str] = None):
         data = {

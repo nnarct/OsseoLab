@@ -15,3 +15,4 @@ from .profile_pic_files import ProfilePicFile
 from .quick_cases import QuickCase
 from .quick_case_files import QuickCaseFile
 from .notifications import Notification
+from .case_technicians import CaseTechnician
