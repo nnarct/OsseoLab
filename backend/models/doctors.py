@@ -2,9 +2,8 @@ import uuid
 from datetime import datetime, timezone
 from enum import Enum
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, String, DateTime, ForeignKey, Enum as PgEnum, Text, Date
+from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from flask_sqlalchemy import SQLAlchemy
 from config.extensions import db
 
 
@@ -19,10 +18,12 @@ class Doctor(db.Model):
     hospital = Column(String(255))
     doctor_registration_id = Column(String(255), nullable=True)
     reference = Column(String(255), nullable=True)
-    created_at = db.Column(db.DateTime, nullable=False,
-                           default=lambda: datetime.now(timezone.utc))
-    last_updated = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
-                             onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(
+        DateTime, nullable=False,
+        default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc))
 
     user = relationship(
         'User', back_populates='doctor_profile', passive_deletes=True)
@@ -44,8 +45,8 @@ class Doctor(db.Model):
             "username": self.user.username if self.user else None,
             "doctor_registration_id": self.doctor_registration_id,
             "reference": self.reference,
-            "created_at": int(self.created_at.timestamp()),
-            "last_updated":  int(self.last_updated.timestamp()),
+            "created_at": int(self.created_at.timestamp()) if self.created_at else None,
+            "updated_at": int(self.updated_at.timestamp()) if self.updated_at else None,
         }
 
         if include:
@@ -54,12 +55,3 @@ class Doctor(db.Model):
             data = {k: v for k, v in data.items() if k not in exclude}
 
         return data
-
-# In your update_current_user function, add the following logic after user updates and before committing:
-
-# if user.role == RoleEnum.doctor:
-#     doctor = Doctor.query.filter_by(user_id=user.id).first()
-#     if doctor:
-#         doctor.hospital = data.get("hospital", doctor.hospital)
-#         doctor.reference = data.get("reference", doctor.reference)
-#         doctor.doctor_registration_id = data.get("doctor_registration_id", doctor.doctor_registration_id)

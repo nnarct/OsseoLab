@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, String, DateTime, Date, Text
+from sqlalchemy import Column, String, Date, Text
 from config.extensions import db
 
 
@@ -19,9 +19,11 @@ class QuickCase(db.Model):
     anatomy = Column(String(255), nullable=False)
     surgery_date = Column(Date, nullable=False)
     additional_info = Column(Text, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(
+        db.DateTime, nullable=False,
+        default=lambda: datetime.now(timezone.utc))
 
-    def to_dict(self, exclude: set[str] = None, include: set[str] = None):
+    def to_dict(self, include=None, exclude=None):
         data = {
             "id": str(self.id),
             "firstname": self.firstname,
@@ -32,16 +34,14 @@ class QuickCase(db.Model):
             "product": self.product,
             "other_product": self.other_product,
             "anatomy": self.anatomy,
-            "surgery_date": int(self.surgery_date.strftime("%s")) if self.surgery_date else None,
+            "surgery_date": int(self.surgery_date.timestamp()) if self.surgery_date else None,
             "additional_info": self.additional_info,
-            "created_at": int(self.created_at.timestamp()) if self.created_at else None
+            "created_at": int(self.created_at.timestamp()) if self.created_at else None,
         }
 
-        if include is not None:
-            if exclude:
-                return {k: v for k, v in data.items() if k in include and k not in exclude}
-            return {k: v for k, v in data.items() if k in include}
+        if include:
+            data = {k: v for k, v in data.items() if k in include}
         if exclude:
-            return {k: v for k, v in data.items() if k not in exclude}
+            data = {k: v for k, v in data.items() if k not in exclude}
 
         return data

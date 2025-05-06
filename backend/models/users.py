@@ -22,10 +22,12 @@ class User(db.Model):
     role = Column(PgEnum(RoleEnum))
     gender = Column(PgEnum(GenderEnum), nullable=True)
     country = Column(String(255), nullable=True)
-    created_at = db.Column(db.DateTime, nullable=False,
-                           default=lambda: datetime.now(timezone.utc))
-    last_updated = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
-                             onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(
+        DateTime, nullable=False,
+        default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc))
     profile_image = Column(UUID(as_uuid=True),  ForeignKey(
         'profile_pic_files.id'), nullable=True)
 
@@ -36,6 +38,7 @@ class User(db.Model):
     profile_pic = relationship(
         'ProfilePicFile', back_populates='user',  foreign_keys='ProfilePicFile.user_id')
     created_cases = relationship('Case', back_populates='creator')
+    created_groups = relationship('CaseFileGroup', back_populates='creator')
 
     def to_dict(self, exclude: set[str] = None):
         data = {
@@ -50,7 +53,7 @@ class User(db.Model):
             "gender": self.gender.name if self.gender else None,
             "country": self.country,
             "created_at": int(self.created_at.timestamp()),
-            "last_updated": int(self.last_updated.timestamp()),
+            "updated_at": int(self.updated_at.timestamp()),
             "profile_image": str(self.profile_image) if self.profile_image else None
         }
         if exclude:

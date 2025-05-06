@@ -71,9 +71,9 @@ def list_cases():
                 "patient_gender": case.patient_gender.name if case.patient_gender else None,
                 "case_code": case.case_code,
                 "case_number": case.case_number,
-                "surgery_date": int(case.surgery_date.strftime("%s")) if case.surgery_date else None,
-                "created_at": int(case.created_at.timestamp()),
-                "last_updated": int(case.last_updated.timestamp()),
+                "surgery_date": int(case.surgery_date.timestamp()) if isinstance(case.surgery_date, datetime) else int(datetime.combine(case.surgery_date, datetime.min.time()).timestamp()) if case.surgery_date else None,
+                "created_at": int(case.created_at.timestamp()) if isinstance(case.created_at, datetime) else int(datetime.combine(case.created_at, datetime.min.time()).timestamp()) if case.created_at else None,
+                "uploaded_at": int(case.updated_at.timestamp()) if isinstance(case.updated_at, datetime) else int(datetime.combine(case.updated_at, datetime.min.time()).timestamp()) if case.updated_at else None,
                 "order": index,
             })
         return jsonify({"statusCode": 200, "data": case_list}), 200
@@ -166,7 +166,7 @@ def get_case_by_id(case_id):
                 "id": str(f.id),
                 "filename": f.filename,
                 "url": generate_secure_url_case_file(str(f.id)),
-                "uploaded_at": int(f.uploaded_at.timestamp()),
+                "uploaded_at": int(f.uploaded_at.timestamp()) if isinstance(f.uploaded_at, datetime) else int(datetime.combine(f.uploaded_at, datetime.min.time()).timestamp()) if f.uploaded_at else None,
                 "order": index + 1
             }
             for index, f in enumerate(files)

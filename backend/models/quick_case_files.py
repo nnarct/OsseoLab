@@ -3,9 +3,10 @@ import uuid
 from datetime import datetime, timezone
 from flask import current_app
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, String, DateTime, Integer, ForeignKey
+from sqlalchemy import Column, String, Integer, ForeignKey
 from config.extensions import db
 from sqlalchemy import event
+
 
 class QuickCaseFile(db.Model):
     __tablename__ = 'quick_case_files'
@@ -17,21 +18,23 @@ class QuickCaseFile(db.Model):
     filepath = Column(String(255), nullable=False)
     filetype = Column(String(100))
     filesize = Column(Integer)
-    uploaded_at = Column(db.DateTime, nullable=False,
-                         default=lambda: datetime.now(timezone.utc))
+    uploaded_at = Column(
+        db.DateTime, nullable=False,
+        default=lambda: datetime.now(timezone.utc))
 
     quick_case = db.relationship(
         'QuickCase', backref=db.backref('files', cascade='all, delete'))
 
     @staticmethod
     def delete_files_from_disk(quick_case_id: str):
-        folder_path = os.path.join(current_app.root_path, "uploads", "quick_cases", quick_case_id)
+        folder_path = os.path.join(
+            current_app.root_path, "uploads", "quick_cases", quick_case_id)
         if os.path.exists(folder_path):
             for f in os.listdir(folder_path):
                 os.remove(os.path.join(folder_path, f))
             os.rmdir(folder_path)
 
-    def to_dict(self, exclude: set[str] = None, include: set[str] = None):
+    def to_dict(self, include=None, exclude=None):
         data = {
             "id": str(self.id),
             "quick_case_id": str(self.quick_case_id),
@@ -42,15 +45,12 @@ class QuickCaseFile(db.Model):
             "uploaded_at": int(self.uploaded_at.timestamp()) if self.uploaded_at else None,
         }
 
-        if include is not None:
-            if exclude:
-                return {k: v for k, v in data.items() if k in include and k not in exclude}
-            return {k: v for k, v in data.items() if k in include}
+        if include:
+            data = {k: v for k, v in data.items() if k in include}
         if exclude:
-            return {k: v for k, v in data.items() if k not in exclude}
+            data = {k: v for k, v in data.items() if k not in exclude}
 
         return data
-
 
 
 @event.listens_for(QuickCaseFile, 'after_delete')

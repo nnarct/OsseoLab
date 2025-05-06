@@ -2,9 +2,8 @@ import uuid
 from datetime import datetime, timezone
 from enum import Enum
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, String, DateTime, ForeignKey, Enum as PgEnum, Text, Date
+from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from flask_sqlalchemy import SQLAlchemy
 from config.extensions import db
 
 
@@ -14,11 +13,28 @@ class ProfilePicFile(db.Model):
     user_id = Column(UUID(as_uuid=True), ForeignKey('user.id'))
     filename = Column(String(255))
     filepath = Column(String(255))
-    created_at = db.Column(db.DateTime, nullable=False,
-                           default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, nullable=False,
+                        default=lambda: datetime.now(timezone.utc))
 
     user = relationship(
         'User',
         back_populates='profile_pic',
         foreign_keys=[user_id]
     )
+
+    def to_dict(self, include=None, exclude=None):
+        data = {
+            "id": str(self.id),
+            "user_id": str(self.user_id),
+            "filename": self.filename,
+            "filepath": self.filepath,
+            "created_at": int(self.created_at.timestamp()) if self.created_at else None,
+        }
+
+        if include:
+            data = {k: v for k, v in data.items() if k in include}
+        if exclude:
+            for key in exclude:
+                data.pop(key, None)
+
+        return data

@@ -14,14 +14,16 @@ class Technician(db.Model):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey(
         'user.id', ondelete="CASCADE"), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False,
-                           default=lambda: datetime.now(timezone.utc))
-    last_updated = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
-                             onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(
+        DateTime, nullable=False,
+        default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc))
 
     user = relationship(
         'User', back_populates='technician_profile', passive_deletes=True)
-    case_links = db.relationship(
+    case_links = relationship(
         'CaseTechnician',
         back_populates='technician',
         passive_deletes=True,
@@ -35,8 +37,8 @@ class Technician(db.Model):
         data = {
             "id": str(self.id),
             "user_id": str(self.user_id),
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "last_updated": self.last_updated.isoformat() if self.last_updated else None
+            "created_at": int(self.created_at.timestamp()) if self.created_at else None,
+            "updated_at":  int(self.updated_at.timestamp()) if self.updated_at else None,
         }
 
         if include:

@@ -15,8 +15,8 @@ def admin_required(f):
         user_id = user_data.get('id')
         try:
             user = User.query.get(user_id)
-        except Exception:
-            abort(500, description="Database error while verifying user role.")
+        except Exception as e:
+            abort(500, description=f"Database error while verifying user. {e}")
         if not user or user.role != RoleEnum.admin:
             abort(403, description="Access denied. Admin Only.")
         return f(*args, **kwargs)
@@ -32,8 +32,8 @@ def tech_required(f):
         user_id = user_data.get('id')
         try:
             user = User.query.get(user_id)
-        except Exception:
-            abort(500, description="Database error while verifying user role.")
+        except Exception as e:
+            abort(500, description=f"Database error while verifying user. {e}")
         if not user or user.role != RoleEnum.technician:
             abort(403, description="Access denied. Technician Only")
         return f(*args, **kwargs)
@@ -48,8 +48,8 @@ def doctor_required(f):
         user_id = user_data.get('id')
         try:
             user = User.query.get(user_id)
-        except Exception:
-            abort(500, description="Database error while verifying user role.")
+        except Exception as e:
+            abort(500, description=f"Database error while verifying user. {e}")
         if not user or user.role != RoleEnum.doctor:
             abort(403, description="Access denied. Doctor Only.")
         return f(*args, **kwargs)
@@ -75,8 +75,8 @@ def roles_required(*allowed_roles):
 
             try:
                 user = User.query.get(user_id)
-            except Exception:
-                abort(500, description="Database error while verifying user.")
+            except Exception as e:
+                abort(500, description=f"Database error while verifying user. {e}")
 
             if not user:
                 abort(403, description="User not found.")

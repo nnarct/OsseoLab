@@ -2,10 +2,11 @@ import uuid
 from datetime import datetime, timezone
 from enum import Enum
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, String, DateTime, ForeignKey, Enum as PgEnum, Text, Date
+from sqlalchemy import Column, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from flask_sqlalchemy import SQLAlchemy
 from config.extensions import db
+
+
 class CaseSurgeon(db.Model):
     __tablename__ = 'case_surgeons'
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -13,13 +14,16 @@ class CaseSurgeon(db.Model):
         'cases.id', ondelete="CASCADE"), nullable=False)
     surgeon_id = Column(UUID(as_uuid=True), ForeignKey(
         'doctors.id', ondelete="CASCADE"), nullable=False)
-    created_at = Column(db.DateTime, nullable=False,
-                           default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
-    active = Column(db.Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, nullable=False,
+                        default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(
+        timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    active = Column(Boolean, nullable=False, default=True)
 
-    case = relationship('Case', back_populates='surgeons', passive_deletes=True)
-    surgeon = relationship('Doctor', back_populates='case_links', passive_deletes=True)
+    case = relationship('Case', back_populates='surgeons',
+                        passive_deletes=True)
+    surgeon = relationship(
+        'Doctor', back_populates='case_links', passive_deletes=True)
 
     def to_dict(self, include=None, exclude=None):
         include = set(include or [])
