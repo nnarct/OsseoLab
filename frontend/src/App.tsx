@@ -10,7 +10,7 @@ import ProtectedRoute from '@/components/common/ProtectedRoute';
 import LoginPage from '@/pages/AuthPage/LoginPage';
 import RegisterPage from '@/pages/AuthPage/RegisterPage';
 import Homepage from '@/pages/Homepage/Homepage';
-import QuickCaseSubmitPage from './pages/AuthPage/QuickCaseSubmitPage';
+import QuickCaseSubmitPage from './pages/Case/QuickCase/QuickCaseSubmitPage';
 import GuestLayout from '@/components/common/GuestLayout';
 
 import { queryClient } from '@/config/queryClient';
@@ -32,6 +32,8 @@ const QuickCaseList = lazy(() => import('@/pages/Case/QuickCase/QuickCaseList'))
 const QuickCaseDetail = lazy(() => import('@/pages/Case/QuickCase/QuickCaseDetail'));
 const QuickCaseModelViewer = lazy(() => import('@/pages/Case/QuickCase/QuickCaseModelViewer'));
 
+// notification
+const NotificationListPage =  lazy(() => import('@/pages/Notification/NotificationListPage'));
 const UserDetailPage = lazy(() => import('@/pages/AuthPage/UserDetailPage'));
 
 const createRoleRoute = (path: string, roles: string[], element: JSX.Element) => (
@@ -80,6 +82,8 @@ const App = () => {
                 {createRoleRoute('/case/quick-case', [UserRole.Admin], <QuickCaseList />)}
                 {createRoleRoute('/case/quick-case/:id', [UserRole.Admin], <QuickCaseDetail />)}
                 {createRoleRoute('/case/quick-case/:quickCaseId/:id', [UserRole.Admin], <QuickCaseModelViewer />)}
+                
+                {createRoleRoute('/notifications', [UserRole.Admin, UserRole.Technician], <NotificationListPage />)}
               </Route>
               {/* </Route> */}
             </Routes>
