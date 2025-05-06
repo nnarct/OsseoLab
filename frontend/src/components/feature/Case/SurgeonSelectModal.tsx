@@ -1,4 +1,4 @@
-import { CaseSurgeonPair } from '@/services/case/case-surgeon.service';
+import { CaseSurgeon } from '@/services/case/case-surgeon.service';
 import { useDoctorSelectOptions } from '@/services/doctor/doctor.service';
 import { Modal, Select } from 'antd';
 
@@ -6,7 +6,8 @@ interface SurgeonSelectModalProps {
   open: boolean;
   onOk: () => void;
   onCancel: () => void;
-  surgeons: CaseSurgeonPair[] | undefined;
+  mainSurgeon: string | undefined;
+  surgeons: CaseSurgeon[] | undefined;
   selectedSurgeon?: string;
   setSelectedSurgeon: (id: string) => void;
 }
@@ -16,10 +17,12 @@ const SurgeonSelectModal = ({
   onOk,
   onCancel,
   surgeons,
+  mainSurgeon,
   selectedSurgeon,
   setSelectedSurgeon,
 }: SurgeonSelectModalProps) => {
-  const { data: options } = useDoctorSelectOptions();
+  const { data } = useDoctorSelectOptions();
+  const options = data?.filter((s) => s.id !== mainSurgeon);
   const doctorSelectOptions = (options || []).map((doc: { firstname: string; lastname: string; id: string }) => ({
     label: `${doc.firstname} ${doc.lastname}`,
     value: doc.id,

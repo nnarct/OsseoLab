@@ -11,8 +11,8 @@ const AdditionalSurgeon = ({ caseId }: { caseId: string }) => {
   const [selectedSurgeon, setSelectedSurgeon] = useState<string>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
-  const { data: surgeons } = useSurgeonsByCaseId(caseId);
-
+  const { data } = useSurgeonsByCaseId(caseId);
+  const { surgeons, main_surgeon } = data ? data : {};
   const filteredSurgeons = (surgeons || []).filter((s) =>
     `${s.firstname} ${s.lastname}`.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -33,6 +33,7 @@ const AdditionalSurgeon = ({ caseId }: { caseId: string }) => {
       console.error(error);
     }
   };
+
   return (
     <>
       {contextHolder}
@@ -53,6 +54,7 @@ const AdditionalSurgeon = ({ caseId }: { caseId: string }) => {
           onOk={handleSubmit}
           onCancel={() => setIsModalOpen(false)}
           surgeons={surgeons}
+          mainSurgeon={main_surgeon}
           selectedSurgeon={selectedSurgeon}
           setSelectedSurgeon={setSelectedSurgeon}
         />
