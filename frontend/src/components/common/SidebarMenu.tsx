@@ -4,6 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { FaUserFriends, FaRegImages, FaChartBar, FaListUl, FaPlusCircle, FaRegFolderOpen } from 'react-icons/fa';
 import { TfiEmail } from 'react-icons/tfi';
 import { useEffect, useState } from 'react';
+import { VscBell, VscBellDot } from 'react-icons/vsc';
+import { useHasUnreadNotification } from '@/services/notification/notification.service';
 
 const SidebarMenu = () => {
   const { role } = useAuth();
@@ -11,16 +13,17 @@ const SidebarMenu = () => {
   const location = useLocation();
 
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const { data: hasUnread } = useHasUnreadNotification();
 
   // Define menu items
   const adminMenu = [
+    {
+      key: '/notifications',
+      label: 'Notifications',
+      icon: hasUnread ? <VscBellDot /> : <VscBell />,
+      onClick: () => navigate('/notifications'),
+    },
     { key: '/', label: 'Dashboard', icon: <FaChartBar />, onClick: () => navigate('/') },
-    // {
-    //   key: '/stl-list',
-    //   label: 'STL List',
-    //   icon: <FaRegImages />,
-    //   onClick: () => navigate('/stl-list'),
-    // },
     {
       key: 'userlist',
       label: 'User List',
@@ -51,10 +54,25 @@ const SidebarMenu = () => {
 
   const techMenu = [
     {
+      key: '/notifications',
+      label: 'Notifications',
+      icon: hasUnread ? <VscBellDot style={{ color: '#fa541c' }} /> : <VscBell />,
+      onClick: () => navigate('/notifications'),
+    },
+    {
       key: '/',
       label: 'Homepage',
       icon: <FaRegImages />,
       onClick: () => navigate('/'),
+    },
+    {
+      key: 'case',
+      label: 'Cases',
+      icon: <FaRegFolderOpen />,
+      children: [
+        { key: '/case/list', icon: <FaListUl />, label: 'Case List', onClick: () => navigate('/case/list') },
+        { key: '/case/create', icon: <FaPlusCircle />, label: 'Create Case', onClick: () => navigate('/case/create') },
+      ],
     },
   ];
 
