@@ -1,7 +1,7 @@
 import { COUNTRIES } from '@/constants/option';
 import { useGetUserById } from '@/services/user/user.service';
 import { Card, Descriptions, Form, Select, Input, Button, DatePicker, notification } from 'antd';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { useRef, useState } from 'react';
 import { axios } from '@/config/axiosConfig';
 import queryClient from '@/config/queryClient';
@@ -21,7 +21,7 @@ const UserDetail = ({ id }: { id: string }) => {
   const submitTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [notificationApi, contextHolder] = notification.useNotification();
 
-  const handleSave = async (values) => {
+  const handleSave = async (values: { dob: Dayjs | string }) => {
     // Set a timer to delay showing the spinner for 1 second
     submitTimerRef.current = setTimeout(() => setIsSubmitting(true), 1000);
     if (values.dob && typeof values.dob !== 'string') {
@@ -63,7 +63,7 @@ const UserDetail = ({ id }: { id: string }) => {
           <Form
             layout='vertical'
             form={form}
-            initialValues={data}
+            initialValues={{...data, dob: data.dob ? dayjs(new Date(data.dob * 1000)) : undefined,}}
             onFinish={handleSave}
             className='grid grid-cols-2 gap-x-4'
           >
@@ -81,7 +81,7 @@ const UserDetail = ({ id }: { id: string }) => {
               <Input placeholder='Enter username' />
             </Form.Item>
             <Form.Item label='Email' name='email' rules={[{ required: true, message: 'Email is required' }]}>
-              <Input placeholder='Enter email address' type='email' />
+              <Input placeholder='Enter email address' />
             </Form.Item>
             <Form.Item
               label='Mobile Number'

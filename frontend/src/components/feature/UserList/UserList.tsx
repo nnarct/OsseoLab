@@ -17,7 +17,7 @@ const UserList = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const navigate = useNavigate();
   const userColumns = getUserColumns(navigate);
-  
+
   const roleColumn = {
     key: 'role',
     dataIndex: 'role',

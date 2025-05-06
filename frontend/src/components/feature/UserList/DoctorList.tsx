@@ -1,7 +1,7 @@
-import { useGetDoctors } from '@/services/admin/user.service';
+import { useGetDoctors } from '@/services/doctor/doctor.service';
 import { Card, Table, Input, Layout } from 'antd';
 import { useState, useMemo } from 'react';
-import { userColumns } from '@/components/feature/UserList/userColumns';
+import { doctorColumns } from '@/components/feature/UserList/userColumns';
 import CreateDoctorModal from './CreateDoctorModal';
 import CustomHeader from '@/components/common/CustomHeader';
 
@@ -11,15 +11,17 @@ const DoctorList = () => {
 
   const filteredData = useMemo(() => {
     if (!data) return [];
+    const query = searchTerm.toLowerCase();
     return data.filter((item) => {
-      const query = searchTerm.toLowerCase();
       return (
         `${item.firstname} ${item.lastname}`.toLowerCase().includes(query) ||
         item.firstname?.toLowerCase().includes(query) ||
         item.lastname?.toLowerCase().includes(query) ||
         item.email?.toLowerCase().includes(query) ||
         item.phone?.toLowerCase().includes(query) ||
-        item.username?.toLowerCase().includes(query)
+        item.username?.toLowerCase().includes(query) ||
+        item.hospital?.toLowerCase().includes(query) ||
+        item.doctor_registration_id?.toLowerCase().includes(query)
       );
     });
   }, [data, searchTerm]);
@@ -42,7 +44,7 @@ const DoctorList = () => {
           </div>
           <Table
             dataSource={filteredData}
-            columns={userColumns}
+            columns={doctorColumns}
             loading={isLoading}
             rowKey={'id'}
             scroll={{ x: 'auto' }}
