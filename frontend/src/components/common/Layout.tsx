@@ -35,7 +35,7 @@ const AppLayout = () => {
   };
 
   return (
-    <Layout hasSider style={{ minHeight: '100vh' }}>
+    <Layout hasSider style={{ height: '100vh' }}>
       {/* 🔹 Navigation Bar */}
       {/* <Header>
         <Menu
@@ -75,12 +75,16 @@ const AppLayout = () => {
       <Layout>
         {/* 🔹 Page Content */}
         {/* <Content className='p-8' style={{ flex: 1, overflow: 'initial' }}> */}
-        <Content style={{ flex: 1, overflow: 'initial' }}>
+        <Content style={{ flex: 1, overflow: 'auto' }}>
           <Outlet /> {/* 🚀 This renders the current route's component */}
         </Content>
 
         {/* 🔹 Footer */}
-        <Footer style={{ textAlign: 'center' }}>STL Viewer ©{new Date().getFullYear()}</Footer>
+        <Footer style={{ textAlign: 'center', padding: '0 50px' }}>
+          <div className='flex h-[1rem] items-center justify-center py-5 text-xs'>
+            STL Viewer ©{new Date().getFullYear()}
+          </div>
+        </Footer>
       </Layout>
     </Layout>
   );
