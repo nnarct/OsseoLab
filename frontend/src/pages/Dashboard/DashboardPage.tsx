@@ -5,6 +5,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
 // Add this above the main component
+
 const DashboardCard = ({ title, count, link }: { title: string; count: number; link: string }) => {
   const navigate = useNavigate();
   return (
