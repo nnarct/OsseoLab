@@ -89,7 +89,7 @@ const CaseDetail = ({ id }: { id: string }) => {
       });
     }
   };
-  
+
   return (
     <Card loading={isLoading} title={`CASE${data ? String(case_number).padStart(3, '0') : ''}`}>
       {contextHolder}
@@ -166,11 +166,7 @@ const CaseDetail = ({ id }: { id: string }) => {
               <DatePicker className='w-full' placeholder={'Select surgery date'} format='DD-MM-YYYY' />
             </Form.Item>
             <Form.Item label='Anticipated ship date' name='anticipated_ship_date'>
-              <DatePicker
-                className='w-full'
-                placeholder={'Select Anticipated ship date'}
-                format='DD-MM-YYYY'
-              />
+              <DatePicker className='w-full' placeholder={'Select Anticipated ship date'} format='DD-MM-YYYY' />
             </Form.Item>
             <Form.Item label='Scan Type' name='scan_type'>
               <Select
@@ -182,14 +178,6 @@ const CaseDetail = ({ id }: { id: string }) => {
                 allowClear
               />
             </Form.Item>
-            
-            <Form.Item label='Problem Description' name='problem_description'>
-              <Input.TextArea placeholder={'Enter problem description'} allowClear />
-            </Form.Item>
-            <Form.Item label='Additional Note' name='additional_note'>
-              <Input.TextArea placeholder={'Enter additional note'} allowClear />
-            </Form.Item>
-
             <Form.Item label='Priority' name='priority'>
               <Select
                 placeholder={'Select priority'}
@@ -214,6 +202,12 @@ const CaseDetail = ({ id }: { id: string }) => {
             </Form.Item>
             <Form.Item label='Created By' name='created_by'>
               <Input disabled />
+            </Form.Item>
+            <Form.Item label='Problem Description' name='problem_description'>
+              <Input.TextArea placeholder={'Enter problem description'} allowClear />
+            </Form.Item>
+            <Form.Item label='Additional Note' name='additional_note'>
+              <Input.TextArea placeholder={'Enter additional note'} allowClear />
             </Form.Item>
 
             <div className='col-span-2 flex items-center justify-center gap-x-4'>
