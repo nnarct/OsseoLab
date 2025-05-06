@@ -3,18 +3,19 @@ import CaseFilesList from '@/components/feature/Case/CaseFilesList';
 import { useGetCaseById } from '@/services/case/case.service';
 import { Button, Card, DatePicker, Divider, Form, Input, notification, Select, Switch, Typography } from 'antd';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { PRODUCTS } from '@/constants/option';
 
 const CaseDetail = ({ id }: { id: string }) => {
   const navigate = useNavigate();
-  const { role } = useAuth();
+
   const { data, isLoading } = useGetCaseById(id);
   const [form] = Form.useForm();
   const [useDobInput, setUseDobInput] = useState(true);
   const [notificationApi, contextHolder] = notification.useNotification();
-const isDoctor = role ==='doctor'
+
+  const [isOtherProduct, setIsOtherProduct] = useState<boolean>(false);
   const {
     surgeon,
     patient_name,
@@ -31,14 +32,23 @@ const isDoctor = role ==='doctor'
     product,
     anticipated_ship_date,
     created_by,
+    case_code,
   } = data ? data : {};
+
+  useEffect(() => {
+    if (product && !PRODUCTS.some((p) => p.value === product)) {
+      setIsOtherProduct(true);
+      form.setFieldValue('product', 'Other');
+      form.setFieldValue('other_product', product);
+    }
+  }, [form, product]);
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-
+      console.log({ values });
       if (values.surgery_date) {
-        values.surgery_date = dayjs(values.surgery_date).hour(12).minute(0).second(0).toISOString();
+        values.surgery_date = dayjs(values.surgery_date).hour(12).format('YYYY-MM-DD');
       }
 
       delete values.surgeon;
@@ -57,11 +67,17 @@ const isDoctor = role ==='doctor'
       if (values.anticipated_ship_date) {
         values.anticipated_ship_date = dayjs(values.anticipated_ship_date).hour(12).minute(0).second(0).toISOString();
       }
-
+      let product;
+      if (isOtherProduct) {
+        product = values.other_product;
+        delete values.product;
+      }
       const payload = {
         patient_dob: patientDobValue,
+        product,
         ...values,
       };
+      console.log({ payload });
 
       await axios.put(`/case/${id}`, payload);
       notificationApi.success({ message: 'Case updated successfully' });
@@ -73,6 +89,7 @@ const isDoctor = role ==='doctor'
       });
     }
   };
+  
   return (
     <Card loading={isLoading} title={`CASE${data ? String(case_number).padStart(3, '0') : ''}`}>
       {contextHolder}
@@ -86,6 +103,7 @@ const isDoctor = role ==='doctor'
             initialValues={{
               anticipated_ship_date: anticipated_ship_date ? dayjs(new Date(anticipated_ship_date * 1000)) : undefined,
               product,
+              case_code,
               case_number: `CASE${String(case_number).padStart(3, '0')}`,
               surgeon: surgeon ? `${surgeon.firstname} ${surgeon.lastname}` : 'N/A',
               patient_name,
@@ -100,44 +118,28 @@ const isDoctor = role ==='doctor'
               status,
               created_by: created_by ? `${created_by.username} (${created_by.firstname} ${created_by.lastname})` : '-',
             }}
-            requiredMark={isDoctor ? false : true}
           >
             <Form.Item label='Case ID' name='case_number'>
-              <Input disabled style={isDoctor ? { color: 'black' } : {}} />
+              <Input disabled />
             </Form.Item>
             <Form.Item label='Case Code' name='case_code' rules={[{ required: true }]}>
-              <Input
-                placeholder={isDoctor ? '-' : 'Enter case code'}
-                allowClear
-                disabled={isDoctor}
-                style={isDoctor ? { color: 'black' } : {}}
-              />
+              <Input placeholder={'Enter case code'} allowClear />
             </Form.Item>
             <Form.Item label='Surgeon' name='surgeon'>
-              <Input
-                placeholder={isDoctor ? '-' : 'Enter surgeon name'}
-                disabled
-                style={isDoctor ? { color: 'black' } : {}}
-              />
+              <Input placeholder={'Enter surgeon name'} disabled />
             </Form.Item>
             <Form.Item label='Patient Name' name='patient_name' rules={[{ required: true }]}>
-              <Input
-                placeholder={isDoctor ? '-' : 'Enter patient name'}
-                disabled={isDoctor}
-                style={isDoctor ? { color: 'black' } : {}}
-              />
+              <Input placeholder={'Enter patient name'} allowClear />
             </Form.Item>
 
             <Form.Item label='Patient Gender' name='patient_gender'>
               <Select
-                placeholder={isDoctor ? '-' : 'Select Patient gender'}
+                placeholder={'Select Patient gender'}
                 options={[
                   { label: 'Female', value: 'female' },
                   { label: 'Male', value: 'male' },
                   { label: 'Other', value: 'other' },
                 ]}
-                disabled={isDoctor}
-                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
 
@@ -145,104 +147,62 @@ const isDoctor = role ==='doctor'
               label={
                 <div className='flex items-center gap-x-2'>
                   Patient Age
-                  <Switch
-                    size='small'
-                    checked={useDobInput}
-                    onChange={(checked) => setUseDobInput(checked)}
-                    disabled={isDoctor}
-                  />
+                  <Switch size='small' checked={useDobInput} onChange={(checked) => setUseDobInput(checked)} />
                   Date of Birth
                 </div>
               }
             >
               {useDobInput ? (
                 <Form.Item name='patient_dob' noStyle>
-                  <DatePicker
-                    className='w-full'
-                    placeholder={isDoctor ? '-' : 'Select patient DOB'}
-                    format='DD-MM-YYYY'
-                    disabled={isDoctor}
-                    style={isDoctor ? { color: 'black' } : {}}
-                  />
+                  <DatePicker className='w-full' placeholder={'Select patient DOB'} format='DD-MM-YYYY' />
                 </Form.Item>
               ) : (
                 <Form.Item name='patient_age' noStyle>
-                  <Input
-                    type='number'
-                    min={0}
-                    placeholder={isDoctor ? '-' : 'Enter patient age'}
-                    disabled={isDoctor}
-                    style={isDoctor ? { color: 'black' } : {}}
-                  />
+                  <Input type='number' min={0} placeholder={'Enter patient age'} />
                 </Form.Item>
               )}
             </Form.Item>
             <Form.Item label='Surgery Date' name='surgery_date' rules={[{ required: true }]}>
-              <DatePicker
-                className='w-full'
-                placeholder={isDoctor ? '-' : 'Select surgery date'}
-                format='DD-MM-YYYY'
-                disabled={isDoctor}
-                style={isDoctor ? { color: 'black' } : {}}
-              />
+              <DatePicker className='w-full' placeholder={'Select surgery date'} format='DD-MM-YYYY' />
             </Form.Item>
             <Form.Item label='Anticipated ship date' name='anticipated_ship_date'>
               <DatePicker
                 className='w-full'
-                placeholder={isDoctor ? '-' : 'Select Anticipated ship date'}
+                placeholder={'Select Anticipated ship date'}
                 format='DD-MM-YYYY'
-                disabled={isDoctor}
-                style={isDoctor ? { color: 'black !important' } : {}}
               />
             </Form.Item>
             <Form.Item label='Scan Type' name='scan_type'>
-              <Input
-                placeholder={isDoctor ? '-' : 'Enter scan type'}
+              <Select
+                placeholder='Scan type'
+                options={[
+                  { label: 'MRI', value: 'MRI' },
+                  { label: 'CT', value: 'CT' },
+                ]}
                 allowClear
-                disabled={isDoctor}
-                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
-            <Form.Item label='Product / Service' name='product'>
-              <Input
-                placeholder={isDoctor ? '-' : 'Enter product'}
-                allowClear
-                disabled={isDoctor}
-                style={isDoctor ? { color: 'black' } : {}}
-              />
-            </Form.Item>
+            
             <Form.Item label='Problem Description' name='problem_description'>
-              <Input.TextArea
-                placeholder={isDoctor ? '-' : 'Enter problem description'}
-                allowClear
-                disabled={isDoctor}
-                style={isDoctor ? { color: 'black' } : {}}
-              />
+              <Input.TextArea placeholder={'Enter problem description'} allowClear />
             </Form.Item>
             <Form.Item label='Additional Note' name='additional_note'>
-              <Input.TextArea
-                placeholder={isDoctor ? '-' : 'Enter additional note'}
-                allowClear
-                disabled={isDoctor}
-                style={isDoctor ? { color: 'black' } : {}}
-              />
+              <Input.TextArea placeholder={'Enter additional note'} allowClear />
             </Form.Item>
 
             <Form.Item label='Priority' name='priority'>
               <Select
-                placeholder={isDoctor ? '-' : 'Select priority'}
+                placeholder={'Select priority'}
                 options={[
                   { label: 'Low', value: 'low' },
                   { label: 'Medium', value: 'medium' },
                   { label: 'High', value: 'high' },
                 ]}
-                disabled={isDoctor}
-                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
             <Form.Item label='Status' name='status'>
               <Select
-                placeholder={isDoctor ? '-' : 'Select status'}
+                placeholder={'Select status'}
                 options={[
                   { label: 'Case creation', value: 'creation' },
                   { label: 'Planning & Design', value: 'planing' },
@@ -250,24 +210,20 @@ const isDoctor = role ==='doctor'
                   { label: 'Design Confirmation', value: 'design-confirmation' },
                   // { label: 'Case Complete', value: 'complete' },
                 ]}
-                disabled={isDoctor}
-                style={isDoctor ? { color: 'black' } : {}}
               />
             </Form.Item>
             <Form.Item label='Created By' name='created_by'>
               <Input disabled />
             </Form.Item>
 
-            {role !== 'doctor' && (
-              <div className='col-span-2 flex items-center justify-center gap-x-4'>
-                <Button onClick={() => navigate('/case/list')} className='w-22' size='middle'>
-                  Cancel
-                </Button>
-                <Button type='primary' htmlType='submit' className='w-22' size='middle'>
-                  Save
-                </Button>
-              </div>
-            )}
+            <div className='col-span-2 flex items-center justify-center gap-x-4'>
+              <Button onClick={() => navigate('/case/list')} className='w-22' size='middle'>
+                Cancel
+              </Button>
+              <Button type='primary' htmlType='submit' className='w-22' size='middle'>
+                Save
+              </Button>
+            </div>
           </Form>
           <div className='col-span-2 flex flex-col pt-2 text-xs'>
             <Typography.Text type='secondary'>
