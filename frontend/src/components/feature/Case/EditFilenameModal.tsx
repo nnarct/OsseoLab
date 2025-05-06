@@ -8,9 +8,10 @@ interface EditFilenameModalProps {
   initialFilename: string;
   id: string;
   caseId: string;
+  disabled? : boolean
 }
 
-const EditFilenameModal = ({ initialFilename, id, caseId }: EditFilenameModalProps) => {
+const EditFilenameModal = ({ initialFilename, id, caseId, disabled }: EditFilenameModalProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [filename, setFilename] = useState(initialFilename);
   const [messageApi, contextHolder] = message.useMessage();
@@ -31,7 +32,7 @@ const EditFilenameModal = ({ initialFilename, id, caseId }: EditFilenameModalPro
   return (
     <>
       {contextHolder}
-      <Button type='text' onClick={openModal} icon={<BiSolidEdit />} />
+      <Button type='text' onClick={openModal} icon={<BiSolidEdit />} disabled={disabled}/>
       <Modal centered open={isOpen} title='Edit Filename' onCancel={closeModal} onOk={onSubmit} okText='Save'>
         <Input value={filename} onChange={(e) => setFilename(e.target.value)} placeholder='Enter new filename' />
       </Modal>

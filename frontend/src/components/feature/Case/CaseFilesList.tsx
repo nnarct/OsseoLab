@@ -8,15 +8,26 @@ import { deleteCaseFileById, uploadCaseFile } from '@/api/case-file.api';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import queryClient from '@/config/queryClient';
 import EditFilenameModal from './EditFilenameModal';
+import { MdOutlineViewInAr } from "react-icons/md";
 
 interface CaseFile {
   id: string;
   filename: string;
   url: string;
-  created_at: number;
+  uploaded_at: number;
 }
 
-const CaseFilesList = ({ files, caseId, caseNumber }: { files: CaseFile[]; caseId: string; caseNumber: number }) => {
+const CaseFilesList = ({
+  files,
+  caseId,
+  caseNumber,
+  readOnly,
+}: {
+  files: CaseFile[];
+  caseId: string;
+  caseNumber: number;
+  readOnly?: boolean;
+}) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const openModal = () => setIsOpen(true);
@@ -33,15 +44,15 @@ const CaseFilesList = ({ files, caseId, caseNumber }: { files: CaseFile[]; caseI
       dataIndex: 'filename',
       render: (filename, record) => (
         <>
-          <EditFilenameModal id={record.id} initialFilename={filename} caseId={caseId} />
+          <EditFilenameModal disabled id={record.id} initialFilename={filename} caseId={caseId} />
           {filename}
         </>
       ),
     },
     {
       title: 'Created At',
-      key: 'created_at',
-      dataIndex: 'created_at',
+      key: 'uploaded_at',
+      dataIndex: 'uploaded_at',
       render: (value) => dayjs.unix(value).format('YYYY-MM-DD HH:mm'),
     },
     {
@@ -51,24 +62,28 @@ const CaseFilesList = ({ files, caseId, caseNumber }: { files: CaseFile[]; caseI
       title: 'Action',
       key: 'id',
       render: (_, record) => (
-        <Button
+        <Button icon={<MdOutlineViewInAr/>}
           onClick={() =>
             navigate(`/case/${caseId}/file/${record.id}`, {
               state: { url: record.url, caseNumber, filename: record.filename },
             })
           }
+
         >
-          View
+          3D Viewer
         </Button>
       ),
     },
-    {
+  ];
+
+  if (!readOnly) {
+    columns.concat({
       width: '0',
       align: 'center',
       title: 'Delete',
       dataIndex: 'id',
-      key: 'id',
-      render: (id) => (
+      key: 'delete',
+      render: (id: string) => (
         <Button
           danger
           icon={<FaRegTrashAlt />}
@@ -78,8 +93,8 @@ const CaseFilesList = ({ files, caseId, caseNumber }: { files: CaseFile[]; caseI
           }}
         />
       ),
-    },
-  ];
+    });
+  }
 
   const handleSubmit = async (values: { nickname: string }) => {
     const nickname = values.nickname;
