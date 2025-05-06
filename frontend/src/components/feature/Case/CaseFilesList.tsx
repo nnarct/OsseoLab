@@ -8,7 +8,7 @@ import { deleteCaseFileById, uploadCaseFile } from '@/api/case-file.api';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import queryClient from '@/config/queryClient';
 import EditFilenameModal from './EditFilenameModal';
-import { MdOutlineViewInAr } from "react-icons/md";
+import { MdOutlineViewInAr } from 'react-icons/md';
 
 interface CaseFile {
   id: string;
@@ -62,13 +62,13 @@ const CaseFilesList = ({
       title: 'Action',
       key: 'id',
       render: (_, record) => (
-        <Button icon={<MdOutlineViewInAr/>}
+        <Button
+          icon={<MdOutlineViewInAr />}
           onClick={() =>
             navigate(`/case/${caseId}/file/${record.id}`, {
               state: { url: record.url, caseNumber, filename: record.filename },
             })
           }
-
         >
           3D Viewer
         </Button>
@@ -77,7 +77,7 @@ const CaseFilesList = ({
   ];
 
   if (!readOnly) {
-    columns.concat({
+    columns.push({
       width: '0',
       align: 'center',
       title: 'Delete',
@@ -85,6 +85,7 @@ const CaseFilesList = ({
       key: 'delete',
       render: (id: string) => (
         <Button
+          type='text'
           danger
           icon={<FaRegTrashAlt />}
           onClick={async () => {
