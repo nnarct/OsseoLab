@@ -38,15 +38,7 @@ export const fetchTechnicians = async () => {
   }
 };
 
-export const fetchDoctors = async () => {
-  try {
-    const { data } = await axios.get('/user/doctor/list');
-    return data.data;
-  } catch (error) {
-    console.error('Error fetching doctors:', error);
-    throw error;
-  }
-};
+
 
 // ---------- Current User ----------
 export const fetchCurrentUser = async (): Promise<UserProfile> => {

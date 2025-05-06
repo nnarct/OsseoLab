@@ -1,9 +1,10 @@
 import axios from '@/config/axiosConfig';
-import type { CaseData, CaseSummary, QuickCaseData, QuickCaseFormValues } from '@/types/case';
+import type { CaseData, CaseSummary, QuickCaseData } from '@/types/case';
 
 export const getCaseById = async (id: string): Promise<CaseData> => {
   try {
     const response = await axios.get(`/case/${id}`);
+    console.log({data: response.data.data})
     return response.data.data;
   } catch (error) {
     console.error('Failed to fetch case by ID:', error);

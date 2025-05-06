@@ -1,10 +1,6 @@
-import { axios } from "@/config/axiosConfig";
+import { axios } from '@/config/axiosConfig';
+import type { Doctor, DoctorSelectOption } from '@/types/doctor';
 
-export interface DoctorSelectOption {
-  id: string;
-  firstname: string;
-  lastname: string;
-}
 
 export const getDoctorSelectOptions = async (): Promise<DoctorSelectOption[]> => {
   try {
@@ -13,5 +9,15 @@ export const getDoctorSelectOptions = async (): Promise<DoctorSelectOption[]> =>
   } catch (error) {
     console.error('Failed to fetch doctor options:', error);
     return [];
+  }
+};
+
+export const fetchDoctors = async () :Promise<Doctor[]> => {
+  try {
+    const { data } = await axios.get('/doctor/list');
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching doctors:', error);
+    throw error;
   }
 };

@@ -1,12 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchUsers, fetchAdmins, fetchTechnicians, fetchDoctors } from '@/api/user.api';
+import { fetchUsers, fetchAdmins, fetchTechnicians } from '@/api/user.api';
 import { UserListDataType } from '@/components/feature/UserList/UserList';
-import {
-  ADMIN_USERS_QUERY_KEY,
-  ADMINS_QUERY_KEY,
-  TECHNICIANS_QUERY_KEY,
-  DOCTORS_QUERY_KEY,
-} from '@/constants/queryKey';
+import { ADMIN_USERS_QUERY_KEY, ADMINS_QUERY_KEY, TECHNICIANS_QUERY_KEY } from '@/constants/queryKey';
 
 export const useGetUsers = () => {
   return useQuery<UserListDataType[]>({
@@ -30,15 +25,6 @@ export const useGetTechnicians = () => {
   return useQuery<UserListDataType[]>({
     queryKey: TECHNICIANS_QUERY_KEY,
     queryFn: fetchTechnicians,
-    staleTime: 1000 * 60 * 5,
-    retry: 1,
-  });
-};
-
-export const useGetDoctors = () => {
-  return useQuery<UserListDataType[]>({
-    queryKey: DOCTORS_QUERY_KEY,
-    queryFn: fetchDoctors,
     staleTime: 1000 * 60 * 5,
     retry: 1,
   });
