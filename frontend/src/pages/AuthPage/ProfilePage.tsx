@@ -2,22 +2,22 @@ import CustomHeader from '@/components/common/CustomHeader';
 import { COUNTRIES } from '@/constants/option';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentUser, useUpdateCurrentUser } from '@/services/user/user.service';
-import { FormUserProfile } from '@/types/user';
-import { Avatar, Button, Card, DatePicker, Form, Input, Layout, notification, Select, Typography } from 'antd';
+import { FormUserProfile, UserRole } from '@/types/user';
+import { Avatar, Button, Card, DatePicker, Divider, Form, Input, Layout, notification, Select, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 
 const ProfilePage = () => {
   const updateCurrentUser = useUpdateCurrentUser();
   const submitTimerRef = useRef<NodeJS.Timeout | null>(null);
-
+  const { role } = useAuth();
   const [form] = Form.useForm<FormUserProfile>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notificationApi, contextHolder] = notification.useNotification();
 
   const { setAccessToken } = useAuth();
   const { data, isLoading, isError } = useCurrentUser();
-
+  const isDoctor = role === UserRole.Doctor;
   // Update form fields when data changes
   useEffect(() => {
     if (data) {
@@ -30,8 +30,15 @@ const ProfilePage = () => {
         gender: data.gender,
         country: data.country,
       });
+      if (isDoctor) {
+        form.setFieldsValue({
+          hospital: data.hospital,
+          reference: data.reference,
+          doctor_registration_id: data.doctor_registration_id,
+        });
+      }
     }
-  }, [data, form]);
+  }, [data, form, isDoctor]);
 
   const onFinish = async (values: FormUserProfile) => {
     // Set a timer to delay showing the spinner for 1 second
@@ -82,7 +89,7 @@ const ProfilePage = () => {
             >
               {data.firstname[0].toUpperCase()}
             </Avatar>
-            {data.role === 'admin' ? 'Admin' : data.role === 'doctor' ? 'Surgeon' : 'Technician'}
+            <Divider> {data.role === 'admin' ? 'Admin' : data.role === 'doctor' ? 'Surgeon' : 'Technician'}</Divider>
           </div>
           <Form<FormUserProfile>
             form={form}
@@ -135,7 +142,7 @@ const ProfilePage = () => {
               />
             </Form.Item>
             <Form.Item label='Username' name='username' initialValue={data.username}>
-              <Input placeholder='Enter your username' type='text' />
+              <Input placeholder='Enter your username' type='text' disabled={!!data.username} />
             </Form.Item>
             {/* gender select */}
             <Form.Item label='Gender' name='gender' initialValue={data.gender}>
@@ -152,6 +159,19 @@ const ProfilePage = () => {
             <Form.Item label='Country' name='country' initialValue={data.country}>
               <Select showSearch placeholder='Select your country' options={COUNTRIES} allowClear />
             </Form.Item>
+            {isDoctor && (
+              <>
+                <Form.Item label='Doctor Registration ID' name={'doctor_registration_id'}>
+                  <Input placeholder='Doctor Registration ID' allowClear />
+                </Form.Item>
+                <Form.Item label='Hospital Name' name={'hospital'}>
+                  <Input placeholder='Hospital Name' allowClear />
+                </Form.Item>
+                <Form.Item label='Reference' name={'reference'} className='col-span-2'>
+                  <Input placeholder='Reference' allowClear />
+                </Form.Item>
+              </>
+            )}
 
             <Form.Item className='col-span-2'>
               <div className='flex items-center justify-center gap-x-4'>
