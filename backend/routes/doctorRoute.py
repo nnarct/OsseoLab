@@ -30,3 +30,22 @@ def get_doctor_dropdown_options():
             "message": "Failed to fetch doctor options",
             "error": str(e)
         }), 500
+
+
+# New route: /doctor/list
+@doctor_bp.route("/doctor/list", methods=["GET"])
+@jwt_required()
+@admin_required
+def list_doctors():
+    try:
+        doctors = Doctor.query.order_by(Doctor.created_at.asc()).all()
+        return jsonify({
+            "statusCode": 200,
+            "data": [doctor.to_dict() for doctor in doctors]
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "statusCode": 500,
+            "message": "Failed to fetch doctors",
+            "error": str(e)
+        }), 500

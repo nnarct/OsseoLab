@@ -56,7 +56,7 @@ def submit_quick_case_combined():
         for admin in admins:
             notif = Notification(
                 user_id=admin.id,
-                message=f"📝 New quick case submitted by {quick_case.firstname} {quick_case.lastname}",
+                message=f"New Case requested  by {quick_case.firstname} {quick_case.lastname}",
                 related_case_id=quick_case.id,
                 case_type="quick"
             )

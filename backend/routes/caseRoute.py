@@ -2,29 +2,36 @@ import os
 from constants.paths import UPLOAD_FOLDER
 from services.url_secure_service import generate_secure_url_case_file
 from models.case_files import CaseFile
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt
 from services.authService import admin_required, roles_required
 from services.authService import get_current_user
 from models.enums import RoleEnum
 from models.cases import Case
 from models.doctors import Doctor
+from models.technicians import Technician
 
 from models.case_surgeons import CaseSurgeon
+from models.case_technicians import CaseTechnician
 
 from flask import request, jsonify
 from datetime import datetime, date
 from models.enums import GenderEnum
 from config.extensions import db
+from werkzeug.utils import secure_filename
 
 case_bp = Blueprint("case", __name__)
 
-UPLOAD_FOLDER = os.getenv("CASE_FILE_UPLOAD_FOLDER")
+# UPLOAD_FOLDER = os.getenv("CASE_FILE_UPLOAD_FOLDER")
+
+
+def get_case_files_upload_folder():
+    return os.path.join(current_app.root_path, "uploads", "case_files")
 
 
 @case_bp.route("/case/list", methods=["GET"])
 @jwt_required()
-@roles_required(RoleEnum.admin.value, RoleEnum.doctor.value)
+@roles_required(RoleEnum.admin.value, RoleEnum.doctor.value, RoleEnum.technician.value)
 def list_cases():
     try:
         user = get_current_user()
@@ -34,8 +41,18 @@ def list_cases():
         elif user.role == RoleEnum.doctor:
             doctor = Doctor.query.filter_by(user_id=user.id).first()
             if not doctor:
-                return jsonify({"statusCode": 404, "message": "Doctor profile not found"}), 404
-            cases = Case.query.filter_by(surgeon_id=doctor.id).order_by(
+                return jsonify({"statusCode": 404, "message": "Case list not found"}), 404
+            case_ids = [cs.case_id for cs in CaseSurgeon.query.filter_by(
+                surgeon_id=doctor.id, active=True).all()]
+            cases = Case.query.filter(Case.id.in_(case_ids)).order_by(
+                Case.created_at.asc()).all()
+        elif user.role == RoleEnum.technician:
+            technician = Technician.query.filter_by(user_id=user.id).first()
+            if not technician:
+                return jsonify({"statusCode": 404, "message": "Case list not found"}), 404
+            case_ids = [cs.case_id for cs in CaseTechnician.query.filter_by(
+                technician_id=technician.id, active=True).all()]
+            cases = Case.query.filter(Case.id.in_(case_ids)).order_by(
                 Case.created_at.asc()).all()
         else:
             return jsonify({"statusCode": 403, "message": "Forbidden"}), 403
@@ -70,7 +87,11 @@ def list_cases():
 @roles_required('admin', 'technician')
 def create_case():
     try:
-        data = request.get_json()
+        # Accept both JSON and form-data for flexibility with files
+        if request.content_type and request.content_type.startswith("multipart/form-data"):
+            data = request.form
+        else:
+            data = request.get_json()
         created_by = get_jwt()["userData"]["id"]
 
         new_case = Case(
@@ -97,6 +118,31 @@ def create_case():
         db.session.add(new_case)
         db.session.commit()
 
+        # --- Save uploaded files ---
+        upload_folder = os.path.join(
+            get_case_files_upload_folder(), str(new_case.id))
+        os.makedirs(upload_folder, exist_ok=True)
+
+        files = request.files.getlist("files")
+        for file in files:
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(upload_folder, filename)
+            file.save(file_path)
+            file.stream.seek(0, os.SEEK_END)
+            filesize = file.stream.tell()
+            file.stream.seek(0)
+            file_record = CaseFile(
+                nickname=filename,
+                case_id=new_case.id,
+                filename=filename,
+                filepath=os.path.relpath(file_path, start=UPLOAD_FOLDER),
+                filetype=file.content_type,
+                filesize=filesize,
+            )
+            db.session.add(file_record)
+
+        db.session.commit()
+
         return jsonify({"statusCode": 201, "message": "Case created successfully", "data": {"id": str(new_case.id)}}), 201
     except Exception as e:
         db.session.rollback()
@@ -104,11 +150,9 @@ def create_case():
 
 
 # Route for retrieving a case by ID
-
-
 @case_bp.route("/case/<case_id>", methods=["GET"])
 @jwt_required()
-@roles_required("admin", "doctor")
+@roles_required("admin", "doctor", "technician")
 def get_case_by_id(case_id):
     try:
         case = Case.query.get(case_id)
@@ -116,13 +160,13 @@ def get_case_by_id(case_id):
             return jsonify({"statusCode": 404, "message": "Case not found"}), 404
 
         files = CaseFile.query.filter_by(
-            case_id=case_id).order_by(CaseFile.created_at).all()
+            case_id=case_id).order_by(CaseFile.uploaded_at).all()
         file_list = [
             {
                 "id": str(f.id),
                 "filename": f.filename,
                 "url": generate_secure_url_case_file(str(f.id)),
-                "created_at": int(f.created_at.timestamp()),
+                "uploaded_at": int(f.uploaded_at.timestamp()),
                 "order": index + 1
             }
             for index, f in enumerate(files)
@@ -139,7 +183,7 @@ def get_case_by_id(case_id):
 
 @case_bp.route("/case/<case_id>", methods=["PUT"])
 @jwt_required()
-@admin_required
+@roles_required('admin', 'doctor', 'technician')
 def update_case(case_id):
     try:
         data = request.get_json()

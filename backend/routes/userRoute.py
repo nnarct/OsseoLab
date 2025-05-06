@@ -17,55 +17,6 @@ from services.authService import admin_required
 user_bp = Blueprint("user", __name__, url_prefix="/user")
 
 
-# @user_bp.route("/list", methods=["GET"])
-# @jwt_required()
-# @admin_required
-# def list_users():
-#     try:
-#         users = User.query.all()
-#         return jsonify({
-#             "statusCode": 200,
-#             "data": [user.to_dict() for user in users]
-#         }), 200
-#     except Exception as e:
-#         return jsonify({
-#             "statusCode": 500,
-#             "error": "Internal Server Error",
-#             "message": str(e)
-#         }), 500
-
-# # ✅ 2. List all admins (Only ADMIN)
-
-
-# @user_bp.route("/admin/list", methods=["GET"])
-# @jwt_required()
-# @admin_required
-# def list_admins():
-
-#     admins = User.query.filter_by(role=Role.ADMIN).all()
-
-#     return jsonify({
-#         "statusCode": 200,
-#         "data": [user.to_dict() for user in admins]
-#     }), 200
-
-# # ✅ 3. List all techs (Only ADMIN)
-
-
-# @user_bp.route("/tech/list", methods=["GET"])
-# @jwt_required()
-# @admin_required
-# def list_techs():
-#     techs = User.query.filter_by(role=Role.TECH).all()
-
-#     return jsonify({
-#         "statusCode": 200,
-#         "data": [user.to_dict() for user in techs]
-#     }), 200
-
-# # ✅ 4. List all doctors (Only ADMIN)
-
-
 @user_bp.route("/list", methods=["GET"])
 @jwt_required()
 @admin_required
@@ -133,9 +84,14 @@ def get_current_user():
     user = User.query.get(user_id)
     if not user:
         return jsonify({"statusCode": 404, "error": "User not found"}), 404
+    data = user.to_dict()
+    if user.role == RoleEnum.doctor and user.doctor_profile:
+        data["hospital"] = user.doctor_profile.hospital
+        data["reference"] = user.doctor_profile.reference
+        data["doctor_registration_id"] = user.doctor_profile.doctor_registration_id
     return jsonify({
         "statusCode": 200,
-        "data": user.to_dict()
+        "data": data
     }), 200
 
 
@@ -163,6 +119,17 @@ def update_current_user():
             setattr(user, key, value)
 
     from config.extensions import db
+
+    # Update doctor profile fields if user is a doctor
+    if user.role == RoleEnum.doctor:
+        doctor_profile = user.doctor_profile
+        if doctor_profile:
+            if "hospital" in data:
+                doctor_profile.hospital = data["hospital"]
+            if "reference" in data:
+                doctor_profile.reference = data["reference"]
+            if "doctor_registration_id" in data:
+                doctor_profile.doctor_registration_id = data["doctor_registration_id"]
 
     db.session.commit()
     user_data = {
