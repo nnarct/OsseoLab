@@ -19,7 +19,7 @@ import AngleTool from './AngleTool/AngleTool';
 import MeasureLineGroup from './MeasureTool/MeasureLineGroup';
 import AngleLineGroup from './AngleTool/AngleLineGroup';
 import ClippingPlaneList from './ClippingPlane/ClippingPlaneList';
-import { useProgress } from '@react-three/drei';
+// import { useProgress } from '@react-three/drei';
 import Loader from './Loader';
 // import AngleTool from './AngleTool/Angle';
 
@@ -48,7 +48,7 @@ const Center = ({ url, id }: { url: string; id?: string }) => {
       // saving={isLoading}
       />
       {/* <Canvas style={{ height: '80vh', maxWidth: '80vh', width: 'auto', background: '#f7f7f7', marginInline: 'auto' }}> */}
-      <Canvas style={{ width: 'auto', height: '90vh', background: '#f7f7f7', marginInline: 'auto' }}>
+      <Canvas style={{ width: 'auto', height: '100%', background: '#f7f7f7', marginInline: 'auto' }}>
         <Suspense fallback={<Loader />}>
           <SceneSetter />
           <Controllers />
