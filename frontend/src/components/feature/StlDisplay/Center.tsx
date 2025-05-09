@@ -101,7 +101,7 @@ const Center = ({ urls }: { urls: string[] }) => {
       navigate(`/case/${caseId}/file/${data.new_version.case_file_id}`, {
         state: { urls: data.urls, filename: data.new_version.filename },
       });
-      clearPlane()
+      // clearPlane()
     } catch (err) {
       console.error('Failed to save cutting planes:', err);
       messageApi.error('Failed to save cutting planes');
