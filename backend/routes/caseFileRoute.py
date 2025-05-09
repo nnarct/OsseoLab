@@ -1,17 +1,16 @@
 import os
-from constants.paths import UPLOAD_FOLDER
 from werkzeug.utils import secure_filename
-from services.url_secure_service import generate_secure_url_case_file
-from flask import Blueprint, request, jsonify, send_from_directory, send_file,current_app
+from services.url_secure_service import generate_secure_url_case_file, serializer
+from flask import Blueprint, request, jsonify, send_from_directory, send_file, current_app
 from config.extensions import db
 import uuid
 from models.case_files import CaseFile
 from models.quick_case_files import QuickCaseFile
-from itsdangerous import URLSafeTimedSerializer
+from itsdangerous import URLSafeTimedSerializer, BadSignature
+
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 case_file_bp = Blueprint("case_file", __name__)
-SECRET_KEY = os.getenv("STL_SECRET_KEY")
-serializer = URLSafeTimedSerializer(SECRET_KEY)
 
 
 def get_case_files_upload_folder():
@@ -19,7 +18,8 @@ def get_case_files_upload_folder():
 
 
 @case_file_bp.route("/case-file/upload", methods=["POST"])
-def add_new_case():
+@jwt_required()
+def add_new_case_file():
     try:
         if "file" not in request.files or "nickname" not in request.form:
             return jsonify({"error": "Missing file or filename"}), 400
@@ -28,12 +28,15 @@ def add_new_case():
         case_id = request.form["case_id"]
         file = request.files["file"]
         nickname = request.form["nickname"].strip()
+        # get current user id
+        user_id = get_jwt_identity()
 
         if file.filename == "":
             return jsonify({"statusCode": 400, "error": "No selected file"}), 400
 
         filename = secure_filename(file.filename)
-        upload_folder = os.path.join(get_case_files_upload_folder(), str(case_id))
+        upload_folder = os.path.join(
+            get_case_files_upload_folder(), str(case_id))
         os.makedirs(upload_folder, exist_ok=True)
         filepath = os.path.join(upload_folder, filename)
         file.save(filepath)
@@ -42,29 +45,46 @@ def add_new_case():
         file.stream.seek(0, os.SEEK_END)
         filesize = file.stream.tell()
         file.stream.seek(0)
-        
-        
-        new_case_file = CaseFile(
+
+        from models.case_file_versions import CaseFileVersion
+
+        # Create a temporary CaseFile to get an ID
+        temp_case_file = CaseFile(
             case_id=case_id,
-            nickname=nickname,
-            filename = filename,
-            filepath = filepath,
-            filetype=file.content_type,
-            filesize=filesize
         )
-        
-        file.stream.seek(0)  # Reset the stream position after reading
-        db.session.add(new_case_file)
+        db.session.add(temp_case_file)
+        db.session.flush()  # Get temp_case_file.id without full commit
+
+        new_version = CaseFileVersion(
+            case_file_id=temp_case_file.id,
+            version_number=1,
+            file_path=os.path.relpath(
+                filepath, start=get_case_files_upload_folder()),
+            filename=filename,
+            nickname=nickname,
+            filetype=file.content_type,
+            filesize=filesize,
+            uploaded_by=user_id  # Set user ID if available
+        )
+        db.session.add(new_version)
+        db.session.flush()  # Get new_version.id
+
+        # Now update temp_case_file with the version
+        temp_case_file.current_version_id = new_version.id
         db.session.commit()
 
         return jsonify({
             "statusCode": 201,
             "message": "File uploaded",
             "data": {
-                "id": new_case_file.id,
-                "nickname": nickname,
-                "url": generate_secure_url_case_file(str(new_case_file.id)),
-                "uploaded_at": int(new_case_file.uploaded_at.timestamp())
+                "id": temp_case_file.id,
+                "filename": filename,
+                "filetype": file.content_type,
+                "filesize": filesize,
+                "url": generate_secure_url_case_file(str(new_version.id)),
+                "created_at": int(temp_case_file.created_at.timestamp()),
+                "version_id": str(new_version.id),
+                "version_number": new_version.version_number
             }
         }), 201
     except Exception as e:
@@ -76,6 +96,7 @@ def add_new_case():
 def verify_case_file_token(token):
     try:
         case_file_id = serializer.loads(token)
+        print(f'${case_file_id}')
         return case_file_id
     except BadSignature:
         return None
@@ -84,23 +105,20 @@ def verify_case_file_token(token):
 @case_file_bp.route("/case-file/<string:token>", methods=["GET"])
 def serve_case_file(token):
     try:
-        case_file_id = verify_case_file_token(token)
-        if not case_file_id:
+        from models.case_file_versions import CaseFileVersion
+        try:
+            version_id = serializer.loads(token)
+        except BadSignature:
             return jsonify({"statusCode": 403, "error": "Invalid or expired token"}), 403
 
-        case_file_entry = CaseFile.query.get(case_file_id)
-        if case_file_entry:
-            # relative_path = case_file_entry.filepath.lstrip("/")
-            return send_file(case_file_entry.filepath, as_attachment=True, mimetype=case_file_entry.filetype or 'application/octet-stream')
+        version_entry = CaseFileVersion.query.get(version_id)
+        if version_entry:
+            return send_file(os.path.join(get_case_files_upload_folder(), version_entry.file_path), as_attachment=True, mimetype='application/octet-stream')
 
-        quick_case_file_entry = QuickCaseFile.query.filter_by(
-            id=case_file_id).first()
-        if quick_case_file_entry:
-            relative_path = quick_case_file_entry.filepath.lstrip("/")
-            return send_from_directory(UPLOAD_FOLDER, relative_path)
-
-        return jsonify({"statusCode": 404, "error": "File not found"}), 404
+        print("Send successfully")
+        return jsonify({"statusCode": 404, "error": "File not found", "payload": {"version_id": version_id, "version_entry": version_entry}}), 404
     except Exception as e:
+        print("Send failed")
         return jsonify({"statusCode": 500, "error": "Internal Server Error", "message": str(e)}), 500
 
 
@@ -111,14 +129,17 @@ def delete_case_file(file_id):
         if not case_file:
             return jsonify({"statusCode": 404, "message": "File not found"}), 404
 
-        # Delete the file from disk
-        file_path = os.path.join(UPLOAD_FOLDER, case_file.filepath)
-        if os.path.exists(file_path):
-            os.remove(file_path)
+    # Delete all versioned files from disk before deleting the CaseFile
+        from models.case_file_versions import CaseFileVersion
+        versions = CaseFileVersion.query.filter_by(case_file_id=case_file.id).all()
+        for version in versions:
+            file_path = os.path.join(get_case_files_upload_folder(), version.file_path)
+            if os.path.exists(file_path):
+                os.remove(file_path)
 
-        # Delete from database
-        db.session.delete(case_file)
-        db.session.commit()
+            # Delete from database
+            db.session.delete(case_file)
+            db.session.commit()
 
         return jsonify({"statusCode": 200, "message": "File deleted successfully"}), 200
     except Exception as e:

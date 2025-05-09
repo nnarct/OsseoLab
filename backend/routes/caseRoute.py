@@ -160,18 +160,24 @@ def get_case_by_id(case_id):
             return jsonify({"statusCode": 404, "message": "Case not found"}), 404
 
         files = CaseFile.query.filter_by(
-            case_id=case_id).order_by(CaseFile.uploaded_at).all()
-        file_list = [
-            {
-                "id": str(f.id),
-                "filename": f.filename,
-                "url": generate_secure_url_case_file(str(f.id)),
-                "uploaded_at": int(f.uploaded_at.timestamp()) if isinstance(f.uploaded_at, datetime) else int(datetime.combine(f.uploaded_at, datetime.min.time()).timestamp()) if f.uploaded_at else None,
-                "order": index + 1
-            }
-            for index, f in enumerate(files)
-        ]
-        print(files)
+            case_id=case_id).order_by(CaseFile.created_at).all()
+        file_list = []
+        urls = [generate_secure_url_case_file(str(f.current_version_id)) for f in files]
+        for index, f in enumerate(files):
+            version = f.current_version
+            if version:
+                file_list.append({
+                    "id": str(f.id), 
+                    "version_id": version.id,
+                    "filename": version.filename,
+                    "nickname": version.nickname,
+                    # "urls": generate_secure_url_case_file(str(version.id)),
+                    "urls": urls,
+                    "filetype": version.filetype,
+                    "filesize": version.filesize,
+                    "created_at": int(f.created_at.timestamp()) if f.created_at else None,
+                    "order": index + 1
+                })
 
         return jsonify({"statusCode": 200, "data": {
             **case.to_dict(),
@@ -254,7 +260,7 @@ def delete_case(case_id):
         # Delete related case files and their disk files
         case_files = CaseFile.query.filter_by(case_id=case_id).all()
         for file in case_files:
-            filepath = os.path.join(UPLOAD_FOLDER, file.filepath)
+            filepath = os.path.join(get_case_files_upload_folder(), file.filepath)
             if os.path.exists(filepath):
                 os.remove(filepath)
             db.session.delete(file)

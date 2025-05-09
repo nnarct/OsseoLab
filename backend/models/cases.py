@@ -49,8 +49,8 @@ class Case(db.Model):
         passive_deletes=True,
         cascade='all, delete-orphan'
     )
-    groups = relationship(
-        "CaseFileGroup", backref="case", cascade="all, delete-orphan")
+    # groups = relationship(
+    #     "CaseFileGroup", backref="case", cascade="all, delete-orphan")
 
     def to_dict(self, exclude: set[str] = None, include: set[str] = None):
         data = {

@@ -6,3 +6,6 @@ flask-cors
 werkzeug
 flask-migrate
 flask-jwt-extended
+trimesh
+scipy>=1.10
+shapely

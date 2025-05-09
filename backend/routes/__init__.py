@@ -12,7 +12,8 @@ from .caseFileRoute import case_file_bp
 from .dashboardRoute import dashboard_bp
 from .quickCaseRoute import quick_case_bp
 from .notificationRoute import notification_bp
-
+from .caseManagerRoute import case_manager_bp
+from .cuttingPlaneRoute import cutting_plane_bp
 
 def register_routes(app):
     app.register_blueprint(auth_bp)
@@ -28,3 +29,5 @@ def register_routes(app):
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(quick_case_bp)
     app.register_blueprint(notification_bp)
+    app.register_blueprint(case_manager_bp)
+    app.register_blueprint(cutting_plane_bp)

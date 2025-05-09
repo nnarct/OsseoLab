@@ -38,8 +38,7 @@ class User(db.Model):
     profile_pic = relationship(
         'ProfilePicFile', back_populates='user',  foreign_keys='ProfilePicFile.user_id')
     created_cases = relationship('Case', back_populates='creator')
-    created_groups = relationship('CaseFileGroup', back_populates='creator')
-
+   
     def to_dict(self, exclude: set[str] = None):
         data = {
             "id": str(self.id),
