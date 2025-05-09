@@ -30,7 +30,7 @@ export interface CaseFile {
   id: string;
   order: number;
   uploaded_at: number;
-  url: string;
+  urls: string[];
 }
 export interface Surgeon {
   id: string;

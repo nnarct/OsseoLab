@@ -21,7 +21,7 @@ export const initializeSTLModel = (
   geometry.computeBoundingBox();
   const center = new THREE.Vector3();
   geometry.boundingBox?.getCenter(center);
-  geometry.translate(-center.x, -center.y, -center.z);
+  // geometry.translate(-center.x, -center.y, -center.z);
 
   const size = new THREE.Vector3();
   geometry.boundingBox?.getSize(size);
@@ -31,14 +31,14 @@ export const initializeSTLModel = (
 
   geometry.computeVertexNormals();
 
-  if (meshRef.current) {
-    meshRef.current.rotation.set(-Math.PI / 2, 0, 0);
-  }
+  // if (meshRef.current) {
+  //   meshRef.current.rotation.set(-Math.PI / 2, 0, 0);
+  // }
 };
 
 /**
  * Converts a hex color to a Three.js shader-compatible RGB string.
- * @param hex - The hex color string.
+* @param hex - The hex color string
  * @returns A string formatted as `r, g, b` values.
  */
 const hexToShaderRGB = (hex: string) => {

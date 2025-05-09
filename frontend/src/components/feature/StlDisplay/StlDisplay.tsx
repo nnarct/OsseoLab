@@ -15,7 +15,7 @@ const StlDisplay = ({ id }: { id: string }) => {
   if (!data) return 'data missing';
   return (
     <StlDisplayProvider>
-      <Center url={data.url} id={id} />
+      <Center urls={[data.url]}/>
       {/* <MenuBar />
       <CanvasScene url={url} /> */}
     </StlDisplayProvider>

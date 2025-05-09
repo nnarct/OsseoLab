@@ -20,7 +20,17 @@ export const usePlaneUpdater = (plane: THREE.Plane, id: string) => {
       plane.setFromNormalAndCoplanarPoint(worldNormal, worldPosition).normalize();
 
       // Use functional state update to prevent potential issues with stale state
-      setPlanes((prevItems) => prevItems.map((item) => (item.id === id ? { ...item, plane: plane.clone() } : item)));
+      setPlanes((prevItems) =>
+        prevItems.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                plane: plane.clone(),
+                position: planeRef.position.clone(),
+              }
+            : item
+        )
+      );
     },
     [id, plane, setPlanes]
   );

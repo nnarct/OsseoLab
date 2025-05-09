@@ -72,6 +72,12 @@ interface StlDisplayContextType {
     removePairById: (id: string) => void;
   };
 
+  meshVisibility: {
+    visibleMeshes: Record<string, boolean>;
+    toggleVisibility: (key: string) => void;
+    setVisibleMeshes: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  };
+
   sceneHandlerRef: React.MutableRefObject<SceneHandlerRefType | null>;
   resetModel: () => void;
   faceFront: () => void;
@@ -99,6 +105,8 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
   const [angleGroup, setAngleGroup] = useState<AngleGroupDataType[]>([]);
   const [currentAngleGroup, setCurrentAngleGroup] = useState<IntersectionData[]>([]);
   const [panelAngleInfo, setAnglePanelInfo] = useState<string | null>('Select a point.');
+ 
+  const [visibleMeshes, setVisibleMeshes] = useState<Record<string, boolean>>({});
 
   const clearAngle = () => {
     setAngleGroup([]);
@@ -173,6 +181,13 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
     setAngleGroup((prev) => prev.map((group) => (group.id === id ? { ...group, show: !group.show } : group)));
 
   const removeAngleGroupById = (id: string) => setAngleGroup((prev) => prev.filter((group) => group.id !== id));
+
+  const toggleVisibility = (key: string) => {
+    setVisibleMeshes((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
 
   const addPlane = useCallback(() => {
     const id = uuid();
@@ -271,7 +286,6 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
   //     }
   //   }
   // };
-
   const resetModel = () => {
     setPlanes([]);
     setCurrentTool(null);
@@ -350,6 +364,11 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
           clear: clearMarkers,
           togglePairVisibility,
           removePairById,
+        },
+        meshVisibility: {
+          visibleMeshes,
+          toggleVisibility,
+          setVisibleMeshes,
         },
         sceneHandlerRef,
         resetModel,

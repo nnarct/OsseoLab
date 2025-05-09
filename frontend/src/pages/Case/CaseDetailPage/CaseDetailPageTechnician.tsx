@@ -15,7 +15,7 @@ const CaseDetailPageTechnician = () => {
 
   return (
     <>
-      <CustomHeader backTo={-1}>
+      <CustomHeader backTo={'/case/list'}>
         <p className='pl-2 text-2xl font-bold'>Case Information</p>
       </CustomHeader>
       <Layout.Content className='p-4'>

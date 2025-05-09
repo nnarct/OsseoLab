@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PRODUCTS } from '@/constants/option';
+import CaseFileVersionList from './dev/CaseFileVersionList';
 
 const CaseDetail = ({ id }: { id: string }) => {
   const navigate = useNavigate();
@@ -229,6 +230,7 @@ const CaseDetail = ({ id }: { id: string }) => {
           </div>
           <Divider />
           <CaseFilesList files={data.files} caseId={id} caseNumber={data.case_number} />
+          <CaseFileVersionList/>
         </>
       ) : (
         <></>

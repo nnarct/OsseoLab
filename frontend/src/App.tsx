@@ -33,8 +33,14 @@ const QuickCaseDetail = lazy(() => import('@/pages/Case/QuickCase/QuickCaseDetai
 const QuickCaseModelViewer = lazy(() => import('@/pages/Case/QuickCase/QuickCaseModelViewer'));
 
 // notification
-const NotificationListPage =  lazy(() => import('@/pages/Notification/NotificationListPage'));
+const NotificationListPage = lazy(() => import('@/pages/Notification/NotificationListPage'));
 const UserDetailPage = lazy(() => import('@/pages/AuthPage/UserDetailPage'));
+
+// case fiels
+const CaseFileGroupItems = lazy(() => import('@/pages/Case/files/CaseFileGroupItems'));
+const CuttingPlanes = lazy(() => import('@/pages/Case/files/CuttingPlanes'));
+const CaseFileGroups = lazy(() => import('@/pages/Case/files/CaseFileGroups'));
+const CaseFileVersions = lazy(() => import('@/pages/Case/files/CaseFileVersions'));
 
 const createRoleRoute = (path: string, roles: string[], element: JSX.Element) => (
   <Route path={path} element={<ProtectedRoute requiredRole={roles} />}>
@@ -82,8 +88,13 @@ const App = () => {
                 {createRoleRoute('/case/quick-case', [UserRole.Admin], <QuickCaseList />)}
                 {createRoleRoute('/case/quick-case/:id', [UserRole.Admin], <QuickCaseDetail />)}
                 {createRoleRoute('/case/quick-case/:quickCaseId/:id', [UserRole.Admin], <QuickCaseModelViewer />)}
-                
+
                 {createRoleRoute('/notifications', [UserRole.Admin, UserRole.Technician], <NotificationListPage />)}
+
+                {createRoleRoute('/case-file-group-items', [UserRole.Admin], <CaseFileGroupItems />)}
+                {createRoleRoute('/cutting-planes', [UserRole.Admin], <CuttingPlanes />)}
+                {createRoleRoute('/case-file-groups', [UserRole.Admin], <CaseFileGroups />)}
+                {createRoleRoute('/case-file-versions', [UserRole.Admin], <CaseFileVersions />)}
               </Route>
               {/* </Route> */}
             </Routes>

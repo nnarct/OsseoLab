@@ -16,9 +16,11 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ requiredRole }: ProtectedRouteProps) => {
   const { role, user } = useAuth();
   if (!role || !user) {
+    console.log('No Account');
     return <Navigate to={'/login'} replace />;
   }
   if (!hasAccess(role, requiredRole)) {
+    console.log('No permission');
     const redirectTo = role ? '/' : '/login';
     return <Navigate to={redirectTo} replace />;
   }

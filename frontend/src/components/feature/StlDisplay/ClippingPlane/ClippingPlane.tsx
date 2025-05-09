@@ -42,6 +42,8 @@ const ClippingPlane = ({
           mode={mode}
           camera={camera}
           domElement={domElement}
+          onMouseUp={() => updatePlane(planeRef.current)}
+          onObjectChange={() => updatePlane(planeRef.current)}
         />
       )}
       <mesh ref={planeRef} userData={{ type: 'clippingPlane' }}>

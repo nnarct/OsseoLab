@@ -4,55 +4,128 @@ import Controllers from './Controllers/Controllers';
 import Model from './Model';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 import MenuBar from './MenuBar/MenuBar';
-import { Suspense, useEffect, useRef } from 'react';
-// import { axios } from '@/config/axiosConfig';
-// import { useQueryClient } from '@tanstack/react-query';
-// import { message } from 'antd';
-// import { STL_LIST_QUERY_KEY } from '@/constants/queryKey';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import SceneSetter from './SceneSetter';
-// import { useSceneStore } from '@/store/useSceneStore';
-// import { convert } from '@/services/stlExporter/convert';
-// import Angle from './AngleTool/Angle';
 
 import { MeasureTool } from './MeasureTool/MeasureTool';
 import AngleTool from './AngleTool/AngleTool';
 import MeasureLineGroup from './MeasureTool/MeasureLineGroup';
 import AngleLineGroup from './AngleTool/AngleLineGroup';
 import ClippingPlaneList from './ClippingPlane/ClippingPlaneList';
-// import { useProgress } from '@react-three/drei';
 import Loader from './Loader';
-// import AngleTool from './AngleTool/Angle';
+import { axios } from '@/config/axiosConfig';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { message } from 'antd';
+import { modelDirection } from 'three/src/nodes/TSL.js';
 
-const Center = ({ url, id }: { url: string; id?: string }) => {
-  // const [messageApi, contextHolder] = message.useMessage();
-  // const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { angleHandler, resetModel, measureHandler } = useStlDisplay();
+export interface PlaneDataType {
+  id: string;
+  plane: THREE.Plane;
+  position: THREE.Vector3;
+  mode: THREE.TransformControlsMode;
+  frontColor: string;
+  backColor: string;
+  opacity: number;
+  show: boolean;
+  number: number;
+}
+
+const Center = ({ urls }: { urls: string[] }) => {
+  console.log('render <Center/>');
+  const [messageApi, contextHolder] = message.useMessage();
+  const location = useLocation();
+  const {
+    angleHandler,
+    resetModel,
+    measureHandler,
+    planeHandler: { getPlanes, clear: clearPlane },
+  } = useStlDisplay();
   const { isActive: isMeasureActive } = measureHandler;
   const { isActive: isAngleActive } = angleHandler;
+  const navigate = useNavigate();
+  const { caseId } = useParams();
+  const save = async () => {
+    const tokens = urls.map((url) => {
+      const parts = url.split('/');
+      return parts[parts.length - 1];
+    });
+    const planes: PlaneDataType[] = getPlanes();
 
-  const meshRef = useRef<THREE.Mesh>(null);
-  // const [saving, setSaving] = useState(false);
+    if (!planes.length || !urls.length) return;
+
+    const rotation = new THREE.Euler(-Math.PI / 2, 0, 0);
+    const matrix = new THREE.Matrix4().makeRotationFromEuler(rotation);
+    const payload = {
+      planes: planes.map((p) => {
+        console.log({ position: p.position, normal: p.plane.normal });
+        const positionVec = new THREE.Vector3(p.position.x, p.position.y, p.position.z);
+        const normalVec = new THREE.Vector3(p.plane.normal.x, p.plane.normal.y, p.plane.normal.z);
+
+        const rotatedPosition = positionVec.clone().applyMatrix4(matrix);
+        if (Math.abs(rotatedPosition.x) < 1e-6) rotatedPosition.x = 0;
+        if (Math.abs(rotatedPosition.y) < 1e-6) rotatedPosition.y = 0;
+        if (Math.abs(rotatedPosition.z) < 1e-6) rotatedPosition.z = 0;
+        const rotatedNormal = normalVec.clone().applyMatrix4(matrix).normalize();
+        if (Math.abs(rotatedNormal.x) < 1e-6) rotatedNormal.x = 0;
+        if (Math.abs(rotatedNormal.y) < 1e-6) rotatedNormal.y = 0;
+        if (Math.abs(rotatedNormal.z) < 1e-6) rotatedNormal.z = 0;
+
+        return {
+          name: `Plane_${p.number}`,
+          position: {
+            x: rotatedPosition.x,
+            y: rotatedPosition.y,
+            z: rotatedPosition.z,
+          },
+          normal: {
+            x: rotatedNormal.x,
+            y: rotatedNormal.y,
+            z: rotatedNormal.z,
+          },
+        };
+      }),
+      tokens,
+    };
+    // console.log({ payload:payload.planes });
+    // return;
+    try {
+      const response = await axios.post('/cutting-plane/save-multiple', payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      console.log('Saved cutting planes:', response.data);
+      messageApi.success('Saved cutting planes.');
+      const data = response.data.results[0] as ResponseType;
+      navigate(`/case/${caseId}/file/${data.new_version.case_file_id}`, {
+        state: { urls: data.urls, filename: data.new_version.filename },
+      });
+      clearPlane()
+    } catch (err) {
+      console.error('Failed to save cutting planes:', err);
+      messageApi.error('Failed to save cutting planes');
+    }
+    // finally{    navigate(-1)}
+  };
 
   useEffect(() => {
     resetModel();
-  }, [url]); // eslint-disable-line react-hooks/exhaustive-deps
-  // const queryClient = useQueryClient();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  console.log({ urls });
   return (
     <>
-      {/* {contextHolder} */}
-      <MenuBar
-      // onSave={async () => {
-      //   await save(id);
-      // }}
-      // saving={isLoading}
-      />
-      {/* <Canvas style={{ height: '80vh', maxWidth: '80vh', width: 'auto', background: '#f7f7f7', marginInline: 'auto' }}> */}
-      <Canvas style={{ width: 'auto', height: '100%', background: '#f7f7f7', marginInline: 'auto' }}>
+      {contextHolder}
+      <MenuBar onSave={save} />
+
+      {/* <Canvas style={{ width: 'auto', height: '100%', background: '#f7f7f7', marginInline: 'auto' }}> */}
+      <Canvas style={{ width: '50vw', height: '50vh', background: '#f7f7f7', marginInline: 'auto' }}>
         <Suspense fallback={<Loader />}>
           <SceneSetter />
           <Controllers />
-          <Model url={url} meshRef={meshRef} />
+          <Model urls={urls} />
 
           {/* <Angle/> */}
           <ClippingPlaneList />
@@ -61,185 +134,47 @@ const Center = ({ url, id }: { url: string; id?: string }) => {
           <MeasureLineGroup />
           <AngleLineGroup />
         </Suspense>
-        {/* {measureActive && <MeasureDistance />} */}
       </Canvas>
-      {/* <MeasureDistance /> */}
     </>
   );
 };
 
 export default Center;
 
-// const applyClippingPlanes = (geometry: THREE.BufferGeometry, planes: THREE.Plane[]) => {
-//   const positions = geometry.attributes.position.array;
-//   const newPositions = [];
-
-//   for (let i = 0; i < positions.length; i += 3) {
-//     const vertex = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
-
-//     let visible = true;
-//     for (const plane of planes) {
-//       if (plane.distanceToPoint(vertex) < 0) {
-//         visible = false;
-//         break;
-//       }
-//     }
-
-//     if (visible) {
-//       newPositions.push(positions[i], positions[i + 1], positions[i + 2]);
-//     }
-//   }
-
-//   const newGeometry = new THREE.BufferGeometry();
-//   newGeometry.setAttribute('position', new THREE.Float32BufferAttribute(newPositions, 3));
-
-//   return newGeometry;
-// };
-
-// const putStlFile = async (formData: FormData) => {
-//   try {
-//     const response = await axios.put(`/stl/file/${id}`, formData);
-//     console.log('File updated successfully:', response.data);
-//     messageApi.success('File updated successfully');
-//     queryClient.invalidateQueries({ queryKey: [STL_LIST_QUERY_KEY] });
-//   } catch (error) {
-//     messageApi.error('Error updating STL file');
-//     console.error('Error updating STL file:', error);
-//   }
-// };
-
-// const upload = async (formData: FormData, nickname: string) => {
-//   try {
-//     setIsLoading(true);
-//     const response = await axios.post('/upload', formData, {
-//       headers: { 'Content-Type': 'multipart/form-data' },
-//     });
-
-//     messageApi.success(`File "${nickname}" uploaded successfully!`);
-//     console.log('Uploaded:', response.data);
-//     queryClient.invalidateQueries({ queryKey: [STL_LIST_QUERY_KEY] });
-//     messageApi.success('uploaded');
-//   } catch (error) {
-//     messageApi.error('Upload failed!');
-//     console.error(error);
-//   } finally {
-//     setIsLoading(false);
-//   }
-// };
-// const save = async (id: string) => {
-//   const scene = useSceneStore.getState().scene;
-//   if (!scene) {
-//     console.error('Scene not found!');
-//     return;
-//   }
-
-//   try {
-//     const result = await convert(scene); // <- await because convert returns Promise<string>
-
-//     if (!result) {
-//       console.error('Convert failed.');
-//       return;
-//     }
-
-//     // const blob = new Blob([result], { type: 'application/octet-stream' }); // .stl is usually 'application/octet-stream' or 'model/stl'
-//     const blob = new Blob([result], { type: 'model/stl' }); // .stl is usually 'application/octet-stream' or 'model/stl'
-//     const url = URL.createObjectURL(blob);
-
-//     const link = document.createElement('a');
-//     link.href = url;
-//     link.download = `${id}.stl`; // file will be saved as e.g., 1234.stl
-//     document.body.appendChild(link);
-//     link.click();
-//     document.body.removeChild(link);
-//     URL.revokeObjectURL(url); // clean memory
-//   } catch (error) {
-//     console.error('Failed to save STL:', error);
-//   }
-// };z
-// const save = async (id: string, planes: THREE.Plane[]) => {
-//   if (!meshRef.current) {
-//     console.error('No mesh available to save.');
-//     return;
-//   }
-//   setIsLoading(true);
-//   console.log('Exporting with Clipping Planes...');
-
-//   // Clone the mesh to avoid modifying the original
-//   const originalMesh = meshRef.current;
-//   const clonedMesh = originalMesh.clone();
-//   clonedMesh.updateMatrixWorld(true);
-
-//   // Clone geometry and apply world transformations
-//   const geometry = clonedMesh.geometry.clone();
-//   geometry.applyMatrix4(clonedMesh.matrixWorld);
-
-//   // Apply Clipping Planes to Geometry
-//   const clippedGeometry = applyClippingPlanes(geometry, planes);
-
-//   // Create a new mesh with the clipped geometry
-//   const finalMesh = new THREE.Mesh(clippedGeometry, clonedMesh.material);
-
-//   // Export using STLExporter
-//   const exporter = new STLExporter();
-//   const stlString = exporter.parse(finalMesh);
-
-//   // Convert STL to Blob and File
-//   const blob = new Blob([stlString], { type: 'application/octet-stream' });
-//   const file = new File([blob], `${id}.stl`, { type: 'application/octet-stream' });
-
-//   // Prepare form data
-//   const formData = new FormData();
-//   formData.append('file', file);
-
-//   await putStlFile(formData);
-//   setIsLoading(false);
-// };
-
-// const save = async (id: string, planes: THREE.Plane[]) => {
-//   setIsLoading(true);
-//   messageApi.info('saving..');
-//   if (!meshRef.current) {
-//     messageApi.error('Mesh reference is not found!');
-//     return;
-//   }
-//   const mesh = meshRef.current;
-//   const clippingPlanes = planes;
-
-//   let clippedMesh = mesh;
-//   clippingPlanes.forEach((plane) => {
-//     const normal = plane.normal;
-//     const constant = plane.constant;
-
-//     const size = 1000;
-//     const boxGeometry = new THREE.BoxGeometry(size, size, size);
-//     const box = new THREE.Mesh(boxGeometry);
-
-//     const position = normal.clone().multiplyScalar(-constant + size / 2);
-//     box.position.copy(position);
-
-//     const quaternion = new THREE.Quaternion();
-//     quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
-//     box.quaternion.copy(quaternion);
-
-//     clippedMesh = CSG.subtract(clippedMesh, box);
-//   });
-//   clippedMesh.geometry = BufferGeometryUtils.mergeVertices(clippedMesh.geometry);
-//   clippedMesh.geometry.computeVertexNormals();
-//   clippedMesh.geometry.computeBoundingBox();
-//   clippedMesh.geometry.computeBoundingSphere();
-//   console.log(clippedMesh.geometry?.attributes?.position?.count); // should be > 0
-//   const exporter = new STLExporter();
-//   const result = exporter.parse(clippedMesh, { binary: true });
-//   const blob = new Blob([result], { type: 'application/octet-stream' }); // or 'application/sla' for STL
-
-//   const formData = new FormData();
-//   const name = new Date().toISOString();
-//   formData.append('file', blob, `${name}.stl`);
-//   await upload(formData, name);
-//   const url = URL.createObjectURL(blob);
-//   const link = document.createElement('a');
-//   link.href = url;
-//   link.download = `${name}.stl`;
-//   document.body.appendChild(link);
-//   link.click();
-// };
+//response is array of interface below
+interface ResponseType {
+  urls: string[];
+  new_version: {
+    case_file_id: 'b8a55069-dcb0-40ab-b11a-1c22b559c2a1';
+    file_path:
+      | '/app/uploads/case_files/2d76b730-686f-4bf1-b630-cbb2de5b9433/mand_20241120_034514_20250205_010047_v2_v3.stl'
+      | string;
+    filename: 'mand_20241120_034514_20250205_010047_v2_v3.stl' | string;
+    filesize: 16689035 | number;
+    filetype: 'application/sla';
+    id: 'e8d0f8c2-c6b8-4bf4-87ba-129f30c56b9e' | string;
+    nickname: 'Maxilla' | string;
+    uploaded_at: 1746789078 | number;
+    uploaded_by: '43405074-904d-4444-b7b3-e07bb786ba82' | string;
+    version_number: number;
+  };
+  plane: {
+    created_at: number | null;
+    id: 'None' | string;
+    is_visible: boolean;
+    name: 'Plane_1' | string;
+    normal: {
+      x: 0 | number;
+      y: 1 | number;
+      z: 0 | number;
+    };
+    original_version_id: '11ffa491-f91b-439f-b56f-88a871cce191' | string;
+    position: {
+      x: -10.129017191688243 | number;
+      y: -27.707872882296595 | number;
+      z: 35.65690703013793 | number;
+    };
+    resulting_version_id: string | 'e8d0f8c2-c6b8-4bf4-87ba-129f30c56b9e';
+    updated_at: null | number;
+  };
+}

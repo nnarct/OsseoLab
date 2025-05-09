@@ -3,7 +3,11 @@ import { useState } from 'react';
 import MenuButton from './MenuButton';
 import { PiFloppyDiskBackDuotone } from 'react-icons/pi';
 
-const SaveButton = () => {
+interface SaveButtonProps {
+  onClick: () => Promise<void>;
+}
+
+const SaveButton = ({ onClick }: SaveButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messageApi, context] = message.useMessage();
   const handleClick = () => {
@@ -16,8 +20,8 @@ const SaveButton = () => {
       <Modal
         open={isOpen}
         centered
-        onOk={() => {
-          messageApi.success('Model saved successfully!');
+        onOk={async () => {
+          await onClick();
           setIsOpen(false);
         }}
         onCancel={() => setIsOpen(false)}

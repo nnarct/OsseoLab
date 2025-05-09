@@ -16,7 +16,7 @@ const QuickCaseModelViewer = () => {
         <CustomHeader backTo={-1}>
           <p className='text-xl font-bold'>{filename}</p>
         </CustomHeader>
-        <Center url={url} />
+        <Center urls={[url]} />
         {/* <MenuBar />
       <CanvasScene url={url} /> */}
       </StlDisplayProvider>

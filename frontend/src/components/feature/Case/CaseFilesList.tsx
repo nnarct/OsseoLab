@@ -13,7 +13,7 @@ import { MdOutlineViewInAr } from 'react-icons/md';
 interface CaseFile {
   id: string;
   filename: string;
-  url: string;
+  urls: string[];
   uploaded_at: number;
 }
 
@@ -36,25 +36,8 @@ const CaseFilesList = ({
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const [file, setFile] = useState<File | null>(null);
-
+  console.log({ files });
   const columns: TableProps<CaseFile>['columns'] = [
-    {
-      title: 'Filename',
-      key: 'filename',
-      dataIndex: 'filename',
-      render: (filename, record) => (
-        <>
-          <EditFilenameModal disabled id={record.id} initialFilename={filename} caseId={caseId} />
-          {filename}
-        </>
-      ),
-    },
-    {
-      title: 'Created At',
-      key: 'uploaded_at',
-      dataIndex: 'uploaded_at',
-      render: (value) => dayjs.unix(value).format('YYYY-MM-DD HH:mm'),
-    },
     {
       width: '0',
       align: 'center',
@@ -64,15 +47,45 @@ const CaseFilesList = ({
       render: (_, record) => (
         <Button
           icon={<MdOutlineViewInAr />}
-          onClick={() =>
+          onClick={() => {
+            console.log({ urls: record.urls, caseNumber, filename: record.filename });
             navigate(`/case/${caseId}/file/${record.id}`, {
-              state: { url: record.url, caseNumber, filename: record.filename },
-            })
-          }
+              state: { urls: record.urls, caseNumber, filename: record.filename },
+            });
+          }}
         >
           3D Viewer
         </Button>
       ),
+    },
+    {
+      title: 'ID',
+      key: 'id',
+      dataIndex: 'id',
+      className: 'whitespace-nowrap',
+      width: '0',
+    },
+    {
+      title: 'Model Name',
+      key: 'nickname',
+      dataIndex: 'nickname',
+      render: (nickname, record) => (
+        <>
+          <EditFilenameModal disabled id={record.id} initialFilename={nickname} caseId={caseId} />
+          {nickname}
+        </>
+      ),
+    },
+    {
+      title: 'Filename',
+      key: 'filename',
+      dataIndex: 'filename',
+    },
+    {
+      title: 'Created At',
+      key: 'created_at',
+      dataIndex: 'created_at',
+      render: (value) => dayjs.unix(value).format('YYYY-MM-DD HH:mm'),
     },
   ];
 
@@ -90,6 +103,7 @@ const CaseFilesList = ({
           icon={<FaRegTrashAlt />}
           onClick={async () => {
             await deleteCaseFileById(id);
+            queryClient.invalidateQueries({ queryKey: ['case-file-versions'] });
             queryClient.invalidateQueries({ queryKey: ['case', caseId] });
           }}
         />
@@ -123,6 +137,7 @@ const CaseFilesList = ({
       messageApi.success('uploaded');
       setFile(null);
       queryClient.invalidateQueries({ queryKey: ['case', caseId] });
+      queryClient.invalidateQueries({ queryKey: ['case-file-versions'] });
     } catch (error) {
       messageApi.error('Upload failed!');
       console.error(error);
@@ -143,7 +158,7 @@ const CaseFilesList = ({
           Upload File
         </Button>
       </div>
-      <Table columns={columns} dataSource={files} rowKey='id' size='small' bordered />
+      <Table columns={columns} dataSource={files} rowKey='id' size='small' bordered scroll={{ x: 'auto' }} />
       <Modal centered footer={null} open={isOpen} destroyOnClose onCancel={closeModal} onClose={closeModal}>
         <Typography.Title level={3}>Add new STL file</Typography.Title>
         <Form form={form} onFinish={handleSubmit} requiredMark='optional' disabled={loading}>
