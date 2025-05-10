@@ -58,7 +58,6 @@ def cut_and_save_multiple():
         data = request.get_json()
         planes = data.get('planes', [])
         tokens = data.get('tokens', [])
-        print()
         if not planes or not tokens:
             return jsonify({"statusCode": 400, "message": "Missing planes or tokens"}), 400
 
@@ -82,40 +81,86 @@ def cut_and_save_multiple():
                 return jsonify({"statusCode": 400, "message": "Physical File from saved path not found"}), 400
 
             mesh = trimesh.load_mesh(original_path)
+            print(mesh.bounds)
             for plane_data in planes:
                 name = plane_data.get("name")
-                position = plane_data.get("position")
+                origin = plane_data.get("origin")
                 normal = plane_data.get("normal")
 
-                if not position or not normal:
+                if not origin or not normal:
                     return jsonify({"statusCode": 400, "message": "Some plane data are missing"}), 400
 
                 new_plane = CuttingPlane(
                     original_version_id=version_entry.id,
                     name=name,
-                    position=position,
+                    position=origin,
                     normal=normal,
                     is_visible=True
                 )
 
-                plane_origin = np.array(
-                    [position["x"], position["y"], position["z"]])
+                # Center mesh using bounding box to match Three.js geometry.center()
+                bbox_center = mesh.bounding_box.centroid
 
-                plane_normal = np.array(
-                    [normal["x"], normal["y"], normal["z"]])
+                # Convert from Three.js Y-up to Trimesh Z-up
+                frontend_origin = np.array(
+                    [origin['x'], origin['y'], origin['z']])
+                frontend_normal = np.array(
+                    [normal['x'], normal['y'], normal['z']])
+
+                def convert_yup_to_zup(vector):
+                    return np.array([vector[0], vector[2], -vector[1]])
+                X = np.array([
+                    [-1,  0,  0],
+                    [ 0,  0, -1],
+                    [ 0,  1,  0]
+                ])
+                # plane_origin = convert_yup_to_zup(frontend_origin) - bbox_center
+                # plane_normal = convert_yup_to_zup(frontend_normal)
+                plane_origin = X @ frontend_origin
+                plane_normal = X @ (frontend_normal)
+
+                # Flip the plane like rotating vertical paper to horizontal (rotate 90° around X)
+                plane_normal = trimesh.transformations.rotation_matrix(
+                    np.radians(90), [1, 0, 0]
+                )[:3, :3] @ plane_normal
+
+                print("Trimesh extents:", mesh.extents)
+                print("Trimesh bounding box center:",
+                      mesh.bounding_box.centroid)
+                print("Trimesh principal axes:",
+                      mesh.principal_inertia_transform)
                 cut_filename = f"{os.path.splitext(version_entry.filename)[0]}_v{version_entry.version_number+1}.stl"
 
                 cut_folder = os.path.join(
                     get_case_files_upload_folder(), str(case_file_entry.case_id))
                 os.makedirs(cut_folder, exist_ok=True)
                 cut_path = os.path.join(cut_folder, cut_filename)
-                
-                sliced_meshes = slice_mesh_plane(mesh, plane_origin, plane_normal)
-                # sliced_meshes = mesh.slice_plane(plane_origin, plane_normal)
 
+                # Manual slicing logic (replaces slice_mesh_plane)
+                dot = (mesh.vertices - plane_origin) @ plane_normal
+                keep_face_mask = np.all(dot[mesh.faces] < 0, axis=1)
 
+                if np.sum(keep_face_mask) == 0:
+                    print("WARNING: Slice produced 0 faces.")
+                    sliced_meshes = mesh.copy()  # return full mesh as fallback
+                else:
+                    sliced_meshes = mesh.submesh([keep_face_mask], append=True)
+
+                print("[CUT DEBUG] Cutting plane", name)
+                print(" - origin:", plane_origin)
+                print(" - normal:", plane_normal)
+                print(" - constant:", -np.dot(plane_normal, plane_origin))
+
+                if hasattr(sliced_meshes, 'faces') and len(sliced_meshes.faces) == 0:
+                    print("WARNING: Slice produced 0 faces.")
+
+                # return jsonify({
+                #     "statusCode": 201,
+                #     "message": "Cutting planes saved and versions updated successfully",
+                #     "mesh" : mesh.bounds.tolist(),
+                #     "plane_constant": -np.dot(plane_normal, plane_origin)
+                # }), 201
                 sliced_meshes.export(file_obj=cut_path, file_type='stl_ascii')
-
                 filesize = os.path.getsize(cut_path)
 
                 new_version = CaseFileVersion(
@@ -128,6 +173,11 @@ def cut_and_save_multiple():
                     filesize=filesize,
                     uploaded_by=created_by
                 )
+                # {
+#     "x": 0.15622774214283058,
+#     "y": -0.9516275808802899,
+#     "z": -0.2645710488562214
+# }
                 db.session.add(new_version)
                 db.session.flush()
                 new_plane.resulting_version_id = new_version.id
@@ -138,7 +188,9 @@ def cut_and_save_multiple():
                 all_results.append({
                     "plane": new_plane.to_dict(),
                     "new_version": new_version.to_dict(),
-                    "urls" : [generate_secure_url_case_file(str(new_version.id))]
+                    "origin": origin,
+                    "normal": normal,
+                    "urls": [generate_secure_url_case_file(str(new_version.id))]
                 })
 
         db.session.commit()
