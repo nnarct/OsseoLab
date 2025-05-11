@@ -21,11 +21,11 @@ export const deleteCaseFileById = async (fileId: string): Promise<void> => {
   }
 };
 
-export const renameCaseFile = async (fileId: string, newFilename: string): Promise<void> => {
+export const renameCaseFileVersion = async (case_file_version_id: string, newModelName: string): Promise<void> => {
   try {
-    await axios.patch(`/case-file/${fileId}/rename`, { filename: newFilename });
+    await axios.patch(`/case-file-version/${case_file_version_id}/rename`, { nickname: newModelName });
   } catch (error) {
-    console.error('Failed to rename case file:', error);
+    console.error('Failed to change model name:', error);
     throw error;
   }
 };

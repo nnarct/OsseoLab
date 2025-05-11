@@ -1,17 +1,17 @@
 import { Button, Modal, Input, message } from 'antd';
 import { useState } from 'react';
-import { renameCaseFile } from '@/api/case-file.api';
+import { renameCaseFileVersion } from '@/api/case-file.api';
 import { BiSolidEdit } from 'react-icons/bi';
 import queryClient from '@/config/queryClient';
 
 interface EditFilenameModalProps {
   initialFilename: string;
-  id: string;
+  version_id: string;
   caseId: string;
-  disabled? : boolean
+  disabled?: boolean;
 }
 
-const EditFilenameModal = ({ initialFilename, id, caseId, disabled }: EditFilenameModalProps) => {
+const EditFilenameModal = ({ initialFilename, version_id, caseId, disabled }: EditFilenameModalProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [filename, setFilename] = useState(initialFilename);
   const [messageApi, contextHolder] = message.useMessage();
@@ -20,9 +20,11 @@ const EditFilenameModal = ({ initialFilename, id, caseId, disabled }: EditFilena
 
   const onSubmit = async () => {
     try {
-      await renameCaseFile(id, filename);
-      messageApi.success('Filename updated');
+      await renameCaseFileVersion(version_id, filename);
+      messageApi.success('Model name updated');
       queryClient.invalidateQueries({ queryKey: ['case', caseId] });
+
+      queryClient.invalidateQueries({ queryKey: ['case-file-versions', caseId] });
       closeModal();
     } catch {
       messageApi.error('Failed to update filename');
@@ -32,8 +34,15 @@ const EditFilenameModal = ({ initialFilename, id, caseId, disabled }: EditFilena
   return (
     <>
       {contextHolder}
-      <Button type='text' onClick={openModal} icon={<BiSolidEdit />} disabled={disabled}/>
-      <Modal centered open={isOpen} title='Edit Filename' onCancel={closeModal} onOk={onSubmit} okText='Save'>
+      <Button type='text' onClick={openModal} icon={<BiSolidEdit />} disabled={disabled} />
+      <Modal
+        centered
+        open={isOpen}
+        title='Edit File Display name (Model Name)'
+        onCancel={closeModal}
+        onOk={onSubmit}
+        okText='Save'
+      >
         <Input value={filename} onChange={(e) => setFilename(e.target.value)} placeholder='Enter new filename' />
       </Modal>
     </>

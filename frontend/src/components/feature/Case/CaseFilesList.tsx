@@ -9,13 +9,7 @@ import { FaRegTrashAlt } from 'react-icons/fa';
 import queryClient from '@/config/queryClient';
 import EditFilenameModal from './EditFilenameModal';
 import { MdOutlineViewInAr } from 'react-icons/md';
-
-interface CaseFile {
-  id: string;
-  filename: string;
-  urls: string[];
-  uploaded_at: number;
-}
+import type { CaseFile } from '@/types/case';
 
 const CaseFilesList = ({
   files,
@@ -36,7 +30,6 @@ const CaseFilesList = ({
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const [file, setFile] = useState<File | null>(null);
-  console.log({ files });
   const columns: TableProps<CaseFile>['columns'] = [
     {
       width: '0',
@@ -71,7 +64,7 @@ const CaseFilesList = ({
       dataIndex: 'nickname',
       render: (nickname, record) => (
         <>
-          <EditFilenameModal disabled id={record.id} initialFilename={nickname} caseId={caseId} />
+          <EditFilenameModal version_id={record.version_id} initialFilename={nickname} caseId={caseId} />
           {nickname}
         </>
       ),
