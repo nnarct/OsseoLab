@@ -2,6 +2,7 @@ import { message, Modal } from 'antd';
 import { useState } from 'react';
 import MenuButton from './MenuButton';
 import { PiFloppyDiskBackDuotone } from 'react-icons/pi';
+import { useStlDisplay } from '@/hooks/useStlDisplay';
 
 interface SaveButtonProps {
   onClick: () => Promise<void>;
@@ -9,21 +10,36 @@ interface SaveButtonProps {
 
 const SaveButton = ({ onClick }: SaveButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messageApi, context] = message.useMessage();
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const handleClick = () => {
     setIsOpen(true);
   };
+  const {
+    planeHandler: { getPlanes },
+  } = useStlDisplay();
+  const planes = getPlanes();
   return (
     <>
-      {context}
-      <MenuButton icon={<PiFloppyDiskBackDuotone />} onClick={handleClick} tooltip='Save Model' text='Save' />
+      <MenuButton
+        icon={<PiFloppyDiskBackDuotone />}
+        onClick={handleClick}
+        tooltip='Save Model'
+        text='Save'
+        disabled={planes.length === 0}
+      />
       <Modal
         open={isOpen}
         centered
         onOk={async () => {
-          await onClick();
-          setIsOpen(false);
+          setIsSaving(true);
+          try {
+            await onClick();
+            setIsOpen(false);
+          } finally {
+            setIsSaving(false);
+          }
         }}
+        confirmLoading={isSaving}
         onCancel={() => setIsOpen(false)}
         title='Confirm Save'
         okText='Save'
