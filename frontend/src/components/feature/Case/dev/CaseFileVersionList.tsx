@@ -1,4 +1,4 @@
-import { Button, message, Popconfirm, Table, TableProps } from 'antd';
+import { Button, message, Popconfirm, Table, TableProps, Typography } from 'antd';
 import { axios } from '@/config/axiosConfig';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
@@ -37,10 +37,10 @@ const CaseFileVersionList = () => {
       dataIndex: 'nickname',
       title: 'Model name',
       render: (nickname, record) => (
-        <>
+        <div className='whitespace-nowrap'>
           <EditFilenameModal version_id={record.id} initialFilename={nickname} caseId={id as string} />
           {nickname}
-        </>
+        </div>
       ),
     },
     { dataIndex: 'version_number', title: 'Version Number', align: 'center' },
@@ -50,7 +50,7 @@ const CaseFileVersionList = () => {
         const maxVersion = Math.max(...data.map((item) => item.version_number));
         const isCurrent = record.version_number === maxVersion;
         return isCurrent ? (
-          '-'
+          'Current Version'
         ) : (
           <Popconfirm title='Revert to this version?' onConfirm={() => reverseVersion(record.id)}>
             <Button type='link'>Revert</Button>
@@ -61,16 +61,28 @@ const CaseFileVersionList = () => {
     },
   ];
 
-  return (
-    <div>
-      {contextHolder}
-      <Table
-        dataSource={[...data].sort((a, b) => b.version_number - a.version_number)}
-        columns={columns}
-        rowKey={'id'}
-      />
-    </div>
-  );
+  if (data.length > 0)
+    return (
+      <>
+        {contextHolder}
+        <div className='pb-4'>
+          <Typography.Title level={5} style={{ margin: 0 }}>
+            File versions
+          </Typography.Title>
+        </div>
+        <Table
+          dataSource={[...data].sort((a, b) => {
+            if (a.case_file_id === b.case_file_id) {
+              return b.version_number - a.version_number;
+            }
+            return a.case_file_id.localeCompare(b.case_file_id);
+          })}
+          columns={columns}
+          rowKey={'id'}
+          pagination={false}
+        />
+      </>
+    );
 };
 
 export default CaseFileVersionList;

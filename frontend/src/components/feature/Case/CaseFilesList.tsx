@@ -35,7 +35,7 @@ const CaseFilesList = ({
       width: '0',
       align: 'center',
       dataIndex: 'id',
-      title: 'Action',
+      title: <div className='whitespace-nowrap'>3D viewer</div>,
       key: 'id',
       render: (_, record) => (
         <Button
