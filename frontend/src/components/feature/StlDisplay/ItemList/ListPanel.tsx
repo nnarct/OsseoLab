@@ -10,7 +10,7 @@ import PlaneControls from '../ClippingPlane/PlaneControls';
 const ListPanel = () => {
   const { isOpen } = useItemListPanelStateStore();
   const {
-    planeHandler: { getPlanes, togglePlaneVisibility, removePlaneById },
+    planeHandler: { getPlanes, togglePlaneVisibility, removePlaneById},
     measureHandler: { markerPairs, togglePairVisibility, removePairById },
     angleHandler: { angleGroup, toggleAngleVisibility, removeAngleGroupById },
   } = useStlDisplay();
@@ -56,52 +56,64 @@ const ListPanel = () => {
     );
   };
 
-  if (!isOpen) return null;
+  // if (!isOpen) return null;
   return (
-    <div className='fixed'>
-      <Card
-        title={
-          <Typography.Title level={5} className='!mb-0 px-12 text-center'>
-            Measurement List
-          </Typography.Title>
-        }
-        size='small'
-        style={{ minWidth: 240 }}
+    <div
+      className={`fixed z-[1000] origin-top transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+        isOpen ? 'scale-y-100 opacity-100' : 'pointer-events-none scale-y-95 opacity-0'
+      }`}
+    >
+      <div
+        style={{
+          boxShadow: `0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05)`,
+          borderRadius: '8px',
+          marginTop: '6px',
+        }}
       >
-        <div className='flex flex-col'>
-          {markerPairs.length === 0 && angleGroup.length === 0 && planes.length === 0 && (
-            <div className='whitespace-nowrap'>Select a point.</div>
-          )}
-          {renderGroup(
-            'Distance',
-            markerPairs,
-            (pair) => pair.distance.toFixed(2),
-            togglePairVisibility,
-            removePairById
-          )}
-          {renderGroup(
-            'Angle',
-            angleGroup,
-            (group) => `${group.angleDeg.toFixed(2)} °`,
-            toggleAngleVisibility,
-            removeAngleGroupById
-          )}
-          {renderGroup(
-            'Plane',
-            planes,
-            (plane) => {
-              return (
-                <div className='flex items-center gap-1'>
-                  <span>{`Plane ${plane.number}`}</span>
-                  <PlaneControls plane={plane} />
-                </div>
-              );
-            },
-            togglePlaneVisibility,
-            removePlaneById
-          )}
-        </div>
-      </Card>
+        <Card
+          title={
+            <Typography.Title level={5} className='!mb-0 px-12 text-center'>
+              Measurement List
+            </Typography.Title>
+          }
+          size='small'
+          style={{ minWidth: 240, border: 'none' }}
+        >
+          <div className='flex flex-col'>
+            {markerPairs.length === 0 && angleGroup.length === 0 && planes.length === 0 && (
+              <div className='whitespace-nowrap'>Select a point.</div>
+            )}
+            {renderGroup(
+              'Distance',
+              markerPairs,
+              (pair) => pair.distance.toFixed(2),
+              togglePairVisibility,
+              removePairById
+            )}
+            {renderGroup(
+              'Angle',
+              angleGroup,
+              (group) => `${group.angleDeg.toFixed(2)} °`,
+              toggleAngleVisibility,
+              removeAngleGroupById
+            )}
+            {renderGroup(
+              'Plane',
+              planes,
+              (plane) => {
+                return (
+                  <div className='flex items-center gap-1'>
+                    <span>{`Plane ${plane.number}`}</span>
+                    <PlaneControls plane={plane} />
+                  </div>
+                );
+              },
+              togglePlaneVisibility,
+              removePlaneById
+            )}
+          </div>
+        </Card>
+      </div>
     </div>
   );
 };
