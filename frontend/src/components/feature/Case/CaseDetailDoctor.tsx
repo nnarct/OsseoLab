@@ -2,7 +2,7 @@ import CaseFilesList from '@/components/feature/Case/CaseFilesList';
 import { useGetCaseById } from '@/services/case/case.service';
 import { Button, Card, Descriptions, Divider } from 'antd';
 import dayjs from 'dayjs';
-import { FaRegEdit } from "react-icons/fa";
+import { FaRegEdit } from 'react-icons/fa';
 
 const CaseDetailDoctor = ({
   id,
@@ -38,7 +38,10 @@ const CaseDetailDoctor = ({
       loading={isLoading}
       title={
         <div className='flex justify-between'>
-          {`CASE${data ? String(case_number).padStart(3, '0') : ''} `} <Button onClick={() => setIsEditing(true)} icon={<FaRegEdit />}>Edit</Button>
+          {`CASE${data ? String(case_number).padStart(3, '0') : ''} `}{' '}
+          <Button onClick={() => setIsEditing(true)} icon={<FaRegEdit />}>
+            Edit
+          </Button>
         </div>
       }
     >
@@ -83,7 +86,7 @@ const CaseDetailDoctor = ({
             </Descriptions.Item>
           </Descriptions>
           <Divider />
-          <CaseFilesList files={data.files} caseId={id} caseNumber={data.case_number} />
+          <CaseFilesList files={data.files} caseId={id} caseNumber={data.case_number} readOnly />
         </>
       ) : (
         <></>
