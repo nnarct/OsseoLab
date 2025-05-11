@@ -14,7 +14,7 @@ import AngleButton from './AngleButton';
 import ItemListPanel from '../ItemList/ItemListPanel';
 import ResetModelButton from './ResetModelButton';
 import FaceFrontButton from './FaceFrontButton';
-import VisibilityButton from './VisibilityButton';
+// import VisibilityButton from './VisibilityButton';
 interface MenuBarProps {
   onSave: () => Promise<void>;
   // saving: boolean;
@@ -71,13 +71,13 @@ const MenuBar = (props:MenuBarProps) => {
           zIndex: 1000,
         }}
       >
-        <VisibilityButton/>
+        <ItemListPanel />
+        {/* <VisibilityButton/> */}
         <FaceFrontButton />
         <PlaneButton />
         <MeasureButton />
         <AngleButton />
         <SaveButton onClick={props.onSave}/>
-        <ItemListPanel />
         <ResetModelButton />
       </div>
       {/* {isMeasureActive && (

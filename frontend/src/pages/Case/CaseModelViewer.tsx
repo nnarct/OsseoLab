@@ -4,12 +4,13 @@ import Center from '@/components/feature/StlDisplay/Center';
 import { StlDisplayProvider } from '@/context/StlDisplayContext';
 
 import { Navigate, useLocation, useParams } from 'react-router-dom';
+import { useGetCaseNumberById } from '@/services/case/case.service';
 
 const CaseModelViewer = () => {
   const location = useLocation();
   const { id, caseId } = useParams();
   const { urls, caseNumber, filename } = location.state || {};
-
+  
   const [validUrls, setValidUrls] = useState<string[]>([]);
 
   // const allUrls = typeof rawUrl === 'string' ? [rawUrl] : rawUrl;
@@ -50,7 +51,7 @@ const CaseModelViewer = () => {
             CASE{String(caseNumber).padStart(3, '0')} {filename}
           </p>
         </CustomHeader>
-        <Center urls={urls} id={id} />
+        <Center urls={urls} />
         {/* <MenuBar />
       <CanvasScene url={url} /> */}
       </StlDisplayProvider>

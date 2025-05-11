@@ -1,5 +1,5 @@
 import { useStlDisplay } from '@/hooks/useStlDisplay';
-import { Dropdown, type DropdownProps, Menu, type MenuProps } from 'antd';
+import { Dropdown, type DropdownProps, type MenuProps } from 'antd';
 import MenuButton from './MenuButton';
 import { useState } from 'react';
 import { FaRegEye } from 'react-icons/fa';
