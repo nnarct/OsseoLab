@@ -1,6 +1,7 @@
+
 import { useQuery, useMutation } from '@tanstack/react-query';
 
-import { getCaseById, getCaseList, submitQuickCase } from '@/api/case.api';
+import { getCaseById, getCaseList, getCaseNumberByCaseId, submitQuickCase } from '@/api/case.api';
 import { getQuickCaseList, getQuickCaseById } from '@/api/case.api';
 
 export const useGetCaseList = () => {
@@ -23,4 +24,9 @@ export const useGetQuickCaseList = () => {
 
 export const useGetQuickCaseById = (id: string) => {
   return useQuery({ queryKey: ['quick-case', id], queryFn: () => getQuickCaseById(id) });
+};
+
+
+export const useGetCaseNumberById = (id: string) => {
+  return useQuery({ queryKey: ['case-number', id], queryFn: () => getCaseNumberByCaseId(id) });
 };

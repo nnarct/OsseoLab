@@ -6,6 +6,7 @@ export interface PlaneDataType {
   id: string;
   plane: Plane;
   position: Vector3;
+  origin: Vector3;
   mode: TransformControlsMode;
   frontColor: string;
   backColor: string;

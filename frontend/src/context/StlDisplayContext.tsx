@@ -8,6 +8,7 @@ import { OrbitControls } from 'three/examples/jsm/Addons.js';
 interface SceneHandlerRefType {
   camera?: THREE.PerspectiveCamera;
   controls?: OrbitControls;
+  scene?: THREE.Scene;
 }
 
 interface StlDisplayContextType {
@@ -38,6 +39,7 @@ interface StlDisplayContextType {
   };
 
   planeHandler: {
+    flipPlane: (planeId: string) => void;
     isCut: boolean;
     isActive: boolean;
     activePlaneId: string | null;
@@ -57,6 +59,7 @@ interface StlDisplayContextType {
     ) => void;
     togglePlaneVisibility: (id: string) => void;
     removePlaneById: (id: string) => void;
+    toggleActivePlaneId: (planeId: string) => void;
   };
 
   measureHandler: {
@@ -81,6 +84,9 @@ interface StlDisplayContextType {
   sceneHandlerRef: React.MutableRefObject<SceneHandlerRefType | null>;
   resetModel: () => void;
   faceFront: () => void;
+  faceBottom: () => void;
+  faceTop: () => void;
+  faceLeft: () => void;
 }
 
 const StlDisplayContext = createContext<StlDisplayContextType | undefined>(undefined);
@@ -105,7 +111,7 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
   const [angleGroup, setAngleGroup] = useState<AngleGroupDataType[]>([]);
   const [currentAngleGroup, setCurrentAngleGroup] = useState<IntersectionData[]>([]);
   const [panelAngleInfo, setAnglePanelInfo] = useState<string | null>('Select a point.');
- 
+
   const [visibleMeshes, setVisibleMeshes] = useState<Record<string, boolean>>({});
 
   const clearAngle = () => {
@@ -189,36 +195,64 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
-  const addPlane = useCallback(() => {
-    const id = uuid();
-    const newPlane = {
-      id,
-      plane: new THREE.Plane(new THREE.Vector3(1, 0, 0), 0),
-      position: new THREE.Vector3(0, 0, 0),
-      mode: 'translate' as TransformControlsMode,
-      frontColor: '#00ff00',
-      backColor: '#ff0000',
-      opacity: 0.5,
-      show: true,
-      number: planes[planes.length - 1]?.number + 1 || 1,
-    };
+  const addPlane = useCallback(
+    // (position: { x: number; y: number; z: number }) => {
+    () => {
+      const id = uuid();
+      const origin = new THREE.Vector3(0, 0, 0);
+      const newPlane = {
+        id,
+        plane: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
+        position: origin,
+        origin,
+        mode: 'translate' as TransformControlsMode,
+        frontColor: '#5bd389',
+        backColor: '#e95e5e',
+        opacity: 0.5,
+        show: true,
+        number: planes[planes.length - 1]?.number + 1 || 1,
+      };
 
-    setPlanes((prevPlanes) => [...prevPlanes, newPlane]);
-    setActivePlaneId(id);
-  }, [planes]);
+      setPlanes((prevPlanes) => [...prevPlanes, newPlane]);
+      setActivePlaneId(id);
+    },
+    [planes]
+  );
+  const flipPlane = (planeId: string) => {
+    setPlanes((prevItems) =>
+      prevItems.map((item) => {
+        if (item.id !== planeId) return item;
 
-  // const handleCuttingPlaneSelect = (index: number, value: string | undefined) => {
-  //   setSelectedCutPlanes((prev) => {
-  //     const updated = [...prev];
-  //     updated[index] = value;
+        const flipped = item.plane.clone().negate();
 
-  //     if (index === 0 && updated[1] === value) {
-  //       updated[1] = undefined;
-  //     }
+        // try updating mesh if it's active
+        const planeMesh = sceneHandlerRef.current?.scene?.getObjectByName(planeId) as THREE.Mesh;
+        if (planeMesh) {
+          const newNormal = flipped.normal.clone().normalize();
+          const quaternion = new THREE.Quaternion().setFromUnitVectors(
+            new THREE.Vector3(0, 0, 1), // default Z-plane
+            newNormal
+          );
+          planeMesh.setRotationFromQuaternion(quaternion);
+        }
 
-  //     return updated;
-  //   });
-  // };
+        return {
+          ...item,
+          plane: flipped,
+        };
+      })
+    );
+  };
+
+  const toggleActivePlaneId = (planeId: string) => {
+    if (activePlaneId === planeId) {
+      setActivePlaneId(null);
+      setCurrentTool(null);
+    } else {
+      setActivePlaneId(planeId);
+      setCurrentTool('plane');
+    }
+  };
 
   const removePlane = useCallback((id: string) => {
     setPlanes((prevPlanes) => prevPlanes.filter((plane) => plane.id !== id));
@@ -249,43 +283,64 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const faceFront = () => {
-    if (sceneHandlerRef.current) {
-      const camera = sceneHandlerRef.current.camera;
-      const controls = sceneHandlerRef.current.controls;
-      if (camera && controls) {
-        camera.position.set(0, 0, 60);
-        controls.target.set(0, 0, 0);
-        controls.autoRotate = false;
-        controls.update();
-      }
+    if (!sceneHandlerRef.current) {
+      return;
     }
+    const camera = sceneHandlerRef.current.camera;
+    const controls = sceneHandlerRef.current.controls;
+    if (!(camera && controls)) {
+      return;
+    }
+    camera.position.set(0, 0, 200);
+    controls.target.set(0, 0, 0);
+    controls.autoRotate = false;
+    controls.update();
   };
 
-  // const faceTop = () => {
-  //   if (sceneHandlerRef.current) {
-  //     const camera = sceneHandlerRef.current.camera;
-  //     const controls = sceneHandlerRef.current.controls;
-  //     if (camera && controls) {
-  //       camera.position.set(0, 60, 0); // กล้องลอยจากข้างบน
-  //       controls.target.set(0, 0, 0);
-  //       controls.autoRotate = false;
-  //       controls.update();
-  //     }
-  //   }
-  // };
+  const faceBottom = () => {
+    if (!sceneHandlerRef.current) {
+      return;
+    }
+    const camera = sceneHandlerRef.current.camera;
+    const controls = sceneHandlerRef.current.controls;
+    if (!(camera && controls)) {
+      return;
+    }
+    camera.position.set(0, -200, 0);
+    controls.target.set(0, 0, 0);
+    controls.autoRotate = false;
+    controls.update();
+  };
 
-  // const faceLeft = () => {
-  //   if (sceneHandlerRef.current) {
-  //     const camera = sceneHandlerRef.current.camera;
-  //     const controls = sceneHandlerRef.current.controls;
-  //     if (camera && controls) {
-  //       camera.position.set(-60, 0, 0); // กล้องจากด้านซ้าย
-  //       controls.target.set(0, 0, 0);
-  //       controls.autoRotate = false;
-  //       controls.update();
-  //     }
-  //   }
-  // };
+  const faceTop = () => {
+    if (!sceneHandlerRef.current) {
+      return;
+    }
+    const camera = sceneHandlerRef.current.camera;
+    const controls = sceneHandlerRef.current.controls;
+    if (!(camera && controls)) {
+      return;
+    }
+    camera.position.set(0, 200, 0); // กล้องลอยจากข้างบน
+    controls.target.set(0, 0, 0);
+    controls.autoRotate = false;
+    controls.update();
+  };
+
+  const faceLeft = () => {
+    if (!sceneHandlerRef.current) {
+      return;
+    }
+    const camera = sceneHandlerRef.current.camera;
+    const controls = sceneHandlerRef.current.controls;
+    if (!(camera && controls)) {
+      return;
+    }
+    camera.position.set(-200, 0, 0); // กล้องจากด้านซ้าย
+    controls.target.set(0, 0, 0);
+    controls.autoRotate = false;
+    controls.update();
+  };
   const resetModel = () => {
     setPlanes([]);
     setCurrentTool(null);
@@ -336,6 +391,7 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
         },
 
         planeHandler: {
+          flipPlane,
           isActive: currentTool === 'plane',
           activePlaneId,
           setActivePlaneId,
@@ -352,6 +408,7 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
           updateProperty: updatePlaneProperty,
           togglePlaneVisibility,
           removePlaneById: deletePlane,
+          toggleActivePlaneId,
         },
         measureHandler: {
           isActive: currentTool === 'measure',
@@ -373,6 +430,9 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
         sceneHandlerRef,
         resetModel,
         faceFront,
+        faceBottom,
+        faceTop,
+        faceLeft,
       }}
     >
       {children}

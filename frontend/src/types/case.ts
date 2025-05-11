@@ -32,11 +32,18 @@ export interface CaseFile {
   uploaded_at: number;
   urls: string[];
 }
-export interface Surgeon {
+export interface CaseFile {
+  created_at: number;
+  filename: string;
+  filesize: number;
+  filetype: string;
   id: string;
-  firstname: string;
-  lastname: string;
+  nickname: string;
+  order: number;
+  urls: string[];
+  version_id: string;
 }
+
 
 export interface CaseData {
   additional_note: string | null;

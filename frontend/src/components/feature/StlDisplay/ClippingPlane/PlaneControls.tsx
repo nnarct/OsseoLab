@@ -6,14 +6,23 @@ import { HiOutlineArrowsExpand } from 'react-icons/hi';
 import { IoMdMove } from 'react-icons/io';
 import { TbRotate360 } from 'react-icons/tb';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
+import { MdFlip } from 'react-icons/md';
 
 const PlaneControls = ({ plane }: { plane: PlaneDataType }) => {
-  const { updateProperty: updatePlaneProperty, activePlaneId, setActivePlaneId } = useStlDisplay().planeHandler;
+  const {
+    updateProperty: updatePlaneProperty,
+    activePlaneId,
+    toggleActivePlaneId,
+    flipPlane,
+  } = useStlDisplay().planeHandler;
   const isActive = activePlaneId === plane.id;
 
   return (
     <>
       <PlaneSettings plane={plane} />
+      <Tooltip title='Flip'>
+        <Button size='small' type={'text'} icon={<MdFlip />} onClick={() => flipPlane(plane.id)} />
+      </Tooltip>
       <Tooltip title='Move'>
         <Button
           type={plane.mode === 'translate' ? 'primary' : 'text'}
@@ -43,7 +52,7 @@ const PlaneControls = ({ plane }: { plane: PlaneDataType }) => {
       </Tooltip>
       <Button
         size='small'
-        onClick={() => setActivePlaneId(plane.id)}
+        onClick={() => toggleActivePlaneId(plane.id)}
         type={isActive ? 'primary' : 'text'}
         icon={<FaCheck />}
         shape='circle'

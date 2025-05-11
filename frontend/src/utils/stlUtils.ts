@@ -13,7 +13,7 @@ export const initializeSTLModel = (
   },
   meshRef: React.RefObject<THREE.Mesh>,
   gl: THREE.WebGLRenderer
-) => {
+) => { 
   if (!geometry) return;
 
   gl.localClippingEnabled = true;
@@ -21,19 +21,15 @@ export const initializeSTLModel = (
   geometry.computeBoundingBox();
   const center = new THREE.Vector3();
   geometry.boundingBox?.getCenter(center);
-  // geometry.translate(-center.x, -center.y, -center.z);
-
+  console.log('Bounding box:', geometry.boundingBox);
   const size = new THREE.Vector3();
   geometry.boundingBox?.getSize(size);
-  const maxSize = Math.max(size.x, size.y, size.z);
-  camera.position.set(0, 0, maxSize);
+  // const maxSize = Math.max(size.x, size.y, size.z);
+  camera.position.set(0, -200, 0);
   camera.lookAt(0, 0, 0);
 
   geometry.computeVertexNormals();
 
-  // if (meshRef.current) {
-  //   meshRef.current.rotation.set(-Math.PI / 2, 0, 0);
-  // }
 };
 
 /**

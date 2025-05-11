@@ -7,10 +7,14 @@ import * as THREE from 'three';
 const SceneSetter = () => {
   const { scene } = useThree();
   const setScene = useSceneStore((state) => state.setScene);
+  const { sceneHandlerRef } = useStlDisplay();
   const { setMarkerRadius } = useStlDisplay().tool;
   useEffect(() => {
     setScene(scene);
-  }, [scene, setScene]);
+    if (sceneHandlerRef.current) {
+      sceneHandlerRef.current.scene = scene;
+    }
+  }, [scene, sceneHandlerRef, setScene]);
   useEffect(() => {
     const box = new THREE.Box3().setFromObject(scene);
     const sphere = box.getBoundingSphere(new THREE.Sphere());

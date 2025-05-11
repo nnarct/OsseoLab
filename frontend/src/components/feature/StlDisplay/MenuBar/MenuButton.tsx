@@ -12,7 +12,10 @@ const MenuButton: React.FC<MenuButtonProps> = ({ tooltip, icon, text, ...props }
       {...props}
       type={props.type}
       size='large'
-      onClick={props.onClick}
+      
+      onClick={(e) => {
+        props.onClick?.(e);
+      }}
       disabled={props.disabled}
       style={{ width: 64, padding: '24px 8px', ...props.style }}
     >
