@@ -4,7 +4,7 @@ import Marker from '../MeasureTool/Marker';
 
 const AngleLine = ({ triple, markerRadius }: { triple: AngleGroupDataType; markerRadius: number }) => {
   return (
-    <group>
+    <group visible={triple.show}>
       <Marker position={triple.origin.point} normal={triple.origin.normal} radius={markerRadius} />
       <Marker position={triple.middle.point} normal={triple.origin.normal} radius={markerRadius} />
       <Marker position={triple.destination.point} normal={triple.destination.normal} radius={markerRadius} />

@@ -8,11 +8,7 @@ const AngleLineGroup = () => {
   } = useStlDisplay();
 
   return (
-    <>
-      {angleGroup?.map((triple, index) => {
-        if (triple.show) return <AngleLine key={index} triple={triple} markerRadius={markerRadius} />;
-      })}
-    </>
+    <>{angleGroup?.map((triple, index) => <AngleLine key={index} triple={triple} markerRadius={markerRadius} />)}</>
   );
 };
 

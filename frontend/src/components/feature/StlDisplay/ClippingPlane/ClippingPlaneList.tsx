@@ -6,9 +6,9 @@ const ClippingPlaneList = () => {
 
   return (
     <>
-      {planes.map((planeObj) => {
-        if (planeObj.show) return <ClippingPlane key={planeObj.id} {...planeObj} />;
-      })}
+      {planes.map((planeObj) => (
+        <ClippingPlane key={planeObj.id} {...planeObj} />
+      ))}
     </>
   );
 };

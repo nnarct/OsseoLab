@@ -15,6 +15,7 @@ const ClippingPlane = ({
   frontColor = '#00ff00',
   backColor = '#ff0000',
   opacity = 0.5,
+  show
 }: {
   plane: THREE.Plane;
   id: string;
@@ -22,11 +23,14 @@ const ClippingPlane = ({
   frontColor?: string;
   backColor?: string;
   opacity?: number;
+  show: boolean
 }) => {
   const planeRef = useRef<THREE.Mesh>(null);
-  const { planeHandler } = useStlDisplay();
+  const { planeHandler, tool } = useStlDisplay();
   const updatePlane = usePlaneUpdater(plane, id);
-  const isActive = id === planeHandler.activePlaneId;
+
+
+  const isActive = id === planeHandler.activePlaneId && tool.current === 'plane';
 
   const { transformRef, camera, domElement } = useTransformControls(isActive, planeRef, () =>
     updatePlane(planeRef.current)
@@ -43,11 +47,39 @@ const ClippingPlane = ({
           camera={camera}
           domElement={domElement}
           onMouseUp={() => updatePlane(planeRef.current)}
-          onObjectChange={() => updatePlane(planeRef.current)}
+          onObjectChange={() => {
+            updatePlane(planeRef.current);
+            // const mesh = planeRef.current;
+            // if (mesh) {
+            //   const plane_origin = mesh.getWorldPosition(new THREE.Vector3());
+            //   const plane_normal = new THREE.Vector3(0, 0, 1)
+            //     .applyQuaternion(mesh.getWorldQuaternion(new THREE.Quaternion()))
+            //     .normalize();
+            //   const plane_constant = -plane_normal.dot(plane_origin);
+
+            //   const convertVectorToTrimeshSpace = (v: THREE.Vector3) => new THREE.Vector3(-v.x, v.z, -v.y);
+
+            //   const converted_normal = convertVectorToTrimeshSpace(plane_normal);
+            //   const converted_origin = convertVectorToTrimeshSpace(plane_origin);
+            //   const converted_constant = -converted_normal.dot(converted_origin);
+            //   // console.log(`ori:${plane_normal.x},${plane_normal.y},${plane_normal.z}`);
+            //   // console.log(`con:${converted_normal.x},${converted_normal.y},${converted_normal.z}`);
+            //   // console.log({
+            //   //   plane_origin: converted_origin,
+            //   //   plane_normal: converted_normal,
+            //   //   plane_constant: converted_constant,
+            //   // });
+            //   // console.log({
+            //   //   plane_origin,
+            //   //   plane_normal,
+            //   //   plane_constant,
+            //   // });
+            // }
+          }}
         />
       )}
-      <mesh ref={planeRef} userData={{ type: 'clippingPlane' }}>
-        <planeGeometry args={[50, 50]} />
+      <mesh ref={planeRef} userData={{ type: 'clippingPlane' }} name={id} visible={show}>
+        <planeGeometry args={[150, 150]} />
         <primitive object={material} />
       </mesh>
     </>

@@ -11,7 +11,7 @@ const MeasureLine = ({ pair, markerRadius }: { pair: MarkerPairDataType;  marker
     .add(new THREE.Vector3(0, markerRadius * 2, 0));
 
   return (
-    <group >
+    <group visible={pair.show}>
       <Marker position={pair.origin.point} normal={pair.origin.normal} radius={markerRadius} />
       <Marker position={pair.destination.point} normal={pair.destination.normal} radius={markerRadius} />
 
@@ -40,6 +40,8 @@ const MeasureLine = ({ pair, markerRadius }: { pair: MarkerPairDataType;  marker
         //   transform: `scale(${computeScale(camera, midPoint)})`,
         //   transformOrigin: 'center center',
         // }}
+        zIndexRange={[0, 0]} 
+        style={{ zIndex: 1 }}
       >
         <div
           style={{
