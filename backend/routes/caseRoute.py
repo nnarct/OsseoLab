@@ -1,3 +1,4 @@
+
 import os
 from constants.paths import UPLOAD_FOLDER
 from services.url_secure_service import generate_secure_url_case_file
@@ -272,3 +273,22 @@ def delete_case(case_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"statusCode": 500, "message": "Failed to delete case", "error": str(e)}), 500
+
+# Route to get case number by case ID
+@case_bp.route("/case/<case_id>/number", methods=["GET"])
+@jwt_required()
+@roles_required("admin", "doctor", "technician")
+def get_case_number(case_id):
+    try:
+        case = Case.query.get(case_id)
+        if not case:
+            return jsonify({"statusCode": 404, "message": "Case not found"}), 404
+
+        return jsonify({
+            "statusCode": 200,
+            "data": {
+                "case_number": case.case_number
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({"statusCode": 500, "message": "Failed to retrieve case number", "error": str(e)}), 500

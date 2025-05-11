@@ -51,6 +51,8 @@ def add_new_case_file():
         # Create a temporary CaseFile to get an ID
         temp_case_file = CaseFile(
             case_id=case_id,
+            original_filename=filename,
+        
         )
         db.session.add(temp_case_file)
         db.session.flush()  # Get temp_case_file.id without full commit
@@ -131,15 +133,17 @@ def delete_case_file(file_id):
 
     # Delete all versioned files from disk before deleting the CaseFile
         from models.case_file_versions import CaseFileVersion
-        versions = CaseFileVersion.query.filter_by(case_file_id=case_file.id).all()
+        versions = CaseFileVersion.query.filter_by(
+            case_file_id=case_file.id).all()
         for version in versions:
-            file_path = os.path.join(get_case_files_upload_folder(), version.file_path)
+            file_path = os.path.join(
+                get_case_files_upload_folder(), version.file_path)
             if os.path.exists(file_path):
                 os.remove(file_path)
 
             # Delete from database
-            db.session.delete(case_file)
-            db.session.commit()
+        db.session.delete(case_file)
+        db.session.commit()
 
         return jsonify({"statusCode": 200, "message": "File deleted successfully"}), 200
     except Exception as e:
@@ -148,30 +152,41 @@ def delete_case_file(file_id):
 
 
 # Endpoint to rename a CaseFile by its ID
-@case_file_bp.route("/case-file/<string:file_id>/rename", methods=["PATCH"])
-def rename_case_file(file_id):
-    try:
-        data = request.get_json()
-        new_name = data.get("filename", "").strip()
+# @case_file_bp.route("/case-file/<string:file_id>/rename", methods=["PATCH"])
+# def rename_case_file(file_id):
+#     try:
+#         data = request.get_json()
+#         new_name = data.get("filename", "").strip()
 
-        if not new_name:
-            return jsonify({"statusCode": 400, "message": "New filename is required"}), 400
+#         if not new_name:
+#             return jsonify({"statusCode": 400, "message": "New filename is required"}), 400
 
-        case_file = CaseFile.query.filter_by(id=file_id).first()
-        if not case_file:
-            return jsonify({"statusCode": 404, "message": "File not found"}), 404
+#         case_file = CaseFile.query.filter_by(id=file_id).first()
+#         if not case_file:
+#             return jsonify({"statusCode": 404, "message": "File not found"}), 404
 
-        case_file.filename = new_name
-        db.session.commit()
+#         case_file.filename = new_name
+#         db.session.commit()
 
-        return jsonify({
-            "statusCode": 200,
-            "message": "Filename updated successfully",
-            "data": {
-                "id": str(case_file.id),
-                "filename": case_file.filename
-            }
-        }), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"statusCode": 500, "message": "Failed to update filename", "error": str(e)}), 500
+#         return jsonify({
+#             "statusCode": 200,
+#             "message": "Filename updated successfully",
+#             "data": {
+#                 "id": str(case_file.id),
+#                 "filename": case_file.filename
+#             }
+#         }), 200
+#     except Exception as e:
+#         db.session.rollback()
+#         return jsonify({"statusCode": 500, "message": "Failed to update filename", "error": str(e)}), 500
+
+
+# # Automatically delete file from disk when a CaseFileVersion is removed
+# from sqlalchemy.event import listens_for
+# from models.case_file_versions import CaseFileVersion
+
+# @listens_for(CaseFileVersion, "before_delete")
+# def delete_case_file_version_file(mapper, connection, target):
+#     file_path = os.path.join(get_case_files_upload_folder(), target.file_path)
+#     if os.path.exists(file_path):
+#         os.remove(file_path)
