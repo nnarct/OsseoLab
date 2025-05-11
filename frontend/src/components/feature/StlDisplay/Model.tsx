@@ -1,24 +1,58 @@
-import { Ref, useEffect, useRef, useState } from 'react';
-import { useLoader, useThree } from '@react-three/fiber';
+import { Ref, useEffect, useRef, useState, useMemo, createRef } from 'react';
+import { useThree } from '@react-three/fiber';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import * as THREE from 'three';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 import { initializeSTLModel } from '@/utils/stlUtils';
-import { Html } from '@react-three/drei';
-import { Button } from 'antd';
+
+const useSafeStlLoader = (urls: string[]): THREE.BufferGeometry[] => {
+  const [geometries, setGeometries] = useState<THREE.BufferGeometry[]>([]);
+
+  useEffect(() => {
+    const loader = new STLLoader();
+
+    const loadAll = async () => {
+      const loadedGeometries: THREE.BufferGeometry[] = [];
+
+      for (const url of urls) {
+        try {
+          const text = await fetch(url).then((res) => res.text());
+
+          if (text.trim() === 'solid\nendsolid' || text.trim() === 'solid\r\nendsolid') {
+            console.warn(`Empty STL — skipping: ${url}`);
+            continue;
+          }
+
+          const buffer = await fetch(url).then((res) => res.arrayBuffer());
+          const geometry = loader.parse(buffer);
+          loadedGeometries.push(geometry);
+        } catch (err) {
+          console.error('Error loading STL:', err);
+        }
+      }
+
+      setGeometries(loadedGeometries);
+    };
+
+    loadAll();
+  }, [urls]);
+
+  return geometries;
+};
 
 const Model = ({ urls }: { urls: string[] }) => {
-  console.log('render <Model/>')
+  // console.log('render <Model/>')
   const { camera, gl } = useThree();
   const { planeHandler } = useStlDisplay();
   const { isCut } = planeHandler;
   const planes = planeHandler.getPlanes();
 
-  const { visibleMeshes, toggleVisibility, setVisibleMeshes } = useStlDisplay().meshVisibility;
+  const { visibleMeshes, setVisibleMeshes } = useStlDisplay().meshVisibility;
 
-  const geometries = useLoader(STLLoader, urls) as THREE.BufferGeometry[];
+  const geometries = useSafeStlLoader(urls);
 
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
+  const meshRefs = useMemo(() => urls.map(() => createRef<THREE.Mesh>()), [urls]);
 
   useEffect(() => {
     const initialVisibility: Record<string, boolean> = {};
@@ -26,7 +60,7 @@ const Model = ({ urls }: { urls: string[] }) => {
       initialVisibility[url] = true;
     });
     setVisibleMeshes(initialVisibility);
-  }, [urls]);
+  }, [setVisibleMeshes, urls]);
 
   useEffect(() => {
     if (materialRef.current && planes.length > 0 && isCut) {
@@ -36,37 +70,12 @@ const Model = ({ urls }: { urls: string[] }) => {
     }
   }, [planes, isCut]);
 
-  if (!geometries || geometries.length === 0) return null;
+  if (!geometries || geometries.length === 0 || geometries[0].attributes.position.count === 0) {
+    console.warn('Empty STL loaded — no geometry found');
+    return null;
+  }
   return (
     <>
-      {/* <Html fullscreen zIndexRange={[1, 0]}>
-        <div style={{
-          position: 'absolute',
-          top: 20,
-          left: 20,
-          background: 'white',
-          padding: '8px',
-          borderRadius: '4px',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
-        }}>
-          {urls.map((url, index) => (
-            <Button
-              key={url}
-              onClick={() => toggleVisibility(url)}
-              style={{
-                display: 'block',
-                marginBottom: '4px',
-                padding: '4px 8px',
-                background: visibleMeshes[url] ? '#ffcccc' : '#ccffcc',
-                border: '1px solid #ccc',
-                cursor: 'pointer',
-              }}
-            >
-              {visibleMeshes[url] ? `Hide Mesh ${index + 1}` : `Show Mesh ${index + 1}`}
-            </Button>
-          ))}
-        </div>
-      </Html> */}
       {geometries.map((geometry, index) => (
         <MeshComponent
           key={index}
@@ -75,6 +84,7 @@ const Model = ({ urls }: { urls: string[] }) => {
           materialRef={materialRef}
           gl={gl}
           visible={visibleMeshes[urls[index]]}
+          localRef={meshRefs[index]}
         />
       ))}
     </>
@@ -89,6 +99,7 @@ const MeshComponent = ({
   materialRef,
   gl,
   visible,
+  localRef,
 }: {
   geometry: THREE.BufferGeometry;
   camera: THREE.Camera;
@@ -96,21 +107,16 @@ const MeshComponent = ({
   gl: THREE.WebGLRenderer;
   visible: boolean;
   onClick?: () => void;
+  localRef: Ref<THREE.Mesh>;
 }) => {
-  console.log('render <MeshComponent/>')
-  const localRef = useRef<THREE.Mesh>(null);
-
   useEffect(() => {
-    initializeSTLModel(geometry, camera, localRef, gl);
-  }, [geometry, camera, gl]);
+    if (localRef && 'current' in localRef && localRef.current) {
+      initializeSTLModel(geometry, camera, localRef, gl);
+    }
+  }, [geometry, camera, gl, localRef]);
 
   return (
-    <mesh
-      ref={localRef}
-      geometry={geometry}
-      visible={visible}
-      userData={{ type: 'stlModel' }}
-    >
+    <mesh ref={localRef} geometry={geometry} visible={visible} userData={{ type: 'stlModel' }}>
       <meshStandardMaterial
         ref={materialRef}
         color='#E8D7C0'
