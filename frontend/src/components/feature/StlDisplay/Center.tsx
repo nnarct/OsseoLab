@@ -72,12 +72,24 @@ const Center = ({ urls }: { urls: string[] }) => {
     };
 
     if (payload.planes.length === 2) {
-      const n0 = payload.planes[0].normal;
-      const n1 = payload.planes[1].normal;
-      const v0 = new THREE.Vector3(n0.x, n0.y, n0.z).normalize();
-      const v1 = new THREE.Vector3(n1.x, n1.y, n1.z).normalize();
-      const dot = v0.dot(v1);
-      console.log(`[DOT FRONTEND] Plane 0 normal:`, v0.toArray(), `Plane 1 normal:`, v1.toArray(), `Dot product:`, dot);
+      const [p0, p1] = payload.planes;
+
+      const origin0 = new THREE.Vector3(p0.origin.x, p0.origin.y, p0.origin.z);
+      const origin1 = new THREE.Vector3(p1.origin.x, p1.origin.y, p1.origin.z);
+
+      const normal0 = new THREE.Vector3(p0.normal.x, p0.normal.y, p0.normal.z).normalize();
+      const normal1 = new THREE.Vector3(p1.normal.x, p1.normal.y, p1.normal.z).normalize();
+
+      const direction01 = origin1.clone().sub(origin0).normalize();
+      const direction10 = origin0.clone().sub(origin1).normalize();
+
+      const facing0 = normal0.dot(direction01); // > 0 means Plane 0 faces Plane 1
+      const facing1 = normal1.dot(direction10); // > 0 means Plane 1 faces Plane 0
+
+      const areFacingEachOther = facing0 > 0 && facing1 > 0;
+
+      console.log(`[FACING CHECK] Plane 0 facing 1:`, facing0, `Plane 1 facing 0:`, facing1);
+      console.log('Planes facing each other:', areFacingEachOther);
     }
 
     console.log({ payload: payload.planes });

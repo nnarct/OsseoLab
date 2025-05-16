@@ -196,27 +196,90 @@ def cut_plane(mesh, normal, constant, cut_path):
 
 
 def cut_two_planes(mesh, normal_a, constant_a, normal_b, constant_b, cut_path):
+    import numpy as np
+
+    vec_a = np.array([normal_a['x'], normal_a['y'], normal_a['z']])
+    vec_b = np.array([normal_b['x'], normal_b['y'], normal_b['z']])
+    vec_a = vec_a / np.linalg.norm(vec_a)
+    vec_b = vec_b / np.linalg.norm(vec_b)
+
+    dot = np.dot(vec_a, vec_b)
+    are_not_parallel = not np.isclose(abs(dot), 1.0, atol=1e-2)
+
+    origin_a = -vec_a * constant_a
+    origin_b = -vec_b * constant_b
+
+    direction_ab = origin_b - origin_a
+    direction_ba = origin_a - origin_b
+
+    facing_a = np.dot(vec_a, direction_ab) > 0
+    facing_b = np.dot(vec_b, direction_ba) > 0
+
+    are_facing_each_other = facing_a and facing_b
+
+    # --- Crossing point and relation to mesh center ---
+    center = mesh.centroid  # Center of mesh
+
+    # Estimate intersection line direction from cross product of normals
+    line_direction = np.cross(vec_a, vec_b)
+    if np.linalg.norm(line_direction) < 1e-6:
+        line_direction = np.zeros(3)
+
+    # Midpoint between the two plane origins
+    midpoint = (origin_a + origin_b) / 2
+
+    # Vector from center of mesh to the crossing point
+    center_to_cross = midpoint - center
+
+    # Project distance along the intersection direction
+    distance_to_center = np.dot(center_to_cross, line_direction)
+
+    # Heuristic: if too far, we consider the cut to be away from center
+    is_cutting_away_from_center = abs(distance_to_center) > np.max(mesh.extents) * 0.5
+
+    # --- Method selection with additional center heuristic ---
+    if not are_not_parallel and are_facing_each_other and not is_cutting_away_from_center:
+        method = 1  # Case 1: parallel, facing, and close to center
+    else:
+        method = 2  # Case 2, 3, 4 or far from center
+
+    if method == 1:
+        result_mesh = method_1(mesh, normal_a, constant_a, normal_b, constant_b)
+    else:
+        result_mesh = method_2(mesh, normal_a, constant_a, normal_b, constant_b)
+
+    result_mesh.export(file_obj=cut_path, file_type='stl_ascii')
+    return f'method_{method}', result_mesh
+
+
+def method_1(mesh, normal_a, constant_a, normal_b, constant_b):
+    mesh_a = mesh.copy()
+
+    normal_a = np.array(
+        [normal_a['x'], normal_a['y'], normal_a['z']])
+    origin_a = -normal_a * constant_a
+    normal_b = np.array(
+        [normal_b['x'], normal_b['y'], normal_b['z']])
+    origin_b = -normal_b * constant_b
+    mesh_a = mesh_a.slice_plane(origin_a, normal_a)
+    result_mesh = mesh_a.slice_plane(origin_b, normal_b)
+    return result_mesh
+
+
+def method_2(mesh, normal_a, constant_a, normal_b, constant_b):
     mesh_a = mesh.copy()
     mesh_b = mesh.copy()
-    normal_a_np = np.array(
-        [normal_a['x'], normal_a['y'], normal_a['z']])
-    origin_a = -normal_a_np * constant_a
-    normal_b_np = np.array(
-        [normal_b['x'], normal_b['y'], normal_b['z']])
-    origin_b = -normal_b_np * constant_b
-    cross = bool(will_planes_cross(normal_a, origin_a, normal_b, origin_b))
 
-    if cross:
-        mesh_a = mesh_a.slice_plane(origin_a, normal_a_np)
-        mesh_b = mesh_b.slice_plane(origin_b, normal_b_np)
-        merged = mesh_a + (mesh_b)
-        merged.export(file_obj=cut_path, file_type='stl_ascii')
-        return str(cross), mesh
-    else:
-        mesh_a = mesh_a.slice_plane(origin_a, normal_a_np)
-        result = mesh_a.slice_plane(origin_b, normal_b_np)
-        result.export(file_obj=cut_path, file_type='stl_ascii')
-        return str(cross), mesh
+    normal_a = np.array(
+        [normal_a['x'], normal_a['y'], normal_a['z']])
+    origin_a = -normal_a * constant_a
+    normal_b = np.array(
+        [normal_b['x'], normal_b['y'], normal_b['z']])
+    origin_b = -normal_b * constant_b
+    mesh_a = mesh_a.slice_plane(origin_a, normal_a)
+    mesh_b = mesh_b.slice_plane(origin_b, normal_b)
+    result_mesh = mesh_a + mesh_b
+    return result_mesh
 
 
 def will_planes_cross(normal_a, origin_a, normal_b, origin_b):
@@ -229,10 +292,12 @@ def will_planes_cross(normal_a, origin_a, normal_b, origin_b):
     vec_b = vec_b / np.linalg.norm(vec_b)
 
     dot = np.dot(vec_a, vec_b)
-    is_parallel = np.isclose(dot, 1.0, atol=1e-2) or np.isclose(dot, -1.0, atol=1e-2)
+    is_parallel = np.isclose(
+        dot, 1.0, atol=1e-2) or np.isclose(dot, -1.0, atol=1e-2)
 
     origin_diff = origin_b - origin_a
-    face_check = (np.dot(vec_a, origin_diff) > 0 and np.dot(vec_b, -origin_diff) > 0)
+    face_check = (np.dot(vec_a, origin_diff) >
+                  0 and np.dot(vec_b, -origin_diff) > 0)
 
     print(f"Dot: {dot}, Parallel: {is_parallel}, Faces each other: {face_check}")
     return not is_parallel and face_check
