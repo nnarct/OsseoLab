@@ -52,6 +52,8 @@ def verify_case_file_version_token(token):
 @cutting_plane_bp.route("/cutting-plane/save-multiple", methods=["POST"])
 @jwt_required()
 def cut_and_save_multiple():
+    # return jsonify({"statusCode": 500, "message": "Failed to process cutting planes", }), 500
+
     try:
         created_by = get_jwt()["userData"]["id"]
 
@@ -62,7 +64,7 @@ def cut_and_save_multiple():
             return jsonify({"statusCode": 400, "message": "Missing planes or tokens"}), 400
 
         all_results = []
-        urls=[]
+        urls = []
         for token in tokens:
             version_id = verify_case_file_version_token(token)
             if not version_id:
@@ -80,13 +82,13 @@ def cut_and_save_multiple():
             if not os.path.exists(original_path):
                 return jsonify({"statusCode": 400, "message": "Physical File from saved path not found"}), 400
 
-            mesh = trimesh.load_mesh(original_path)
-
             cut_filename = f"{os.path.splitext(case_file_entry.original_filename)[0]}_v{version_entry.version_number+1}.stl"
             cut_folder = os.path.join(
                 get_case_files_upload_folder(), str(case_file_entry.case_id))
             os.makedirs(cut_folder, exist_ok=True)
             cut_path = os.path.join(cut_folder, cut_filename)
+
+            mesh = trimesh.load_mesh(original_path)
 
             # Apply either one or two plane cuts, then create new version and planes
             if len(planes) == 1:
@@ -113,22 +115,12 @@ def cut_and_save_multiple():
                 dot = np.dot(vec_a, vec_b)
                 angle = np.degrees(np.arccos(np.clip(dot, -1.0, 1.0)))
                 is_cross = 70 <= angle <= 110
-
+                origin_a = -vec_a * constant_a
+                origin_b = -vec_b * constant_b
                 try:
-                    if dot > 0 :
-                        cut_method, mesh = cut_two_planes(
-                            mesh, normal_a, constant_a, normal_b, constant_b, cut_path)
-                        cut_method = 'หันเข้าหากัน'
-                    elif not is_cross:
-                        # Cut one plane first
-                        cut_method, t_mesh = cut_plane(
-                            mesh, normal_a, constant_a, cut_path)
-                        # Then generate temp path for second cut
-                        cut_path_temp = cut_path.replace('.stl', '_tmp.stl')
-                        cut_method, mesh = cut_plane(
-                            t_mesh, normal_b, constant_b, cut_path_temp)
-                        cut_method = 'หันออกจากกัน' if dot <= 0 else 'cross'
-                        os.replace(cut_path_temp, cut_path)
+                    cut_method, mesh = cut_two_planes(
+                        mesh, normal_a, constant_a, normal_b, constant_b, cut_path)
+
                     new_planes = []
                 except Exception as e:
                     db.session.rollback()
@@ -200,27 +192,50 @@ def cut_plane(mesh, normal, constant, cut_path):
     mesh = mesh.slice_plane(origin, normal)
     print(mesh.bounds)
     mesh.export(file_obj=cut_path, file_type='stl_ascii')
-    return 'jena', mesh
+    return 'one_pane', mesh
 
 
 def cut_two_planes(mesh, normal_a, constant_a, normal_b, constant_b, cut_path):
     mesh_a = mesh.copy()
     mesh_b = mesh.copy()
-
-    normal_a = np.array(
+    normal_a_np = np.array(
         [normal_a['x'], normal_a['y'], normal_a['z']])
-    origin_a = -normal_a * constant_a
-    mesh_a = mesh.slice_plane(origin_a, normal_a)
-
-    normal_b = np.array(
+    origin_a = -normal_a_np * constant_a
+    normal_b_np = np.array(
         [normal_b['x'], normal_b['y'], normal_b['z']])
-    origin_b = -normal_b * constant_b
-    mesh_b = mesh.slice_plane(origin_b, normal_b)
+    origin_b = -normal_b_np * constant_b
+    cross = bool(will_planes_cross(normal_a, origin_a, normal_b, origin_b))
 
-    merged = mesh_a + (mesh_b)
-    merged.export(file_obj=cut_path, file_type='stl_ascii')
-    return 'jena', mesh
+    if cross:
+        mesh_a = mesh_a.slice_plane(origin_a, normal_a_np)
+        mesh_b = mesh_b.slice_plane(origin_b, normal_b_np)
+        merged = mesh_a + (mesh_b)
+        merged.export(file_obj=cut_path, file_type='stl_ascii')
+        return str(cross), mesh
+    else:
+        mesh_a = mesh_a.slice_plane(origin_a, normal_a_np)
+        result = mesh_a.slice_plane(origin_b, normal_b_np)
+        result.export(file_obj=cut_path, file_type='stl_ascii')
+        return str(cross), mesh
 
+
+def will_planes_cross(normal_a, origin_a, normal_b, origin_b):
+    vec_a = np.array([normal_a['x'], normal_a['y'], normal_a['z']])
+    vec_b = np.array([normal_b['x'], normal_b['y'], normal_b['z']])
+    origin_a = np.array(origin_a)
+    origin_b = np.array(origin_b)
+
+    vec_a = vec_a / np.linalg.norm(vec_a)
+    vec_b = vec_b / np.linalg.norm(vec_b)
+
+    dot = np.dot(vec_a, vec_b)
+    is_parallel = np.isclose(dot, 1.0, atol=1e-2) or np.isclose(dot, -1.0, atol=1e-2)
+
+    origin_diff = origin_b - origin_a
+    face_check = (np.dot(vec_a, origin_diff) > 0 and np.dot(vec_b, -origin_diff) > 0)
+
+    print(f"Dot: {dot}, Parallel: {is_parallel}, Faces each other: {face_check}")
+    return not is_parallel and face_check
 
 # def cutting_mesh(mesh, origin, normal, cut_path):
 #     from trimesh.intersections import slice_mesh_plane
