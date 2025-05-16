@@ -33,33 +33,28 @@ const MeasureLine = ({ pair, markerRadius }: { pair: MarkerPairDataType;  marker
         polygonOffset={true}
         polygonOffsetFactor={-1}
       />
-      <Html
-        position={midPoint}
-        center
-        // style={{
-        //   transform: `scale(${computeScale(camera, midPoint)})`,
-        //   transformOrigin: 'center center',
-        // }}
-        zIndexRange={[0, 0]} 
-        style={{ zIndex: 1 }}
-      >
-        <div
-          style={{
-            // width: '50vw',
-            padding: '0.5rem',
-            borderRadius: '0.5rem',
-            backgroundColor: '#ff6f00',
-            color: 'white',
-            // fontWeight: 'bold',
-            fontSize: '1rem',
-            boxShadow: '0 0 4px rgba(0,0,0,0.3)',
-            whiteSpace: 'nowrap',
-          }}
+      {pair.show && (
+        <Html
+          position={midPoint}
+          center
+          zIndexRange={[0, 0]} 
+          style={{ zIndex: 1 }}
         >
-          {/* what is the real metrics size, !!need calculation */}
-          {pair.distance.toFixed(3)}
-        </div>
-      </Html>
+          <div
+            style={{
+              padding: '0.5rem',
+              borderRadius: '0.5rem',
+              backgroundColor: '#ff6f00',
+              color: 'white',
+              fontSize: '1rem',
+              boxShadow: '0 0 4px rgba(0,0,0,0.3)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {pair.distance.toFixed(3)} mm
+          </div>
+        </Html>
+      )}
     </group>
   );
 };

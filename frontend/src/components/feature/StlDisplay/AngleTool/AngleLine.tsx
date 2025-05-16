@@ -39,7 +39,7 @@ const AngleLine = ({ triple, markerRadius }: { triple: AngleGroupDataType; marke
         polygonOffset={true}
         polygonOffsetFactor={-1}
       />
-      <Html
+     {triple.show && <Html
         position={triple.middle.point}
         center
         // style={{
@@ -62,7 +62,7 @@ const AngleLine = ({ triple, markerRadius }: { triple: AngleGroupDataType; marke
         >
           {triple.angleDeg.toFixed(2)}°
         </div>
-      </Html>
+      </Html>}
     </group>
   );
 };
