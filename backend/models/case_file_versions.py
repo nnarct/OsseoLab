@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship
 class CaseFileVersion(db.Model):
     __tablename__ = "case_file_versions"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    case_file_id = Column(String, ForeignKey('case_files.id', ondelete='CASCADE'), nullable=False)
+    case_file_id = Column(UUID, ForeignKey('case_files.id', ondelete='CASCADE'), nullable=False)
     version_number = Column(Integer, nullable=False)
     file_path = Column(String, nullable=False)  # actual storage path of the file
     filename = Column(String(255), nullable=False)

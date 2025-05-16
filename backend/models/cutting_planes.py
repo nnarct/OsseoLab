@@ -11,9 +11,9 @@ class CuttingPlane(db.Model):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     # Store both original and resulting version IDs
-    original_version_id = Column(String, ForeignKey(
+    original_version_id = Column(UUID, ForeignKey(
         "case_file_versions.id", ondelete="CASCADE"), nullable=False)
-    resulting_version_id = Column(String, ForeignKey(
+    resulting_version_id = Column(UUID, ForeignKey(
         "case_file_versions.id", ondelete="CASCADE"), nullable=False)
 
     name = Column(String)
