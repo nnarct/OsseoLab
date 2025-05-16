@@ -1,44 +1,9 @@
-import { Ref, useEffect, useRef, useState, useMemo, createRef } from 'react';
+import { Ref, useEffect, useRef, useMemo, createRef } from 'react';
 import { useThree } from '@react-three/fiber';
-import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import * as THREE from 'three';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 import { initializeSTLModel } from '@/utils/stlUtils';
-
-const useSafeStlLoader = (urls: string[]): THREE.BufferGeometry[] => {
-  const [geometries, setGeometries] = useState<THREE.BufferGeometry[]>([]);
-
-  useEffect(() => {
-    const loader = new STLLoader();
-
-    const loadAll = async () => {
-      const loadedGeometries: THREE.BufferGeometry[] = [];
-
-      for (const url of urls) {
-        try {
-          const text = await fetch(url).then((res) => res.text());
-
-          if (text.trim() === 'solid\nendsolid' || text.trim() === 'solid\r\nendsolid') {
-            console.warn(`Empty STL — skipping: ${url}`);
-            continue;
-          }
-
-          const buffer = await fetch(url).then((res) => res.arrayBuffer());
-          const geometry = loader.parse(buffer);
-          loadedGeometries.push(geometry);
-        } catch (err) {
-          console.error('Error loading STL:', err);
-        }
-      }
-
-      setGeometries(loadedGeometries);
-    };
-
-    loadAll();
-  }, [urls]);
-
-  return geometries;
-};
+import useSafeStlLoader from '@/hooks/useSafeStlLoader';
 
 const Model = ({ urls }: { urls: string[] }) => {
   // console.log('render <Model/>')
@@ -54,6 +19,7 @@ const Model = ({ urls }: { urls: string[] }) => {
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const meshRefs = useMemo(() => urls.map(() => createRef<THREE.Mesh>()), [urls]);
 
+  const meshColors = ['#E8D7C0', 'red', 'green', 'blue', 'lightblue', 'slategray'];
   useEffect(() => {
     const initialVisibility: Record<string, boolean> = {};
     urls.forEach((url) => {
@@ -85,6 +51,7 @@ const Model = ({ urls }: { urls: string[] }) => {
           gl={gl}
           visible={visibleMeshes[urls[index]]}
           localRef={meshRefs[index]}
+          color={meshColors[index % meshColors.length]}
         />
       ))}
     </>
@@ -100,6 +67,7 @@ const MeshComponent = ({
   gl,
   visible,
   localRef,
+  color,
 }: {
   geometry: THREE.BufferGeometry;
   camera: THREE.Camera;
@@ -108,6 +76,7 @@ const MeshComponent = ({
   visible: boolean;
   onClick?: () => void;
   localRef: Ref<THREE.Mesh>;
+  color: string;
 }) => {
   useEffect(() => {
     if (localRef && 'current' in localRef && localRef.current) {
@@ -119,7 +88,7 @@ const MeshComponent = ({
     <mesh ref={localRef} geometry={geometry} visible={visible} userData={{ type: 'stlModel' }}>
       <meshStandardMaterial
         ref={materialRef}
-        color='#E8D7C0'
+        color={color}
         metalness={0.1}
         roughness={0.6}
         clipIntersection
