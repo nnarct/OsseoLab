@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { v4 as uuid } from 'uuid';
 import type { IntersectionData, MarkerPairDataType, AngleGroupDataType } from '@/types/measureTool';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import React from 'react';
 
 interface SceneHandlerRefType {
   camera?: THREE.PerspectiveCamera;
@@ -199,12 +200,15 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
     // (position: { x: number; y: number; z: number }) => {
     () => {
       const id = uuid();
-      const origin = new THREE.Vector3(0, 0, 0);
+      // const origin = new THREE.Vector3(0, 0, 0);
+      const meshRef = React.createRef<THREE.Mesh>(); // ✅ create a new ref
+
       const newPlane = {
         id,
         plane: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
-        position: origin,
-        origin,
+        // position: origin,
+        // origin,
+        meshRef: meshRef,
         mode: 'translate' as TransformControlsMode,
         frontColor: '#5bd389',
         backColor: '#e95e5e',

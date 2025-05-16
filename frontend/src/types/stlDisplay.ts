@@ -1,12 +1,13 @@
-import type { Plane, Vector3 } from 'three';
+import type { Plane, Vector3, Mesh } from 'three';
 
 export type TransformControlsMode = 'translate' | 'scale' | 'rotate';
 
 export interface PlaneDataType {
   id: string;
   plane: Plane;
-  position: Vector3;
-  origin: Vector3;
+  // position: Vector3;
+  // origin: Vector3;
+  meshRef: React.RefObject<Mesh>;
   mode: TransformControlsMode;
   frontColor: string;
   backColor: string;

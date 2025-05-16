@@ -10,7 +10,7 @@ const CaseModelViewer = () => {
   const location = useLocation();
   const { id, caseId } = useParams();
   const { urls, caseNumber, filename } = location.state || {};
-  
+
   const [validUrls, setValidUrls] = useState<string[]>([]);
 
   // const allUrls = typeof rawUrl === 'string' ? [rawUrl] : rawUrl;
@@ -47,9 +47,7 @@ const CaseModelViewer = () => {
     <>
       <StlDisplayProvider>
         <CustomHeader backTo={`/case/${caseId}`}>
-          <p className='text-xl font-bold'>
-            CASE{String(caseNumber).padStart(3, '0')} {filename}
-          </p>
+          <p className='text-xl font-bold'>CASE{String(caseNumber).padStart(3, '0')}</p>
         </CustomHeader>
         <Center urls={urls} />
         {/* <MenuBar />

@@ -16,19 +16,7 @@ import Loader from './Loader';
 import { axios } from '@/config/axiosConfig';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { message } from 'antd';
-
-export interface PlaneDataType {
-  id: string;
-  plane: THREE.Plane;
-  position: THREE.Vector3;
-  mode: 'translate' | 'rotate' | 'scale';
-  frontColor: string;
-  backColor: string;
-  opacity: number;
-  show: boolean;
-  number: number;
-  origin: THREE.Vector3;
-}
+import { PlaneDataType } from '@/types/stlDisplay';
 
 const Center = ({ urls }: { urls: string[] }) => {
   // console.log('Center/>');
@@ -55,9 +43,14 @@ const Center = ({ urls }: { urls: string[] }) => {
     if (!planes.length || !urls.length) return;
     const payload = {
       planes: planes.map((p) => {
-        // Use world position and world normal, already stored in p.origin and p.normal
-        const origin = p.origin.clone(); // already stored from getWorldPosition
-        const normal = p.plane.normal.clone().normalize();
+        const origin = new THREE.Vector3();
+        const normal = new THREE.Vector3(0, 0, 1);
+        console.log(`Plane ${p.number} normal:`, normal.toArray());
+        if (p.meshRef?.current) {
+          p.meshRef.current.getWorldPosition(origin);
+          normal.applyQuaternion(p.meshRef.current.quaternion).normalize();
+        }
+
         const constant = -normal.dot(origin);
 
         return {
@@ -78,8 +71,17 @@ const Center = ({ urls }: { urls: string[] }) => {
       tokens,
     };
 
-    // console.log({ payload: payload.planes });
-    // // return;
+    if (payload.planes.length === 2) {
+      const n0 = payload.planes[0].normal;
+      const n1 = payload.planes[1].normal;
+      const v0 = new THREE.Vector3(n0.x, n0.y, n0.z).normalize();
+      const v1 = new THREE.Vector3(n1.x, n1.y, n1.z).normalize();
+      const dot = v0.dot(v1);
+      console.log(`[DOT FRONTEND] Plane 0 normal:`, v0.toArray(), `Plane 1 normal:`, v1.toArray(), `Dot product:`, dot);
+    }
+
+    console.log({ payload: payload.planes });
+    // return;
     try {
       const response = await axios.post('/cutting-plane/save-multiple', payload, {
         headers: {

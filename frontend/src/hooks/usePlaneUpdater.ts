@@ -26,7 +26,6 @@ export const usePlaneUpdater = (plane: THREE.Plane, id: string) => {
             ? {
                 ...item,
                 plane: plane.clone(),
-                position: planeRef.position.clone(),
               }
             : item
         )
