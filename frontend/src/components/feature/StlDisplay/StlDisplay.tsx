@@ -1,7 +1,7 @@
-import { StlDisplayProvider } from '@/context/StlDisplayContext';
-import Center from './Center';
-import { useGetStlById } from '@/services/admin/stl.service';
 import { Spin } from 'antd';
+import { StlDisplayProvider } from '@/context/StlDisplayContext';
+import { useGetStlById } from '@/services/admin/stl.service';
+import Center from './Center';
 
 const StlDisplay = ({ id }: { id: string }) => {
   const { data, isLoading } = useGetStlById(id);
@@ -15,9 +15,11 @@ const StlDisplay = ({ id }: { id: string }) => {
   if (!data) return 'data missing';
   return (
     <StlDisplayProvider>
-      <Center urls={[data.url]}/>
-      {/* <MenuBar />
+      
+        <Center urls={[data.url]} />
+        {/* <MenuBar />
       <CanvasScene url={url} /> */}
+      
     </StlDisplayProvider>
   );
 };

@@ -17,6 +17,7 @@ import { axios } from '@/config/axiosConfig';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { message } from 'antd';
 import { PlaneDataType } from '@/types/stlDisplay';
+import { StlModelProvider } from '@/context/StlModelContext';
 
 const Center = ({ urls }: { urls: string[] }) => {
   // console.log('Center/>');
@@ -31,8 +32,9 @@ const Center = ({ urls }: { urls: string[] }) => {
   } = useStlDisplay();
   const { isActive: isMeasureActive } = measureHandler;
   const { isActive: isAngleActive } = angleHandler;
-  const navigate = useNavigate();
   const { caseId } = useParams();
+  const navigate = useNavigate();
+
   const save = async () => {
     const tokens = urls.map((url) => {
       const parts = url.split('/');
@@ -123,7 +125,7 @@ const Center = ({ urls }: { urls: string[] }) => {
 
   // console.log({ urls });
   return (
-    <>
+    <><StlModelProvider>
       {contextHolder}
       <MenuBar onSave={save} />
 
@@ -141,7 +143,7 @@ const Center = ({ urls }: { urls: string[] }) => {
           <MeasureLineGroup />
           <AngleLineGroup />
         </Suspense>
-      </Canvas>
+      </Canvas></StlModelProvider>
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { StlDisplayContext } from '@/context/StlDisplayContext';
+import { StlDisplayContext } from "@/context/StlDisplayContext";
 import { useContext } from 'react';
 
 export const useStlDisplay = () => {

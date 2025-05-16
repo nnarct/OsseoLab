@@ -1,8 +1,9 @@
 import { Ref, useEffect, useRef, useMemo, createRef } from 'react';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useStlDisplay } from '@/hooks/useStlDisplay';
 import { initializeSTLModel } from '@/utils/stlUtils';
+import { useStlDisplay } from '@/hooks/useStlDisplay';
+import { useStlModel } from '@/hooks/useStlModel';
 import useSafeStlLoader from '@/hooks/useSafeStlLoader';
 
 const Model = ({ urls }: { urls: string[] }) => {
@@ -14,12 +15,18 @@ const Model = ({ urls }: { urls: string[] }) => {
 
   const { visibleMeshes, setVisibleMeshes } = useStlDisplay().meshVisibility;
 
-  const geometries = useSafeStlLoader(urls);
+  const loadedGeometries = useSafeStlLoader(urls);
+  const { geometries, setGeometries, meshColors } = useStlModel()!;
+
+  useEffect(() => {
+    if (loadedGeometries && loadedGeometries.length > 0) {
+      setGeometries(loadedGeometries);
+    }
+  }, [loadedGeometries, setGeometries]);
 
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const meshRefs = useMemo(() => urls.map(() => createRef<THREE.Mesh>()), [urls]);
 
-  const meshColors = ['#E8D7C0', 'red', 'green', 'blue', 'lightblue', 'slategray'];
   useEffect(() => {
     const initialVisibility: Record<string, boolean> = {};
     urls.forEach((url) => {
