@@ -202,12 +202,20 @@ def cut_two_planes(mesh, normal_a, constant_a, normal_b, constant_b, cut_path):
     vec_b = np.array([normal_b['x'], normal_b['y'], normal_b['z']])
     vec_a = vec_a / np.linalg.norm(vec_a)
     vec_b = vec_b / np.linalg.norm(vec_b)
-
-    dot = np.dot(vec_a, vec_b)
-    are_not_parallel = not np.isclose(abs(dot), 1.0, atol=1e-2)
-
     origin_a = -vec_a * constant_a
     origin_b = -vec_b * constant_b
+
+    dot = np.dot(vec_a, vec_b)
+    are_almost_parallel = np.isclose(abs(dot), 1.0, atol=1e-2)
+
+    # Distance between two plane origins
+    plane_distance = np.linalg.norm(origin_a - origin_b)
+
+    # If angle is shallow and distance is far, then treat as not intersecting
+    too_far_apart_to_intersect = (plane_distance > np.max(mesh.extents) * 0.8) and not are_almost_parallel
+
+    # Final decision
+    are_not_parallel = not are_almost_parallel and not too_far_apart_to_intersect
 
     direction_ab = origin_b - origin_a
     direction_ba = origin_a - origin_b
