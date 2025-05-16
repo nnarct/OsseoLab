@@ -31,7 +31,12 @@ const ColorButton = () => {
     <>
       <div ref={panelRef} className='relative'>
         <Tooltip title='Change model color'>
-          <MenuButton onClick={handleClick} icon={<MdColorLens />} type={isOpen ? 'primary' : 'default'} text='Items' />
+          <MenuButton
+            onClick={handleClick}
+            icon={<MdColorLens />}
+            type={isOpen ? 'primary' : 'default'}
+            text='Colors'
+          />
         </Tooltip>
         <MeshColorPicker isOpen={isOpen} />
       </div>
