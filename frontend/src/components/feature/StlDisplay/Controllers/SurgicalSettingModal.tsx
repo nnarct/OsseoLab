@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Modal, Table, Checkbox, TableProps, message } from 'antd';
 import { axios } from '@/config/axiosConfig';
 import queryClient from '@/config/queryClient';
 
 type Props = {
+  caseFiles: CaseFile[];
   caseId: string;
   isOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
+  onUpdate: () => void;
+  setCaseFiles: React.Dispatch<React.SetStateAction<CaseFile[]>>;
 };
 
 type CaseFile = {
@@ -17,18 +20,9 @@ type CaseFile = {
   post: boolean;
 };
 
-const SurgicalSettingModal = ({ caseId, isOpen, closeModal }: Props) => {
-  const [caseFiles, setCaseFiles] = useState<CaseFile[]>([]);
+const SurgicalSettingModal = ({ caseFiles, caseId, isOpen, closeModal, onUpdate }: Props) => {
   const [updatedFiles, setUpdatedFiles] = useState<Record<string, { pre: boolean; post: boolean }>>({});
   const [messageApi, contextHolder] = message.useMessage();
-  useEffect(() => {
-    if (caseId && isOpen) {
-      axios
-        .get(`/case-files/${caseId}/active`)
-        .then((res) => setCaseFiles(res.data))
-        .catch((err) => console.error('Failed to fetch case files:', err));
-    }
-  }, [caseId, isOpen]);
 
   const handleCheckboxChange = (id: string, field: 'pre' | 'post', checked: boolean) => {
     setUpdatedFiles((prev) => ({
@@ -45,6 +39,7 @@ const SurgicalSettingModal = ({ caseId, isOpen, closeModal }: Props) => {
       await axios.patch('/case-files/update-pre-post', updatedFiles);
       messageApi.success('Saved successfully');
       queryClient.invalidateQueries({ queryKey: ['caseFileByCaseId', caseId] });
+      onUpdate();
       closeModal();
     } catch (err) {
       console.error('Failed to update case files:', err);

@@ -114,7 +114,7 @@ const CaseFilesList = ({ caseId, readOnly }: { caseId: string; readOnly?: boolea
       width: '0',
       align: 'center',
       title: 'Delete',
-      dataIndex: 'id',
+      dataIndex: 'case_file_id',
       key: 'delete',
       render: (id: string) => (
         <Button
@@ -125,6 +125,7 @@ const CaseFilesList = ({ caseId, readOnly }: { caseId: string; readOnly?: boolea
             await deleteCaseFileById(id);
             queryClient.invalidateQueries({ queryKey: ['case-file-versions'] });
             queryClient.invalidateQueries({ queryKey: ['case', caseId] });
+            queryClient.invalidateQueries({ queryKey: ['caseFilesByCaseId', caseId] });
           }}
         />
       ),
@@ -158,6 +159,7 @@ const CaseFilesList = ({ caseId, readOnly }: { caseId: string; readOnly?: boolea
       setFile(null);
       queryClient.invalidateQueries({ queryKey: ['case', caseId] });
       queryClient.invalidateQueries({ queryKey: ['case-file-versions'] });
+      queryClient.invalidateQueries({ queryKey: ['caseFilesByCaseId', caseId] });
     } catch (error) {
       messageApi.error('Upload failed!');
       console.error(error);

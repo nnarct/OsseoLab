@@ -3,6 +3,7 @@ import {
   getCaseFileGroups,
   getCaseFilesByCaseId,
   getCaseFileVersions,
+  getCaseModelsByCaseId,
   getCuttingPlanes,
 } from '@/api/files.api';
 import { useQuery } from '@tanstack/react-query';
@@ -24,6 +25,13 @@ export const useCaseFilesByCaseId = (caseId: string) => {
   return useQuery({
     queryKey: ['caseFilesByCaseId', caseId],
     queryFn: () => getCaseFilesByCaseId(caseId),
+    enabled: !!caseId,
+  });
+};
+export const useCaseModelsByCaseId = (caseId: string) => {
+  return useQuery({
+    queryKey: ['caseModelByCaseId', caseId],
+    queryFn: () => getCaseModelsByCaseId(caseId),
     enabled: !!caseId,
   });
 };

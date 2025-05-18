@@ -349,3 +349,42 @@ def update_pre_post_flags():
     except Exception as e:
         db.session.rollback()
         return jsonify({"statusCode": 500, "message": "Failed to update Pre/Post flags", "error": str(e)}), 500
+
+
+@case_file_bp.route("/case-file/by-case/<string:case_id>/model", methods=["GET"])
+@jwt_required()
+def get_case_models_by_case_id(case_id):
+    try:
+        case_files = CaseFile.query.filter_by(case_id=case_id).all()
+        if not case_files:
+            return jsonify({"statusCode": 404, "message": "No case model found for this case ID"}), 404
+
+        from models.case_file_versions import CaseFileVersion
+
+        result = []
+        for file in case_files:
+            current_version = CaseFileVersion.query.get(
+                file.current_version_id)
+            result.append({
+                "case_file_id": str(file.id),
+                "active": file.active,
+                "version_id": str(current_version.id) if current_version else None,
+                "name": current_version.nickname if current_version else None,
+                "pre": file.pre,
+                "post": file.post,
+                "url": (generate_secure_url_case_file(
+                    str(file.current_version_id)))
+
+            })
+
+        return jsonify({
+            "statusCode": 200,
+            "message": "Case models retrieved successfully",
+            "data": result
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "statusCode": 500,
+            "message": "Failed to retrieve case models",
+            "error": str(e)
+        }), 500

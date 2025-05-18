@@ -1,9 +1,10 @@
 import { useStlModel } from '@/hooks/useStlModel';
 import { Button, Card, ColorPicker, Tooltip, Switch } from 'antd';
 import { IoReloadSharp } from 'react-icons/io5';
-const MeshColorPicker = ({ isOpen }: { isOpen: boolean }) => {
-  const { totalMesh, meshColors, updateMeshColor, resetMeshColor, names, meshVisibility, updateMeshVisibility } = useStlModel();
-
+const ObjectSettingPanel = ({ isOpen }: { isOpen: boolean }) => {
+  const { totalMesh, meshColors, updateMeshColor, resetMeshColor, names, meshVisibility, updateMeshVisibility } =
+    useStlModel();
+console.log({meshVisibility})
   return (
     <div
       className={`fixed z-[1000] origin-top transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
@@ -35,13 +36,14 @@ const MeshColorPicker = ({ isOpen }: { isOpen: boolean }) => {
               <Switch
                 checked={meshVisibility[index]}
                 onChange={(checked) => updateMeshVisibility(index, checked)}
-                size="small"
+                size='small'
               />
               <ColorPicker
                 value={meshColors[index]}
                 onChange={(color) => updateMeshColor(index, color.toHexString())}
                 style={{ marginLeft: '8px' }}
               />
+              // buttton to update mesh opacity
             </div>
           ))}
         </Card>
@@ -50,4 +52,4 @@ const MeshColorPicker = ({ isOpen }: { isOpen: boolean }) => {
   );
 };
 
-export default MeshColorPicker;
+export default ObjectSettingPanel;

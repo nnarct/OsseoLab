@@ -59,6 +59,15 @@ export const getCaseFilesByCaseId = async (caseId: string): Promise<CaseFileById
     throw error;
   }
 };
+export const getCaseModelsByCaseId = async (caseId: string): Promise<CaseModelById[]> => {
+  try {
+    const response = await axios.get(`/case-file/by-case/${caseId}/model`);
+    return response.data.data;
+  } catch (error) {
+    console.log('Failed to get case files');
+    throw error;
+  }
+};
 
 export interface CaseFileById {
   case_file_id: string;
@@ -71,5 +80,14 @@ export interface CaseFileById {
   created_at: number;
   uploaded_at: number;
   uploaded_by: string;
+  url: string;
+}
+export interface CaseModelById {
+  case_file_id: string;
+  active: boolean;
+  version_id: string;
+  name: string;
+  pre: boolean;
+  post: boolean;
   url: string;
 }

@@ -4,9 +4,7 @@ import { Button, Layout, Result } from 'antd';
 import CustomHeader from '@/components/common/CustomHeader';
 import Center from '@/components/feature/StlDisplay/Center';
 import { StlModelProvider } from '@/context/StlModelContext';
-import { useCaseFilesByCaseId } from '@/services/case/case-files.service';
-import { useState } from 'react';
-
+import { useCaseModelsByCaseId } from '@/services/case/case-files.service';
 const CaseModelViewerPage = () => {
   const navigate = useNavigate();
   const { caseId } = useParams();
@@ -51,18 +49,15 @@ const CaseModelViewerPage = () => {
 export default CaseModelViewerPage;
 
 const CaseModelViewer = ({ caseId }: { caseId: string }) => {
-  const { data } = useCaseFilesByCaseId(caseId);
+  const { data } = useCaseModelsByCaseId(caseId);
   if (!data) return null;
-  const files = data.map((file) => {
-    return { id: file.version_id, name: file.nickname, url: file.url, active: file.active };
-  });
 
   return (
     <>
       <CustomHeader backTo={`/case/${caseId}`}>
         <p className='text-xl font-bold'>3D Viewer</p>
       </CustomHeader>
-      <Center files={files} />
+      <Center files={data} />
     </>
   );
 };

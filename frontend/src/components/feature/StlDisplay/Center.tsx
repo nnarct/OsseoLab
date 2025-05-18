@@ -14,23 +14,17 @@ import AngleLineGroup from './AngleTool/AngleLineGroup';
 import ClippingPlaneList from './ClippingPlane/ClippingPlaneList';
 import Loader from './Loader';
 import { axios } from '@/config/axiosConfig';
-import { message } from 'antd';
+import { Button, message } from 'antd';
 import { PlaneDataType } from '@/types/stlDisplay';
 import { StlModelProvider } from '@/context/StlModelContext';
 import { useParams } from 'react-router-dom';
 import queryClient from '@/config/queryClient';
 import { MessageInstance } from 'antd/es/message/interface';
-interface Files {
-  id: string;
-  name: string;
-  url: string;
-  active: boolean;
-}
-
-const Center = ({ files }: { files: Files[] }) => {
+import { CaseModelById } from '@/api/files.api';
+import { useStlModel } from '@/hooks/useStlModel';
+const Center = ({ files }: { files: CaseModelById[] }) => {
   // console.log('Center/>');
-  const urls = files.map((i) => i.url);
-  const names = files.map((i) => i.name);
+
   const { caseId } = useParams();
   const [messageApi, contextHolder] = message.useMessage();
   const {
@@ -41,23 +35,24 @@ const Center = ({ files }: { files: Files[] }) => {
   } = useStlDisplay();
   const { isActive: isMeasureActive } = measureHandler;
   const { isActive: isAngleActive } = angleHandler;
-
+  const urls = files.map((i) => i.url);
+  const names = files.map((i) => i.name);
   const save = async () => {
     const planes: PlaneDataType[] = getPlanes();
     await saveModel(urls, planes, messageApi, caseId);
   };
-
   useEffect(() => {
     resetModel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // console.log({ urls });
   return (
     <>
       <StlModelProvider>
         {contextHolder}
         <MenuBar onSave={save} />
+        <Button onClick={() => toggle(0)}>0</Button>
+        <Button onClick={() => toggle(1)}>1</Button>
         <div
           style={{
             height: '100%',

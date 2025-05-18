@@ -2,7 +2,7 @@ import { Tooltip } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { MdColorLens } from 'react-icons/md';
 import MenuButton from './MenuButton';
-import MeshColorPicker from '../Controllers/MeshColorPicker';
+import ObjectSettingPanel from '../Controllers/ObjectSettingPanel';
 
 const MeshsButton = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -38,7 +38,7 @@ const MeshsButton = () => {
             text='Objects'
           />
         </Tooltip>
-        <MeshColorPicker isOpen={isOpen} />
+        <ObjectSettingPanel isOpen={isOpen} />
       </div>
     </>
   );
