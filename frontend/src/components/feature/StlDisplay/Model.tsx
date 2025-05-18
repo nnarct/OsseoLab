@@ -50,6 +50,7 @@ const Model = ({ activeMeshes }: ModelProps) => {
     return null;
   }
 
+
   return (
     <>
       {meshes.map((mesh) => (
