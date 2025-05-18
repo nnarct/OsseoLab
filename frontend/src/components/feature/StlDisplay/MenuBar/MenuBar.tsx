@@ -14,14 +14,14 @@ import AngleButton from './AngleButton';
 import ItemListPanel from '../ItemList/ItemListPanel';
 import ResetModelButton from './ResetModelButton';
 import FaceFrontButton from './FaceFrontButton';
-import ColorButton from './ColorButton';
+import MeshsButton from './MeshsButton';
 // import VisibilityButton from './VisibilityButton';
 interface MenuBarProps {
   onSave: () => Promise<void>;
   // saving: boolean;
 }
 
-const MenuBar = (props:MenuBarProps) => {
+const MenuBar = (props: MenuBarProps) => {
   // const { sceneHandlerRef, measureHandler } = useStlDisplay();
 
   // const [zoom, setZoom] = useState<number>(100); // เริ่มที่ 100 (เหมือน faceFront)
@@ -78,9 +78,9 @@ const MenuBar = (props:MenuBarProps) => {
         <PlaneButton />
         <MeasureButton />
         <AngleButton />
-        <SaveButton onClick={props.onSave}/>
         <ResetModelButton />
-        <ColorButton/>
+        <MeshsButton />
+        <SaveButton onClick={props.onSave} />
       </div>
       {/* {isMeasureActive && (
         <>

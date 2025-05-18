@@ -4,7 +4,7 @@ import { MdColorLens } from 'react-icons/md';
 import MenuButton from './MenuButton';
 import MeshColorPicker from '../Controllers/MeshColorPicker';
 
-const ColorButton = () => {
+const MeshsButton = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const handleClick = () => setIsOpen(!isOpen);
 
@@ -35,7 +35,7 @@ const ColorButton = () => {
             onClick={handleClick}
             icon={<MdColorLens />}
             type={isOpen ? 'primary' : 'default'}
-            text='Colors'
+            text='Objects'
           />
         </Tooltip>
         <MeshColorPicker isOpen={isOpen} />
@@ -44,4 +44,4 @@ const ColorButton = () => {
   );
 };
 
-export default ColorButton;
+export default MeshsButton;

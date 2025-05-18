@@ -25,7 +25,7 @@ const TechnicianList = lazy(() => import('@/components/feature/UserList/Technici
 const CaseDetailPage = lazy(() => import('@/pages/Case/CaseDetailPage/CaseDetailPage'));
 const CaseList = lazy(() => import('@/pages/Case/CaseList'));
 const CaseCreateForm = lazy(() => import('@/pages/Case/CaseCreateForm'));
-const CaseModelViewer = lazy(() => import('@/pages/Case/CaseModelViewer'));
+const CaseModelViewerPage = lazy(() => import('@/pages/Case/CaseModelViewerPage'));
 
 // quick case
 const QuickCaseList = lazy(() => import('@/pages/Case/QuickCase/QuickCaseList'));
@@ -79,7 +79,7 @@ const App = () => {
                 {createRoleRoute(
                   '/case/:caseId/file/',
                   [UserRole.Admin, UserRole.Technician, UserRole.Doctor],
-                  <CaseModelViewer />
+                  <CaseModelViewerPage />
                 )}
                 {createRoleRoute('/profile', [UserRole.Admin, UserRole.Technician, UserRole.Doctor], <ProfilePage />)}
 

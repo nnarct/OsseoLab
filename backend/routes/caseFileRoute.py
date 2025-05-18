@@ -52,7 +52,7 @@ def add_new_case_file():
         temp_case_file = CaseFile(
             case_id=case_id,
             original_filename=filename,
-        
+
         )
         db.session.add(temp_case_file)
         db.session.flush()  # Get temp_case_file.id without full commit
@@ -181,8 +181,6 @@ def delete_case_file(file_id):
 #         return jsonify({"statusCode": 500, "message": "Failed to update filename", "error": str(e)}), 500
 
 
-
-
 # Toggle active status endpoint
 @case_file_bp.route("/case-file/<string:file_id>/toggle-active", methods=["PATCH"])
 @jwt_required()
@@ -208,5 +206,48 @@ def toggle_case_file_active(file_id):
         return jsonify({
             "statusCode": 500,
             "message": "Failed to toggle active status",
+            "error": str(e)
+        }), 500
+
+
+@case_file_bp.route("/case-file/by-case/<string:case_id>", methods=["GET"])
+@jwt_required()
+def get_case_files_by_case_id(case_id):
+    try:
+        case_files = CaseFile.query.filter_by(case_id=case_id).all()
+        if not case_files:
+            return jsonify({"statusCode": 404, "message": "No case files found for this case ID"}), 404
+
+        from models.case_file_versions import CaseFileVersion
+
+        result = []
+        for file in case_files:
+            current_version = CaseFileVersion.query.get(
+                file.current_version_id)
+            result.append({
+                "case_file_id": str(file.id),
+                "filename": file.original_filename,
+                "created_at": int(file.created_at.timestamp()),
+                "active": file.active,
+                "version_id": str(current_version.id) if current_version else None,
+                "version_number": current_version.version_number if current_version else None,
+                "nickname": current_version.nickname if current_version else None,
+                "filesize": current_version.filesize if current_version else None,
+                "uploaded_by": current_version.uploaded_by if current_version else None,
+                "uploaded_at": int(file.updated_at.timestamp()),
+                "url": (generate_secure_url_case_file(
+                    str(file.current_version_id)))
+
+            })
+
+        return jsonify({
+            "statusCode": 200,
+            "message": "Case files retrieved successfully",
+            "data": result
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "statusCode": 500,
+            "message": "Failed to retrieve case files",
             "error": str(e)
         }), 500

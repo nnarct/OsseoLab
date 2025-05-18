@@ -4,7 +4,7 @@ import Controllers from './Controllers/Controllers';
 import Model from './Model';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 import MenuBar from './MenuBar/MenuBar';
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import SceneSetter from './SceneSetter';
 
 import { MeasureTool } from './MeasureTool/MeasureTool';
@@ -14,16 +14,27 @@ import AngleLineGroup from './AngleTool/AngleLineGroup';
 import ClippingPlaneList from './ClippingPlane/ClippingPlaneList';
 import Loader from './Loader';
 import { axios } from '@/config/axiosConfig';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { message } from 'antd';
 import { PlaneDataType } from '@/types/stlDisplay';
 import { StlModelProvider } from '@/context/StlModelContext';
+import { useParams } from 'react-router-dom';
+import queryClient from '@/config/queryClient';
+import { MessageInstance } from 'antd/es/message/interface';
+interface Files {
+  id: string;
+  name: string;
+  url: string;
+  active: boolean;
+}
 
-const Center = ({ urls, names }: { urls: string[]; names: string[] }) => {
+const Center = ({ files }: { files: Files[] }) => {
+  const [isPreSur, setIsPreSur] = useState<boolean>(false);
+
   // console.log('Center/>');
-  const location = useLocation();
+  const urls = files.map((i) => i.url);
+  const names = files.map((i) => i.name);
+  const { caseId } = useParams();
   const [messageApi, contextHolder] = message.useMessage();
-  const { caseNumber } = location.state;
   const {
     angleHandler,
     resetModel,
@@ -32,95 +43,10 @@ const Center = ({ urls, names }: { urls: string[]; names: string[] }) => {
   } = useStlDisplay();
   const { isActive: isMeasureActive } = measureHandler;
   const { isActive: isAngleActive } = angleHandler;
-  const { caseId } = useParams();
-  const navigate = useNavigate();
 
   const save = async () => {
-    const tokens = urls.map((url) => {
-      const parts = url.split('/');
-      return parts[parts.length - 1];
-    });
     const planes: PlaneDataType[] = getPlanes();
-
-    if (!planes.length || !urls.length) return;
-    const payload = {
-      planes: planes.map((p) => {
-        const origin = new THREE.Vector3();
-        const normal = new THREE.Vector3(0, 0, 1);
-        console.log(`Plane ${p.number} normal:`, normal.toArray());
-        if (p.meshRef?.current) {
-          p.meshRef.current.getWorldPosition(origin);
-          normal.applyQuaternion(p.meshRef.current.quaternion).normalize();
-        }
-
-        const constant = -normal.dot(origin);
-
-        return {
-          name: `Plane_${p.number}`,
-          origin: {
-            x: origin.x,
-            y: origin.y,
-            z: origin.z,
-          },
-          normal: {
-            x: normal.x,
-            y: normal.y,
-            z: normal.z,
-          },
-          constant: constant,
-        };
-      }),
-      tokens,
-    };
-
-    if (payload.planes.length === 2) {
-      const [p0, p1] = payload.planes;
-
-      const origin0 = new THREE.Vector3(p0.origin.x, p0.origin.y, p0.origin.z);
-      const origin1 = new THREE.Vector3(p1.origin.x, p1.origin.y, p1.origin.z);
-
-      const normal0 = new THREE.Vector3(p0.normal.x, p0.normal.y, p0.normal.z).normalize();
-      const normal1 = new THREE.Vector3(p1.normal.x, p1.normal.y, p1.normal.z).normalize();
-
-      const direction01 = origin1.clone().sub(origin0).normalize();
-      const direction10 = origin0.clone().sub(origin1).normalize();
-
-      const facing0 = normal0.dot(direction01); // > 0 means Plane 0 faces Plane 1
-      const facing1 = normal1.dot(direction10); // > 0 means Plane 1 faces Plane 0
-
-      const areFacingEachOther = facing0 > 0 && facing1 > 0;
-
-      console.log(`[FACING CHECK] Plane 0 facing 1:`, facing0, `Plane 1 facing 0:`, facing1);
-      console.log('Planes facing each other:', areFacingEachOther);
-    }
-
-    console.log({ payload: payload.planes });
-    // return;
-    try {
-      const response = await axios.post('/cutting-plane/save-multiple', payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      // console.log('Saved cutting planes:', response.data);
-      const data = response.data as ResponseType;
-      if (data.results.length > 0) {
-        // const results = data.results;
-        // messageApi.success(`Saved cutting planes. ${response.data.results[0]?.cut_method}`);
-        messageApi.success(`Anatomical structure was successfully segmented`);
-        navigate(`/case/${caseId}/file`, {
-          state: { caseNumber, urls: data.urls, names },
-        });
-      } else {
-        messageApi.success(`No changes were applied to the anatomical model`);
-      }
-      // clearPlane()
-    } catch (err) {
-      console.error('Failed to save cutting planes:', err);
-      messageApi.error('Failed to save cutting planes');
-    }
-    // finally{    navigate(-1)}
+    await saveModel(urls, planes, messageApi, caseId);
   };
 
   useEffect(() => {
@@ -147,7 +73,7 @@ const Center = ({ urls, names }: { urls: string[]; names: string[] }) => {
             <Suspense fallback={<Loader />}>
               <SceneSetter />
               <Controllers />
-              <Model urls={urls} names={names}/>
+              <Model urls={urls} names={names} />
 
               {/* <Angle/> */}
               <ClippingPlaneList />
@@ -205,3 +131,89 @@ interface ResponseType {
     };
   }[];
 }
+
+const saveModel = async (
+  urls: string[],
+  planes: PlaneDataType[],
+  messageApi: MessageInstance,
+  caseId: string | undefined
+) => {
+  const tokens = urls.map((url) => {
+    const parts = url.split('/');
+    return parts[parts.length - 1];
+  });
+  // const planes: PlaneDataType[] = getPlanes();
+
+  if (!planes.length || !urls.length) return;
+  const payload = {
+    planes: planes.map((p) => {
+      const origin = new THREE.Vector3();
+      const normal = new THREE.Vector3(0, 0, 1);
+      if (p.meshRef?.current) {
+        p.meshRef.current.getWorldPosition(origin);
+        normal.applyQuaternion(p.meshRef.current.quaternion).normalize();
+      }
+
+      const constant = -normal.dot(origin);
+
+      return {
+        name: `Plane_${p.number}`,
+        origin: {
+          x: origin.x,
+          y: origin.y,
+          z: origin.z,
+        },
+        normal: {
+          x: normal.x,
+          y: normal.y,
+          z: normal.z,
+        },
+        constant: constant,
+      };
+    }),
+    tokens,
+  };
+
+  if (payload.planes.length === 2) {
+    // const [p0, p1] = payload.planes;
+    // const origin0 = new THREE.Vector3(p0.origin.x, p0.origin.y, p0.origin.z);
+    // const origin1 = new THREE.Vector3(p1.origin.x, p1.origin.y, p1.origin.z);
+    // const normal0 = new THREE.Vector3(p0.normal.x, p0.normal.y, p0.normal.z).normalize();
+    // const normal1 = new THREE.Vector3(p1.normal.x, p1.normal.y, p1.normal.z).normalize();
+    // const direction01 = origin1.clone().sub(origin0).normalize();
+    // const direction10 = origin0.clone().sub(origin1).normalize();
+    // const facing0 = normal0.dot(direction01); // > 0 means Plane 0 faces Plane 1
+    // const facing1 = normal1.dot(direction10); // > 0 means Plane 1 faces Plane 0
+    // const areFacingEachOther = facing0 > 0 && facing1 > 0;
+    // console.log(`[FACING CHECK] Plane 0 facing 1:`, facing0, `Plane 1 facing 0:`, facing1);
+    // console.log('Planes facing each other:', areFacingEachOther);
+  }
+
+  // console.log({ payload: payload.planes });
+  // return;
+  try {
+    const response = await axios.post('/cutting-plane/save-multiple', payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    // console.log('Saved cutting planes:', response.data);
+    const data = response.data as ResponseType;
+    if (data.results.length > 0) {
+      // const results = data.results;
+      // messageApi.success(`Saved cutting planes. ${response.data.results[0]?.cut_method}`);
+      messageApi.success(`Anatomical structure was successfully segmented`);
+      console.log({ response });
+      queryClient.invalidateQueries({ queryKey: ['caseFilesByCaseId', caseId] });
+      // navigate(`/case/${caseId}/file`);
+    } else {
+      messageApi.success(`No changes were applied to the anatomical model`);
+    }
+    // clearPlane()
+  } catch (err) {
+    console.error('Failed to save cutting planes:', err);
+    messageApi.error('Failed to save cutting planes');
+  }
+  // finally{    navigate(-1)}
+};

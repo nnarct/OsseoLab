@@ -1,4 +1,10 @@
-import { getCaseFileGroupItems, getCaseFileGroups, getCaseFileVersions, getCuttingPlanes } from "@/api/files.api";
+import {
+  getCaseFileGroupItems,
+  getCaseFileGroups,
+  getCaseFilesByCaseId,
+  getCaseFileVersions,
+  getCuttingPlanes,
+} from '@/api/files.api';
 import { useQuery } from '@tanstack/react-query';
 
 export const useCaseFileGroups = () => {
@@ -12,4 +18,12 @@ export const useCaseFileVersions = () => {
 };
 export const useCuttingPlanes = () => {
   return useQuery({ queryKey: ['cuttingPlanes'], queryFn: getCuttingPlanes });
+};
+
+export const useCaseFilesByCaseId = (caseId: string) => {
+  return useQuery({
+    queryKey: ['caseFilesByCaseId', caseId],
+    queryFn: () => getCaseFilesByCaseId(caseId),
+    enabled: !!caseId,
+  });
 };

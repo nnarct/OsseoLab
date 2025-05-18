@@ -49,3 +49,27 @@ export const getCuttingPlanes = async (): Promise<any[]> => {
     throw error;
   }
 };
+
+export const getCaseFilesByCaseId = async (caseId: string): Promise<CaseFileById[]> => {
+  try {
+    const response = await axios.get(`/case-file/by-case/${caseId}`);
+    return response.data.data;
+  } catch (error) {
+    console.log('Failed to get case files');
+    throw error;
+  }
+};
+
+export interface CaseFileById {
+  case_file_id: string;
+  version_id: string;
+  version_number: number;
+  nickname: string;
+  filename: string;
+  filesize: number;
+  active: boolean;
+  created_at: number;
+  uploaded_at: number;
+  uploaded_by: string;
+  url: string;
+}

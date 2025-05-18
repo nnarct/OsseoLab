@@ -1,18 +1,17 @@
 import { StlDisplayProvider } from '@/context/StlDisplayContext';
-import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Layout, Result } from 'antd';
 import CustomHeader from '@/components/common/CustomHeader';
 import Center from '@/components/feature/StlDisplay/Center';
 import { StlModelProvider } from '@/context/StlModelContext';
+import { useCaseFilesByCaseId } from '@/services/case/case-files.service';
+import { useState } from 'react';
 
-const CaseModelViewer = () => {
-  const location = useLocation();
+const CaseModelViewerPage = () => {
   const navigate = useNavigate();
   const { caseId } = useParams();
 
-  if (!caseId) return <>case id is missing</>;
-
-  if (!location.state)
+  if (!caseId)
     return (
       <>
         <CustomHeader backTo={`/case/${caseId}`}>
@@ -27,7 +26,7 @@ const CaseModelViewer = () => {
           <Result
             status='500'
             title='500'
-            subTitle='Sorry, something went wrong.'
+            subTitle='Sorry, case URL is incorrect.'
             extra={
               <Button type='primary' onClick={() => navigate(`/case/list`)}>
                 Back To Case List
@@ -37,25 +36,33 @@ const CaseModelViewer = () => {
         </Layout.Content>
       </>
     );
-  const { urls, caseNumber, names } = location.state || {};
 
-  // if (!urls || !caseNumber || !filename) return <Navigate to={`/case/${caseId}`} />;
-
-  console.log({ urls });
   return (
     <>
       <StlDisplayProvider>
         <StlModelProvider>
-          <CustomHeader backTo={`/case/${caseId}`}>
-            <p className='text-xl font-bold'>3D Viewer CASE{String(caseNumber).padStart(3, '0')}</p>
-          </CustomHeader>
-          <Center urls={urls} names={names} />
-          {/* <MenuBar />
-      <CanvasScene url={url} /> */}
+          <CaseModelViewer caseId={caseId} />
         </StlModelProvider>
       </StlDisplayProvider>
     </>
   );
 };
 
-export default CaseModelViewer;
+export default CaseModelViewerPage;
+
+const CaseModelViewer = ({ caseId }: { caseId: string }) => {
+  const { data } = useCaseFilesByCaseId(caseId);
+  if (!data) return null;
+  const files = data.map((file) => {
+    return { id: file.version_id, name: file.nickname, url: file.url, active: file.active };
+  });
+
+  return (
+    <>
+      <CustomHeader backTo={`/case/${caseId}`}>
+        <p className='text-xl font-bold'>3D Viewer</p>
+      </CustomHeader>
+      <Center files={files} />
+    </>
+  );
+};

@@ -9,24 +9,12 @@ import { FaRegTrashAlt } from 'react-icons/fa';
 import queryClient from '@/config/queryClient';
 import EditFilenameModal from './EditFilenameModal';
 import { MdOutlineViewInAr } from 'react-icons/md';
-import type { CaseFile } from '@/types/case';
 import { Form, Button, Modal, Table, type TableProps, Typography, message, Input, Upload, Switch } from 'antd';
+import { useCaseFilesByCaseId } from '@/services/case/case-files.service';
+import { CaseFileById } from '@/api/files.api';
 
-const CaseFilesList = ({
-  files,
-  caseId,
-  caseNumber,
-  readOnly,
-  urls,
-  names,
-}: {
-  files: CaseFile[];
-  caseId: string;
-  caseNumber: number;
-  readOnly?: boolean;
-  urls: string[];
-  names: string[];
-}) => {
+const CaseFilesList = ({ caseId, readOnly }: { caseId: string; readOnly?: boolean }) => {
+  const { data: filesData } = useCaseFilesByCaseId(caseId);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const openModal = () => setIsOpen(true);
@@ -46,8 +34,8 @@ const CaseFilesList = ({
       messageApi.error('Failed to update status');
     }
   };
-
-  const columns: TableProps<CaseFile>['columns'] = [
+  console.log({ filesData });
+  const columns: TableProps<CaseFileById>['columns'] = [
     // {
     //   width: '0',
     //   align: 'center',
@@ -107,7 +95,9 @@ const CaseFilesList = ({
       key: 'active',
       dataIndex: 'active',
       align: 'center',
-      render: (active: boolean, record) => <Switch checked={active} onChange={() => toggleActive(record.id)} />,
+      render: (active: boolean, record) => (
+        <Switch checked={active} onChange={() => toggleActive(record.case_file_id)} />
+      ),
       sorter: (a, b) => Number(a.active) - Number(b.active),
     },
     {
@@ -188,9 +178,7 @@ const CaseFilesList = ({
           <Button
             icon={<MdOutlineViewInAr />}
             onClick={() => {
-              navigate(`/case/${caseId}/file`, {
-                state: { urls, caseNumber, names },
-              });
+              navigate(`/case/${caseId}/file`);
             }}
           >
             3D Viewer
@@ -200,7 +188,7 @@ const CaseFilesList = ({
           </Button>
         </div>
       </div>
-      <Table columns={columns} dataSource={files} rowKey='id' size='small' bordered scroll={{ x: 'auto' }} />
+      <Table columns={columns} dataSource={filesData} rowKey='id' size='small' bordered scroll={{ x: 'auto' }} />
       <Modal centered footer={null} open={isOpen} destroyOnClose onCancel={closeModal} onClose={closeModal}>
         <Typography.Title level={3}>Add new STL file</Typography.Title>
         <Form form={form} onFinish={handleSubmit} requiredMark='optional' disabled={loading}>
