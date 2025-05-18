@@ -50,37 +50,37 @@ const SidebarMenu = () => {
         },
       ],
     },
-    {
-      key: 'case files',
-      label: 'Cases Files',
-      icon: <FaRegFolderOpen />,
-      children: [
-        {
-          key: '/case-file-versions',
-          icon: <TfiEmail />,
-          label: 'Case Version',
-          onClick: () => navigate('/case-file-versions'),
-        },
-        {
-          key: '/case-file-groups',
-          icon: <TfiEmail />,
-          label: 'File Groups',
-          onClick: () => navigate('/case-file-groups'),
-        },
-        {
-          key: '/case-file-group-items',
-          icon: <FaListUl />,
-          label: 'File Group Items',
-          onClick: () => navigate('/case-file-group-items'),
-        },
-        {
-          key: '/cutting-planes',
-          icon: <TfiEmail />,
-          label: 'Cutting Planes',
-          onClick: () => navigate('/cutting-planes'),
-        },
-      ],
-    },
+    // {
+    //   key: 'case files',
+    //   label: 'Cases Files',
+    //   icon: <FaRegFolderOpen />,
+    //   children: [
+    //     {
+    //       key: '/case-file-versions',
+    //       icon: <TfiEmail />,
+    //       label: 'Case Version',
+    //       onClick: () => navigate('/case-file-versions'),
+    //     },
+    //     {
+    //       key: '/case-file-groups',
+    //       icon: <TfiEmail />,
+    //       label: 'File Groups',
+    //       onClick: () => navigate('/case-file-groups'),
+    //     },
+    //     {
+    //       key: '/case-file-group-items',
+    //       icon: <FaListUl />,
+    //       label: 'File Group Items',
+    //       onClick: () => navigate('/case-file-group-items'),
+    //     },
+    //     {
+    //       key: '/cutting-planes',
+    //       icon: <TfiEmail />,
+    //       label: 'Cutting Planes',
+    //       onClick: () => navigate('/cutting-planes'),
+    //     },
+    //   ],
+    // },
   ];
 
   const techMenu = [
