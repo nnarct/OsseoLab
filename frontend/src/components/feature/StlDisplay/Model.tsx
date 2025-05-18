@@ -84,24 +84,30 @@ const MeshComponent = ({
   opacity?: number;
 }) => {
   useEffect(() => {
-    if (localRef && 'current' in localRef && localRef.current) {
+    if (localRef) {
+      if (!localRef.current || !geometry || localRef.current.userData.initialized) return;
+
       initializeSTLModel(geometry, camera, localRef, gl);
+      localRef.current.userData.initialized = true;
+      localRef.current.userData.type = 'stlModel';
     }
   }, [geometry, camera, gl, localRef]);
 
   return (
-    <mesh ref={localRef} geometry={geometry} visible={visible} userData={{ type: 'stlModel' }}>
-      <meshStandardMaterial
-        ref={materialRef}
-        color={color}
-        metalness={0.1}
-        roughness={0.6}
-        clipIntersection
-        clipShadows
-        opacity={opacity}
-        side={THREE.DoubleSide}
-        transparent={opacity !== undefined && opacity < 1}
-      />
-    </mesh>
+    <group rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh ref={localRef} geometry={geometry} visible={visible}>
+        <meshStandardMaterial
+          ref={materialRef}
+          color={color}
+          metalness={0.1}
+          roughness={0.6}
+          clipIntersection
+          clipShadows
+          opacity={opacity}
+          side={THREE.DoubleSide}
+          transparent={opacity !== undefined && opacity < 1}
+        />
+      </mesh>
+    </group>
   );
 };

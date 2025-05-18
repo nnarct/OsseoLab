@@ -15,7 +15,7 @@ export const initializeSTLModel = (
   gl: THREE.WebGLRenderer
 ) => {
   if (!geometry) return;
-
+  console.log('initialize model');
   gl.localClippingEnabled = true;
 
   geometry.computeBoundingBox();
@@ -25,7 +25,12 @@ export const initializeSTLModel = (
   const size = new THREE.Vector3();
   geometry.boundingBox?.getSize(size);
   // const maxSize = Math.max(size.x, size.y, size.z);
-  geometry.rotateX(-Math.PI / 2);
+
+  if (meshRef.current && !meshRef.current.userData.initialized) {
+    // Removed direct geometry rotation to avoid mutation
+    meshRef.current.userData.initialized = true;
+    meshRef.current.userData.type = 'stlModel';
+  }
   // camera.position.set(0, -200, 0);
   camera.position.set(0, 0, 200);
   camera.lookAt(0, 0, 0);
