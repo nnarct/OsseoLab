@@ -9,9 +9,6 @@ import useSafeStlLoader from '@/hooks/useSafeStlLoader';
 const Model = ({ urls, names }: { urls: string[]; names: string[] }) => {
   // console.log('render <Model/>')
   const { camera, gl } = useThree();
-  const { planeHandler } = useStlDisplay();
-  const { isCut } = planeHandler;
-  const planes = planeHandler.getPlanes();
 
   // Removed unused visibleMeshes and setVisibleMeshes from useStlDisplay().meshVisibility
 
@@ -25,23 +22,15 @@ const Model = ({ urls, names }: { urls: string[]; names: string[] }) => {
     }
   }, [loadedGeometries, names, setGeometries, setNames]);
 
-  const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const meshRefs = useMemo(() => urls.map(() => createRef<THREE.Mesh>()), [urls]);
 
   // Removed useEffect that initializes visibleMeshes
-
-  useEffect(() => {
-    if (materialRef.current && planes.length > 0 && isCut) {
-      materialRef.current.clippingPlanes = planes.map((item) => item.plane);
-    } else if (materialRef.current && !isCut) {
-      materialRef.current.clippingPlanes = null;
-    }
-  }, [planes, isCut]);
 
   if (!geometries || geometries.length === 0 || geometries[0].attributes.position.count === 0) {
     console.warn('Empty STL loaded — no geometry found');
     return null;
   }
+
   return (
     <>
       {geometries.map((geometry, index) => (
@@ -49,7 +38,6 @@ const Model = ({ urls, names }: { urls: string[]; names: string[] }) => {
           key={index}
           geometry={geometry}
           camera={camera}
-          materialRef={materialRef}
           gl={gl}
           visible={meshVisibility[index]}
           localRef={meshRefs[index]}
@@ -66,7 +54,6 @@ export default Model;
 const MeshComponent = ({
   geometry,
   camera,
-  materialRef,
   gl,
   visible,
   localRef,
@@ -75,7 +62,6 @@ const MeshComponent = ({
 }: {
   geometry: THREE.BufferGeometry;
   camera: THREE.Camera;
-  materialRef: Ref<THREE.MeshStandardMaterial>;
   gl: THREE.WebGLRenderer;
   visible: boolean;
   onClick?: () => void;
@@ -83,6 +69,10 @@ const MeshComponent = ({
   color: string;
   opacity?: number;
 }) => {
+  const { planeHandler } = useStlDisplay();
+  const { isCut } = planeHandler;
+  const planes = planeHandler.getPlanes();
+
   useEffect(() => {
     if (localRef) {
       if (!localRef.current || !geometry || localRef.current.userData.initialized) return;
@@ -93,21 +83,33 @@ const MeshComponent = ({
     }
   }, [geometry, camera, gl, localRef]);
 
+  const material = useRef<THREE.MeshStandardMaterial>();
+
+  useEffect(() => {
+    if (!material.current) {
+      material.current = new THREE.MeshStandardMaterial();
+    }
+
+    material.current.color = new THREE.Color(color);
+    material.current.metalness = 0.1;
+    material.current.roughness = 0.6;
+    material.current.clipIntersection = true;
+    material.current.clipShadows = true;
+    material.current.opacity = opacity ?? 1;
+    material.current.transparent = opacity !== undefined && opacity < 1;
+
+    if (planes.length > 0 && isCut) {
+      material.current.clippingPlanes = planes.map((item) => item.plane);
+    } else {
+      material.current.clippingPlanes = null;
+    }
+
+    material.current.needsUpdate = true;
+  }, [color, opacity, planes, isCut]);
+
   return (
     <group rotation={[-Math.PI / 2, 0, 0]}>
-      <mesh ref={localRef} geometry={geometry} visible={visible}>
-        <meshStandardMaterial
-          ref={materialRef}
-          color={color}
-          metalness={0.1}
-          roughness={0.6}
-          clipIntersection
-          clipShadows
-          opacity={opacity}
-          side={THREE.DoubleSide}
-          transparent={opacity !== undefined && opacity < 1}
-        />
-      </mesh>
+      <mesh ref={localRef} geometry={geometry} visible={visible} material={material.current} />
     </group>
   );
 };

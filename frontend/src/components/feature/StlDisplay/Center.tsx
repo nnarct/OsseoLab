@@ -4,7 +4,7 @@ import Controllers from './Controllers/Controllers';
 import Model from './Model';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 import MenuBar from './MenuBar/MenuBar';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect } from 'react';
 import SceneSetter from './SceneSetter';
 
 import { MeasureTool } from './MeasureTool/MeasureTool';
@@ -14,17 +14,16 @@ import AngleLineGroup from './AngleTool/AngleLineGroup';
 import ClippingPlaneList from './ClippingPlane/ClippingPlaneList';
 import Loader from './Loader';
 import { axios } from '@/config/axiosConfig';
-import { Button, message } from 'antd';
+import { message } from 'antd';
 import { PlaneDataType } from '@/types/stlDisplay';
 import { StlModelProvider } from '@/context/StlModelContext';
-import { useParams } from 'react-router-dom';
+import { NavigateFunction, useNavigate, useParams } from 'react-router-dom';
 import queryClient from '@/config/queryClient';
 import { MessageInstance } from 'antd/es/message/interface';
 import { CaseModelById } from '@/api/files.api';
-import { useStlModel } from '@/hooks/useStlModel';
 const Center = ({ files }: { files: CaseModelById[] }) => {
   // console.log('Center/>');
-
+  const navigate = useNavigate();
   const { caseId } = useParams();
   const [messageApi, contextHolder] = message.useMessage();
   const {
@@ -39,7 +38,7 @@ const Center = ({ files }: { files: CaseModelById[] }) => {
   const names = files.map((i) => i.name);
   const save = async () => {
     const planes: PlaneDataType[] = getPlanes();
-    await saveModel(urls, planes, messageApi, caseId);
+    await saveModel(urls, planes, messageApi, caseId, navigate);
   };
   useEffect(() => {
     resetModel();
@@ -51,8 +50,6 @@ const Center = ({ files }: { files: CaseModelById[] }) => {
       <StlModelProvider>
         {contextHolder}
         <MenuBar onSave={save} />
-        <Button onClick={() => toggle(0)}>0</Button>
-        <Button onClick={() => toggle(1)}>1</Button>
         <div
           style={{
             height: '100%',
@@ -129,7 +126,8 @@ const saveModel = async (
   urls: string[],
   planes: PlaneDataType[],
   messageApi: MessageInstance,
-  caseId: string | undefined
+  caseId: string | undefined,
+  navigate: NavigateFunction
 ) => {
   const tokens = urls.map((url) => {
     const parts = url.split('/');
@@ -198,8 +196,8 @@ const saveModel = async (
       // messageApi.success(`Saved cutting planes. ${response.data.results[0]?.cut_method}`);
       messageApi.success(`Anatomical structure was successfully segmented`);
       console.log({ response });
-      queryClient.invalidateQueries({ queryKey: ['caseFilesByCaseId', caseId] });
-      // navigate(`/case/${caseId}/file`);
+      queryClient.invalidateQueries({ queryKey: ['caseModelByCaseId', caseId] });
+      navigate(`/case/${caseId}/file`);
     } else {
       messageApi.success(`No changes were applied to the anatomical model`);
     }
