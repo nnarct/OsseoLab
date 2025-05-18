@@ -1,10 +1,20 @@
 import { useStlModel } from '@/hooks/useStlModel';
-import { Button, Card, ColorPicker, Tooltip, Switch } from 'antd';
+import { Button, Card, ColorPicker, Tooltip, Switch, Slider } from 'antd';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { IoReloadSharp } from 'react-icons/io5';
+
 const ObjectSettingPanel = ({ isOpen }: { isOpen: boolean }) => {
-  const { totalMesh, meshColors, updateMeshColor, resetMeshColor, names, meshVisibility, updateMeshVisibility } =
-    useStlModel();
-console.log({meshVisibility})
+  const {
+    meshColors,
+    updateMeshColor,
+    resetMeshColor,
+    names,
+    meshVisibility,
+    updateMeshVisibility,
+    meshOpacities,
+    updateMeshOpacity,
+  } = useStlModel();
+
   return (
     <div
       className={`fixed z-[1000] origin-top transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
@@ -33,17 +43,32 @@ console.log({meshVisibility})
                   {index + 1}. {name}
                 </span>
               </div>
-              <Switch
-                checked={meshVisibility[index]}
-                onChange={(checked) => updateMeshVisibility(index, checked)}
-                size='small'
-              />
-              <ColorPicker
-                value={meshColors[index]}
-                onChange={(color) => updateMeshColor(index, color.toHexString())}
-                style={{ marginLeft: '8px' }}
-              />
-              // buttton to update mesh opacity
+              <div className='flex items-center gap-x-1 pl-4'>
+                <Tooltip title={meshVisibility[index] ? 'Hide' : 'Show'}>
+                  <Button
+                    type='text'
+                    icon={meshVisibility[index] ? <FaEye /> : <FaEyeSlash />}
+                    onClick={() => updateMeshVisibility(index, !meshVisibility[index])}
+                  />
+                </Tooltip>
+                <Tooltip title={'Change object color'}>
+                  <ColorPicker
+                    value={meshColors[index]}
+                    onChange={(color) => updateMeshColor(index, color.toHexString())}
+                    style={{ marginLeft: '8px' }}
+                  />
+                </Tooltip>
+                <Tooltip title={'Adjust object opacity'}>
+                  <Slider
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={meshOpacities[index]}
+                    onChange={(value) => updateMeshOpacity(index, value)}
+                    style={{ width: 60, marginLeft: 8 }}
+                  />
+                </Tooltip>
+              </div>
             </div>
           ))}
         </Card>

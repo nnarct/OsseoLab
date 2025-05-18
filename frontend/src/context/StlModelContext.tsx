@@ -15,6 +15,8 @@ interface StlModelContextType {
   setIsPreSur: React.Dispatch<React.SetStateAction<boolean>>;
   meshVisibility: boolean[];
   updateMeshVisibility: (index: number, visible: boolean) => void;
+  meshOpacities: number[];
+  updateMeshOpacity: (index: number, opacity: number) => void;
 }
 
 const StlModelContext = createContext<StlModelContextType | undefined>(undefined);
@@ -25,11 +27,13 @@ export const StlModelProvider = ({ children }: { children: ReactNode }) => {
   const [names, setNames] = useState<string[]>([]);
   const [meshVisibility, setMeshVisibility] = useState<boolean[]>([]);
   const [isPreSur, setIsPreSur] = useState<boolean>(false);
+  const [meshOpacities, setMeshOpacities] = useState<number[]>([]);
 
   useEffect(() => {
     if (geometries.length > 0) {
       setMeshColors(geometries.map((_, index) => defaultColors[index % defaultColors.length]));
       setMeshVisibility(geometries.map(() => true));
+      setMeshOpacities(geometries.map(() => 1)); // default full opacity
     }
   }, [geometries]);
   const totalMesh = geometries.length;
@@ -43,6 +47,7 @@ export const StlModelProvider = ({ children }: { children: ReactNode }) => {
       return updated;
     });
   };
+  
   const resetMeshColor = (index: number) => {
     setMeshColors((prevColors) => {
       const updated = [...prevColors];
@@ -58,6 +63,17 @@ export const StlModelProvider = ({ children }: { children: ReactNode }) => {
       const updated = [...prevVisibility];
       if (index >= 0 && index < updated.length) {
         updated[index] = visible;
+      }
+      return updated;
+    });
+  };
+
+  const updateMeshOpacity = (index: number, opacity: number) => {
+    console.log(opacity)
+    setMeshOpacities((prevOpacities) => {
+      const updated = [...prevOpacities];
+      if (index >= 0 && index < updated.length) {
+        updated[index] = opacity;
       }
       return updated;
     });
@@ -79,6 +95,8 @@ export const StlModelProvider = ({ children }: { children: ReactNode }) => {
         updateMeshVisibility,
         isPreSur,
         setIsPreSur,
+        meshOpacities,
+        updateMeshOpacity,
       }}
     >
       {children}

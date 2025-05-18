@@ -1,5 +1,5 @@
 import { TransformControls } from '@react-three/drei';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import * as THREE from 'three';
 import type { TransformControlsMode } from '@/types/stlDisplay';
 

@@ -16,7 +16,7 @@ const Model = ({ urls, names }: { urls: string[]; names: string[] }) => {
   // Removed unused visibleMeshes and setVisibleMeshes from useStlDisplay().meshVisibility
 
   const loadedGeometries = useSafeStlLoader(urls);
-  const { geometries, setGeometries, setNames, meshColors, meshVisibility } = useStlModel()!;
+  const { geometries, setGeometries, setNames, meshColors, meshVisibility, meshOpacities } = useStlModel()!;
 
   useEffect(() => {
     if (loadedGeometries && loadedGeometries.length > 0) {
@@ -54,6 +54,7 @@ const Model = ({ urls, names }: { urls: string[]; names: string[] }) => {
           visible={meshVisibility[index]}
           localRef={meshRefs[index]}
           color={meshColors[index % meshColors.length]}
+          opacity={meshOpacities[index]}
         />
       ))}
     </>
@@ -70,6 +71,7 @@ const MeshComponent = ({
   visible,
   localRef,
   color,
+  opacity,
 }: {
   geometry: THREE.BufferGeometry;
   camera: THREE.Camera;
@@ -79,6 +81,7 @@ const MeshComponent = ({
   onClick?: () => void;
   localRef: Ref<THREE.Mesh>;
   color: string;
+  opacity?: number;
 }) => {
   useEffect(() => {
     if (localRef && 'current' in localRef && localRef.current) {
@@ -95,6 +98,9 @@ const MeshComponent = ({
         roughness={0.6}
         clipIntersection
         clipShadows
+        opacity={opacity}
+        side={THREE.DoubleSide}
+        transparent={opacity !== undefined && opacity < 1}
       />
     </mesh>
   );
