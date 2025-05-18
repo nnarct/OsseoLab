@@ -29,6 +29,7 @@ const CaseFilesList = ({ caseId, readOnly }: { caseId: string; readOnly?: boolea
       messageApi.success('Status updated');
       queryClient.invalidateQueries({ queryKey: ['case', caseId] });
       queryClient.invalidateQueries({ queryKey: ['case-file-versions'] });
+      queryClient.invalidateQueries({ queryKey: ['caseFilesByCaseId', caseId] });
     } catch (error) {
       console.error(error);
       messageApi.error('Failed to update status');
