@@ -181,12 +181,32 @@ def delete_case_file(file_id):
 #         return jsonify({"statusCode": 500, "message": "Failed to update filename", "error": str(e)}), 500
 
 
-# # Automatically delete file from disk when a CaseFileVersion is removed
-# from sqlalchemy.event import listens_for
-# from models.case_file_versions import CaseFileVersion
 
-# @listens_for(CaseFileVersion, "before_delete")
-# def delete_case_file_version_file(mapper, connection, target):
-#     file_path = os.path.join(get_case_files_upload_folder(), target.file_path)
-#     if os.path.exists(file_path):
-#         os.remove(file_path)
+
+# Toggle active status endpoint
+@case_file_bp.route("/case-file/<string:file_id>/toggle-active", methods=["PATCH"])
+@jwt_required()
+def toggle_case_file_active(file_id):
+    try:
+        case_file = CaseFile.query.filter_by(id=file_id).first()
+        if not case_file:
+            return jsonify({"statusCode": 404, "message": "Case file not found"}), 404
+
+        case_file.active = not case_file.active
+        db.session.commit()
+
+        return jsonify({
+            "statusCode": 200,
+            "message": "Case file active status toggled",
+            "data": {
+                "id": str(case_file.id),
+                "active": case_file.active
+            }
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "statusCode": 500,
+            "message": "Failed to toggle active status",
+            "error": str(e)
+        }), 500
