@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import queryClient from '@/config/queryClient';
 import EditFilenameModal from '../EditFilenameModal';
+import dayjs from 'dayjs';
 
 const fetchCaseFileVersions = async (id: string): Promise<D[]> => {
   const response = await axios.get(`/case-file-versions/${id}`);
@@ -30,9 +31,17 @@ const CaseFileVersionList = () => {
   if (isLoading) return <div>Loading...</div>;
 
   const columns: TableProps<D>['columns'] = [
-    { dataIndex: 'id', title: 'Version ID' },
-    { dataIndex: 'case_file_id', title: 'Case File ID' },
-    { dataIndex: 'filename', title: 'File name' },
+    { dataIndex: 'id', title: 'Version ID', sorter: (a, b) => a.id.localeCompare(b.id) },
+    { dataIndex: 'case_file_id', title: 'Case File ID', sorter: (a, b) => a.case_file_id.localeCompare(b.case_file_id) },
+    { dataIndex: 'filename', title: 'File name', sorter: (a, b) => a.filename.localeCompare(b.filename) },
+    {
+      title: <div className='whitespace-nowrap'>Size (MB)</div>,
+      key: 'size_mb',
+      dataIndex: 'filesize',
+      render: (size) => `${(size / (1024 * 1024)).toFixed(2)} MB`,
+      align: 'center',
+      sorter: (a, b) => a.filesize - b.filesize,
+    },
     {
       dataIndex: 'nickname',
       title: 'Model name',
@@ -42,8 +51,16 @@ const CaseFileVersionList = () => {
           {nickname}
         </div>
       ),
+      sorter: (a, b) => a.nickname.localeCompare(b.nickname),
     },
-    { dataIndex: 'version_number', title: 'Version Number', align: 'center' },
+    { dataIndex: 'version_number', title: 'Version Number', align: 'center', sorter: (a, b) => a.version_number - b.version_number },
+    {
+      dataIndex: 'uploaded_at',
+      title: 'Uploaded At',
+      render: (timestamp: number) => dayjs.unix(timestamp).format('DD-MM-YYYY HH:mm:ss'),
+      sorter: (a, b) => a.uploaded_at - b.uploaded_at,
+      align: 'center',
+    },
     {
       title: 'Action',
       render: (_, record) => {
@@ -94,6 +111,8 @@ interface D {
   uploaded_at: number;
   uploaded_by: string | null;
   version_number: number;
+  filesize: number;
+  nickname:string
 }
 
 const useCaseFileVersions = (caseId: string) => {

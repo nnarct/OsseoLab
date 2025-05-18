@@ -57,11 +57,14 @@ const CaseFilesList = ({
       dataIndex: 'id',
       className: 'whitespace-nowrap',
       width: '0',
+      sorter: (a, b) => a.id.localeCompare(b.id),
+
     },
     {
       title: 'Model Name',
       key: 'nickname',
       dataIndex: 'nickname',
+      sorter: (a, b) => a.nickname.localeCompare(b.nickname),
       render: (nickname, record) => (
         <>
           <EditFilenameModal version_id={record.version_id} initialFilename={nickname} caseId={caseId} />
@@ -73,12 +76,23 @@ const CaseFilesList = ({
       title: 'Filename',
       key: 'filename',
       dataIndex: 'filename',
+      sorter: (a, b) => a.filename.localeCompare(b.filename),
+
+    },
+    {
+      title: <div className='whitespace-nowrap'>Size (MB)</div>,
+      key: 'size_mb',
+      dataIndex: 'filesize',
+      render: (size) => `${(size / (1024 * 1024)).toFixed(2)} MB`,
+      align: 'center',
+      sorter: (a, b) => a.filesize - b.filesize,
     },
     {
       title: 'Created At',
       key: 'created_at',
       dataIndex: 'created_at',
-      render: (value) => dayjs.unix(value).format('YYYY-MM-DD HH:mm'),
+      render: (value) => dayjs.unix(value).format('DD-MM-YYYY HH:mm:ss'),
+      sorter: (a, b) => a.created_at - b.created_at,
     },
   ];
 

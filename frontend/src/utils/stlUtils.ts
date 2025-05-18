@@ -13,28 +13,29 @@ export const initializeSTLModel = (
   },
   meshRef: React.RefObject<THREE.Mesh>,
   gl: THREE.WebGLRenderer
-) => { 
+) => {
   if (!geometry) return;
 
   gl.localClippingEnabled = true;
 
   geometry.computeBoundingBox();
-  const center = new THREE.Vector3();
-  geometry.boundingBox?.getCenter(center);
-  console.log('Bounding box:', geometry.boundingBox);
+  // const center = new THREE.Vector3();
+  // geometry.boundingBox?.getCenter(center);
+  // console.log('Bounding box:', geometry.boundingBox);
   const size = new THREE.Vector3();
   geometry.boundingBox?.getSize(size);
   // const maxSize = Math.max(size.x, size.y, size.z);
-  camera.position.set(0, -200, 0);
+  geometry.rotateX(-Math.PI / 2);
+  // camera.position.set(0, -200, 0);
+  camera.position.set(0, 0, 200);
   camera.lookAt(0, 0, 0);
 
   geometry.computeVertexNormals();
-
 };
 
 /**
  * Converts a hex color to a Three.js shader-compatible RGB string.
-* @param hex - The hex color string
+ * @param hex - The hex color string
  * @returns A string formatted as `r, g, b` values.
  */
 const hexToShaderRGB = (hex: string) => {

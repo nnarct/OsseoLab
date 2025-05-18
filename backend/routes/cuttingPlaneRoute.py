@@ -89,13 +89,34 @@ def cut_and_save_multiple():
             cut_path = os.path.join(cut_folder, cut_filename)
 
             mesh = trimesh.load_mesh(original_path)
+            original_faces_count = len(mesh.faces)
 
             # Apply either one or two plane cuts, then create new version and planes
+            # Define rotation matrix: 90 degrees (pi/2) about X axis
+            rotation_matrix = np.array([
+                [1, 0, 0],
+                [0, 0, -1],
+                [0, 1, 0]
+            ])
             if len(planes) == 1:
                 plane_data = planes[0]
                 normal = plane_data.get("normal")
                 constant = plane_data.get("constant")
-                cut_method, mesh = cut_plane(mesh, normal, constant, cut_path)
+                # Convert normal and origin to numpy arrays
+                vec_normal = np.array([normal['x'], normal['y'], normal['z']])
+                origin = plane_data.get("origin")
+                vec_origin = np.array([origin['x'], origin['y'], origin['z']]) if origin is not None else None
+                # Apply rotation
+                rotated_normal = rotation_matrix @ vec_normal
+                rotated_origin = rotation_matrix @ vec_origin if vec_origin is not None else None
+                # Use rotated normal for cutting, constant remains the same
+                cut_method, mesh = cut_plane(
+                    mesh,
+                    {'x': rotated_normal[0], 'y': rotated_normal[1], 'z': rotated_normal[2]},
+                    constant,
+                    cut_path
+                )
+                # Store original, unrotated values in DB
                 new_planes = [CuttingPlane(
                     original_version_id=version_entry.id,
                     name=plane_data.get("name"),
@@ -104,27 +125,38 @@ def cut_and_save_multiple():
                     is_visible=True
                 )]
             elif len(planes) == 2:
-                normal_a = planes[0].get("normal")
-                constant_a = planes[0].get("constant")
-                normal_b = planes[1].get("normal")
-                constant_b = planes[1].get("constant")
+                # Prepare rotated normals and origins for both planes
+                plane_data_a = planes[0]
+                plane_data_b = planes[1]
+                normal_a = plane_data_a.get("normal")
+                constant_a = plane_data_a.get("constant")
+                normal_b = plane_data_b.get("normal")
+                constant_b = plane_data_b.get("constant")
                 vec_a = np.array([normal_a['x'], normal_a['y'], normal_a['z']])
                 vec_b = np.array([normal_b['x'], normal_b['y'], normal_b['z']])
-                vec_a = vec_a / np.linalg.norm(vec_a)
-                vec_b = vec_b / np.linalg.norm(vec_b)
-                dot = np.dot(vec_a, vec_b)
-                angle = np.degrees(np.arccos(np.clip(dot, -1.0, 1.0)))
-                is_cross = 70 <= angle <= 110
-                origin_a = -vec_a * constant_a
-                origin_b = -vec_b * constant_b
+                origin_a = plane_data_a.get("origin")
+                origin_b = plane_data_b.get("origin")
+                vec_origin_a = np.array([origin_a['x'], origin_a['y'], origin_a['z']]) if origin_a is not None else None
+                vec_origin_b = np.array([origin_b['x'], origin_b['y'], origin_b['z']]) if origin_b is not None else None
+                # Apply rotation
+                rotated_normal_a = rotation_matrix @ vec_a
+                rotated_normal_b = rotation_matrix @ vec_b
+                rotated_origin_a = rotation_matrix @ vec_origin_a if vec_origin_a is not None else None
+                rotated_origin_b = rotation_matrix @ vec_origin_b if vec_origin_b is not None else None
                 try:
                     cut_method, mesh = cut_two_planes(
-                        mesh, normal_a, constant_a, normal_b, constant_b, cut_path)
-
+                        mesh,
+                        {'x': rotated_normal_a[0], 'y': rotated_normal_a[1], 'z': rotated_normal_a[2]},
+                        constant_a,
+                        {'x': rotated_normal_b[0], 'y': rotated_normal_b[1], 'z': rotated_normal_b[2]},
+                        constant_b,
+                        cut_path
+                    )
                     new_planes = []
                 except Exception as e:
                     db.session.rollback()
                     return jsonify({"statusCode": 500, "message": "Failed to process two cutting planes", "error": str(e)}), 500
+                # Store original, unrotated values in DB
                 for plane_data in planes:
                     new_planes.append(CuttingPlane(
                         original_version_id=version_entry.id,
@@ -135,6 +167,12 @@ def cut_and_save_multiple():
                     ))
             else:
                 return jsonify({"statusCode": 400, "message": "Only up to 2 planes are allowed"}), 400
+
+            # After slicing, check if the face count has changed
+            new_faces_count = len(mesh.faces)
+            if new_faces_count == original_faces_count:
+                print("No cut was performed; skipping DB update.")
+                continue  # skip to next token
 
             # Save cut mesh file and version
             filesize = os.path.getsize(cut_path)

@@ -30,6 +30,16 @@ const Controllers = () => {
       <GizmoHelper alignment='bottom-right' margin={[80, 80]}>
         <GizmoViewcube />
       </GizmoHelper>
+
+      <primitive
+        object={(() => {
+          const axesHelper = new THREE.AxesHelper(150);
+          (axesHelper.material as THREE.LineBasicMaterial).linewidth = 9; // Note: may not work in most browsers
+
+          // X red, Y green, Z blue
+          return axesHelper;
+        })()}
+      />
       <Lighting />
     </>
   );

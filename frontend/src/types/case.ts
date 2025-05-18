@@ -25,13 +25,13 @@ export interface CaseSummary {
   case_code: string;
 }
 
-export interface CaseFile {
-  filename: string;
-  id: string;
-  order: number;
-  uploaded_at: number;
-  urls: string[];
-}
+// export interface CaseFile {
+//   filename: string;
+//   id: string;
+//   order: number;
+//   uploaded_at: number;
+//   urls: string[];
+// }
 export interface CaseFile {
   created_at: number;
   filename: string;
@@ -43,7 +43,6 @@ export interface CaseFile {
   urls: string[];
   version_id: string;
 }
-
 
 export interface CaseData {
   additional_note: string | null;

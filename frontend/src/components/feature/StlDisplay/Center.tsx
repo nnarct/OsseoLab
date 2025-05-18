@@ -103,13 +103,19 @@ const Center = ({ urls }: { urls: string[] }) => {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      console.log('Saved cutting planes:', response.data);
-      messageApi.success(`Saved cutting planes. ${response.data.results[0]?.cut_method}`);
+      // console.log('Saved cutting planes:', response.data);
       const data = response.data as ResponseType;
-      const results = data.results;
-      navigate(`/case/${caseId}/file/${results[0].new_version.case_file_id}`, {
-        state: { caseNumber, urls: data.urls, filename: results[0].new_version.filename },
-      });
+      if (data.results.length > 0) {
+        const results = data.results;
+        // messageApi.success(`Saved cutting planes. ${response.data.results[0]?.cut_method}`);
+        messageApi.success(`Anatomical structure was successfully segmented`);
+        navigate(`/case/${caseId}/file/${results[0].new_version.case_file_id}`, {
+          state: { caseNumber, urls: data.urls, filename: results[0].new_version.filename },
+        });
+      } else{
+        messageApi.success(`No changes were applied to the anatomical model`);
+
+      }
       // clearPlane()
     } catch (err) {
       console.error('Failed to save cutting planes:', err);
@@ -125,25 +131,35 @@ const Center = ({ urls }: { urls: string[] }) => {
 
   // console.log({ urls });
   return (
-    <><StlModelProvider>
-      {contextHolder}
-      <MenuBar onSave={save} />
+    <>
+      <StlModelProvider>
+        {contextHolder}
+        <MenuBar onSave={save} />
+        <div
+          style={{
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            maxHeight: 'calc( 100vh - 188px )',
+          }}
+        >
+          <Canvas style={{ flex: 1, background: '#f7f7f7' }}>
+            {/* <Canvas style={{ width: '50vw', height: '50vh', background: '#f7f7f7', marginInline: 'auto' }}> */}
+            <Suspense fallback={<Loader />}>
+              <SceneSetter />
+              <Controllers />
+              <Model urls={urls} />
 
-      <Canvas style={{ width: 'auto', height: '100%', background: '#f7f7f7', marginInline: 'auto' }}>
-        {/* <Canvas style={{ width: '50vw', height: '50vh', background: '#f7f7f7', marginInline: 'auto' }}> */}
-        <Suspense fallback={<Loader />}>
-          <SceneSetter />
-          <Controllers />
-          <Model urls={urls} />
-
-          {/* <Angle/> */}
-          <ClippingPlaneList />
-          {isAngleActive && <AngleTool />}
-          {isMeasureActive && <MeasureTool />}
-          <MeasureLineGroup />
-          <AngleLineGroup />
-        </Suspense>
-      </Canvas></StlModelProvider>
+              {/* <Angle/> */}
+              <ClippingPlaneList />
+              {isAngleActive && <AngleTool />}
+              {isMeasureActive && <MeasureTool />}
+              <MeasureLineGroup />
+              <AngleLineGroup />
+            </Suspense>
+          </Canvas>
+        </div>
+      </StlModelProvider>
     </>
   );
 };
