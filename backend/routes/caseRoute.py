@@ -163,25 +163,33 @@ def get_case_by_id(case_id):
         files = CaseFile.query.filter_by(
             case_id=case_id).order_by(CaseFile.created_at).all()
         file_list = []
-        urls = [generate_secure_url_case_file(str(f.current_version_id)) for f in files]
+        urls = []
+        names = []
         for index, f in enumerate(files):
             version = f.current_version
             if version:
                 file_list.append({
-                    "id": str(f.id), 
+                    "id": str(f.id),
                     "version_id": version.id,
                     "filename": version.filename,
                     "nickname": version.nickname,
                     # "urls": generate_secure_url_case_file(str(version.id)),
-                    "urls": urls,
+                    # "urls": urls,
+                    "active": f.active,
                     "filetype": version.filetype,
                     "filesize": version.filesize,
                     "created_at": int(f.created_at.timestamp()) if f.created_at else None,
                     "order": index + 1
                 })
+                if (f.active):
+                    urls.append(generate_secure_url_case_file(
+                        str(f.current_version_id)))
+                    names.append(version.nickname)
 
         return jsonify({"statusCode": 200, "data": {
             **case.to_dict(),
+            "urls": urls,
+            'names': names,
             "files": file_list
         }}), 200
     except Exception as e:
@@ -261,7 +269,8 @@ def delete_case(case_id):
         # Delete related case files and their disk files
         case_files = CaseFile.query.filter_by(case_id=case_id).all()
         for file in case_files:
-            filepath = os.path.join(get_case_files_upload_folder(), file.filepath)
+            filepath = os.path.join(
+                get_case_files_upload_folder(), file.filepath)
             if os.path.exists(filepath):
                 os.remove(filepath)
             db.session.delete(file)
@@ -275,6 +284,8 @@ def delete_case(case_id):
         return jsonify({"statusCode": 500, "message": "Failed to delete case", "error": str(e)}), 500
 
 # Route to get case number by case ID
+
+
 @case_bp.route("/case/<case_id>/number", methods=["GET"])
 @jwt_required()
 @roles_required("admin", "doctor", "technician")
@@ -292,3 +303,18 @@ def get_case_number(case_id):
         }), 200
     except Exception as e:
         return jsonify({"statusCode": 500, "message": "Failed to retrieve case number", "error": str(e)}), 500
+
+
+# Route to check if a case exists
+@case_bp.route("/case/<case_id>/exists", methods=["GET"])
+@jwt_required()
+@roles_required("admin", "doctor", "technician")
+def check_case_exists(case_id):
+    try:
+        case = Case.query.get(case_id)
+        if case:
+            return jsonify({"statusCode": 200, "exists": True}), 200
+        else:
+            return jsonify({"statusCode": 404, "exists": False, "message": "Case not found"}), 404
+    except Exception as e:
+        return jsonify({"statusCode": 500, "message": "Error checking case existence", "error": str(e)}), 500
