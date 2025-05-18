@@ -32,7 +32,11 @@ const CaseFileVersionList = () => {
 
   const columns: TableProps<D>['columns'] = [
     { dataIndex: 'id', title: 'Version ID', sorter: (a, b) => a.id.localeCompare(b.id) },
-    { dataIndex: 'case_file_id', title: 'Case File ID', sorter: (a, b) => a.case_file_id.localeCompare(b.case_file_id) },
+    {
+      dataIndex: 'case_file_id',
+      title: 'Case File ID',
+      sorter: (a, b) => a.case_file_id.localeCompare(b.case_file_id),
+    },
     { dataIndex: 'filename', title: 'File name', sorter: (a, b) => a.filename.localeCompare(b.filename) },
     {
       title: <div className='whitespace-nowrap'>Size (MB)</div>,
@@ -53,7 +57,12 @@ const CaseFileVersionList = () => {
       ),
       sorter: (a, b) => a.nickname.localeCompare(b.nickname),
     },
-    { dataIndex: 'version_number', title: 'Version Number', align: 'center', sorter: (a, b) => a.version_number - b.version_number },
+    {
+      dataIndex: 'version_number',
+      title: 'Version Number',
+      align: 'center',
+      sorter: (a, b) => a.version_number - b.version_number,
+    },
     {
       dataIndex: 'uploaded_at',
       title: 'Uploaded At',
@@ -78,7 +87,9 @@ const CaseFileVersionList = () => {
     },
   ];
 
-  if (data.length > 0)
+  if (data.length > 0) {
+    console.log({ D: data });
+
     return (
       <>
         {contextHolder}
@@ -100,19 +111,22 @@ const CaseFileVersionList = () => {
         />
       </>
     );
+  }
 };
 
 export default CaseFileVersionList;
 
 interface D {
+  id: string;
   case_file_id: string;
   file_path: string;
-  id: string;
-  uploaded_at: number;
-  uploaded_by: string | null;
-  version_number: number;
+  filename: string;
   filesize: number;
-  nickname:string
+  filetype: string;
+  nickname: string;
+  uploaded_at: number;
+  uploaded_by: string;
+  version_number: number;
 }
 
 const useCaseFileVersions = (caseId: string) => {
