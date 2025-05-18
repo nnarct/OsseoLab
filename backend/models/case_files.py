@@ -24,7 +24,7 @@ class CaseFile(db.Model):
         onupdate=lambda: datetime.now(timezone.utc)
     )
     original_filename = Column(String(255), nullable=True)
-    current_version_id = Column(String, ForeignKey("case_file_versions.id"))
+    current_version_id = Column(UUID(as_uuid=True), ForeignKey("case_file_versions.id"))
 
     case = relationship('Case', back_populates='files')
     # group_items = relationship("CaseFileGroupItem", back_populates="case_file")
