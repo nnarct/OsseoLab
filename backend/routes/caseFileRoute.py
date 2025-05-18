@@ -251,3 +251,60 @@ def get_case_files_by_case_id(case_id):
             "message": "Failed to retrieve case files",
             "error": str(e)
         }), 500
+
+@case_file_bp.route("/case-file/<string:file_id>/set-pre", methods=["PATCH"])
+@jwt_required()
+def set_case_file_pre(file_id):
+    try:
+        data = request.get_json()
+        value = data.get("pre")
+        if value is None:
+            return jsonify({"statusCode": 400, "message": "Missing 'pre' field"}), 400
+
+        case_file = CaseFile.query.filter_by(id=file_id).first()
+        if not case_file:
+            return jsonify({"statusCode": 404, "message": "Case file not found"}), 404
+
+        case_file.pre = bool(value)
+        db.session.commit()
+
+        return jsonify({
+            "statusCode": 200,
+            "message": "'pre' status updated",
+            "data": {
+                "id": str(case_file.id),
+                "pre": case_file.pre
+            }
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"statusCode": 500, "message": "Failed to update 'pre' status", "error": str(e)}), 500
+
+
+@case_file_bp.route("/case-file/<string:file_id>/set-post", methods=["PATCH"])
+@jwt_required()
+def set_case_file_post(file_id):
+    try:
+        data = request.get_json()
+        value = data.get("post")
+        if value is None:
+            return jsonify({"statusCode": 400, "message": "Missing 'post' field"}), 400
+
+        case_file = CaseFile.query.filter_by(id=file_id).first()
+        if not case_file:
+            return jsonify({"statusCode": 404, "message": "Case file not found"}), 404
+
+        case_file.post = bool(value)
+        db.session.commit()
+
+        return jsonify({
+            "statusCode": 200,
+            "message": "'post' status updated",
+            "data": {
+                "id": str(case_file.id),
+                "post": case_file.post
+            }
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"statusCode": 500, "message": "Failed to update 'post' status", "error": str(e)}), 500

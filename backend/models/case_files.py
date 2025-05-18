@@ -13,6 +13,8 @@ class CaseFile(db.Model):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     case_id = Column(UUID(as_uuid=True), ForeignKey('cases.id'), nullable=False)
     active = Column(Boolean, default=True, nullable=False)
+    pre = Column(Boolean, default=True, nullable=False)
+    post = Column(Boolean, default=False, nullable=False)
     created_at = Column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
@@ -47,6 +49,8 @@ class CaseFile(db.Model):
             "id": str(self.id),
             "case_id": str(self.case_id),
             "active": self.active,
+            "pre": self.pre,
+            "post": self.post,
             "created_at": int(self.created_at.timestamp()) if self.created_at else None,
             "updated_at": int(self.updated_at.timestamp()) if self.updated_at else None,
             "original_filename": self.original_filename,
