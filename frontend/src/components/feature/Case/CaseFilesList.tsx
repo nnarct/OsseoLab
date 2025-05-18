@@ -1,5 +1,5 @@
-import { Form, Button, Modal, Table, type TableProps, Typography, message, Input, Upload } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { axios } from '@/config/axiosConfig';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { GrUpload } from 'react-icons/gr';
@@ -10,17 +10,22 @@ import queryClient from '@/config/queryClient';
 import EditFilenameModal from './EditFilenameModal';
 import { MdOutlineViewInAr } from 'react-icons/md';
 import type { CaseFile } from '@/types/case';
+import { Form, Button, Modal, Table, type TableProps, Typography, message, Input, Upload, Switch } from 'antd';
 
 const CaseFilesList = ({
   files,
   caseId,
   caseNumber,
   readOnly,
+  urls,
+  names,
 }: {
   files: CaseFile[];
   caseId: string;
   caseNumber: number;
   readOnly?: boolean;
+  urls: string[];
+  names: string[];
 }) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -30,36 +35,47 @@ const CaseFilesList = ({
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const [file, setFile] = useState<File | null>(null);
-  const columns: TableProps<CaseFile>['columns'] = [
-    {
-      width: '0',
-      align: 'center',
-      dataIndex: 'id',
-      title: <div className='whitespace-nowrap'>3D viewer</div>,
-      key: 'id',
-      render: (_, record) => (
-        <Button
-          icon={<MdOutlineViewInAr />}
-          onClick={() => {
-            console.log({ urls: record.urls, caseNumber, filename: record.filename });
-            navigate(`/case/${caseId}/file/${record.id}`, {
-              state: { urls: record.urls, caseNumber, filename: record.filename },
-            });
-          }}
-        >
-          3D Viewer
-        </Button>
-      ),
-    },
-    {
-      title: 'ID',
-      key: 'id',
-      dataIndex: 'id',
-      className: 'whitespace-nowrap',
-      width: '0',
-      sorter: (a, b) => a.id.localeCompare(b.id),
+  const toggleActive = async (id: string) => {
+    try {
+      await axios.patch(`/case-file/${id}/toggle-active`);
+      messageApi.success('Status updated');
+      queryClient.invalidateQueries({ queryKey: ['case', caseId] });
+      queryClient.invalidateQueries({ queryKey: ['case-file-versions'] });
+    } catch (error) {
+      console.error(error);
+      messageApi.error('Failed to update status');
+    }
+  };
 
-    },
+  const columns: TableProps<CaseFile>['columns'] = [
+    // {
+    //   width: '0',
+    //   align: 'center',
+    //   dataIndex: 'id',
+    //   title: <div className='whitespace-nowrap'>3D viewer</div>,
+    //   key: 'id',
+    //   render: (_, record) => (
+    //     <Button
+    //       icon={<MdOutlineViewInAr />}
+    //       onClick={() => {
+    //         console.log({ urls: record.urls, caseNumber, filename: record.filename });
+    //         navigate(`/case/${caseId}/file/${record.id}`, {
+    //           state: { urls: record.urls, caseNumber, filename: record.filename },
+    //         });
+    //       }}
+    //     >
+    //       3D Viewer
+    //     </Button>
+    //   ),
+    // },
+    // {
+    //   title: 'ID',
+    //   key: 'id',
+    //   dataIndex: 'id',
+    //   className: 'whitespace-nowrap',
+    //   width: '0',
+    //   sorter: (a, b) => a.id.localeCompare(b.id),
+    // },
     {
       title: 'Model Name',
       key: 'nickname',
@@ -77,7 +93,6 @@ const CaseFilesList = ({
       key: 'filename',
       dataIndex: 'filename',
       sorter: (a, b) => a.filename.localeCompare(b.filename),
-
     },
     {
       title: <div className='whitespace-nowrap'>Size (MB)</div>,
@@ -86,6 +101,14 @@ const CaseFilesList = ({
       render: (size) => `${(size / (1024 * 1024)).toFixed(2)} MB`,
       align: 'center',
       sorter: (a, b) => a.filesize - b.filesize,
+    },
+    {
+      title: 'Active',
+      key: 'active',
+      dataIndex: 'active',
+      align: 'center',
+      render: (active: boolean, record) => <Switch checked={active} onChange={() => toggleActive(record.id)} />,
+      sorter: (a, b) => Number(a.active) - Number(b.active),
     },
     {
       title: 'Created At',
@@ -161,9 +184,21 @@ const CaseFilesList = ({
         <Typography.Title level={5} style={{ margin: 0 }}>
           Files
         </Typography.Title>
-        <Button icon={<GrUpload />} onClick={openModal} type='primary'>
-          Upload File
-        </Button>
+        <div className='flex gap-x-2'>
+          <Button
+            icon={<MdOutlineViewInAr />}
+            onClick={() => {
+              navigate(`/case/${caseId}/file`, {
+                state: { urls, caseNumber, names },
+              });
+            }}
+          >
+            3D Viewer
+          </Button>
+          <Button icon={<GrUpload />} onClick={openModal} type='primary'>
+            Upload File
+          </Button>
+        </div>
       </div>
       <Table columns={columns} dataSource={files} rowKey='id' size='small' bordered scroll={{ x: 'auto' }} />
       <Modal centered footer={null} open={isOpen} destroyOnClose onCancel={closeModal} onClose={closeModal}>

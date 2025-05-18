@@ -20,7 +20,7 @@ export interface CaseSummary {
   order: number;
   patient_gender: string;
   patient_name: string;
-  surgeon: Surgeon;
+  surgeon: SurgeonData;
   surgery_date: number;
   case_code: string;
 }
@@ -40,8 +40,9 @@ export interface CaseFile {
   id: string;
   nickname: string;
   order: number;
-  urls: string[];
+  // urls: string[];
   version_id: string;
+  active: boolean;
 }
 
 export interface CaseData {
@@ -52,8 +53,10 @@ export interface CaseData {
   created_at: number;
   created_by: UserData;
   files: CaseFile[];
+  urls: string[];
+  names: string[];
   id: string;
-  last_updated: number;
+  updated_at: number;
   patient_age: number | null;
   patient_dob: null;
   patient_gender: null;

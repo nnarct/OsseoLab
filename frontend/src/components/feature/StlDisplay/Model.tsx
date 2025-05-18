@@ -6,34 +6,29 @@ import { useStlDisplay } from '@/hooks/useStlDisplay';
 import { useStlModel } from '@/hooks/useStlModel';
 import useSafeStlLoader from '@/hooks/useSafeStlLoader';
 
-const Model = ({ urls }: { urls: string[] }) => {
+const Model = ({ urls, names }: { urls: string[]; names: string[] }) => {
   // console.log('render <Model/>')
   const { camera, gl } = useThree();
   const { planeHandler } = useStlDisplay();
   const { isCut } = planeHandler;
   const planes = planeHandler.getPlanes();
 
-  const { visibleMeshes, setVisibleMeshes } = useStlDisplay().meshVisibility;
+  // Removed unused visibleMeshes and setVisibleMeshes from useStlDisplay().meshVisibility
 
   const loadedGeometries = useSafeStlLoader(urls);
-  const { geometries, setGeometries, meshColors } = useStlModel()!;
+  const { geometries, setGeometries, setNames, meshColors, meshVisibility } = useStlModel()!;
 
   useEffect(() => {
     if (loadedGeometries && loadedGeometries.length > 0) {
       setGeometries(loadedGeometries);
+      setNames(names);
     }
-  }, [loadedGeometries, setGeometries]);
+  }, [loadedGeometries, names, setGeometries, setNames]);
 
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const meshRefs = useMemo(() => urls.map(() => createRef<THREE.Mesh>()), [urls]);
 
-  useEffect(() => {
-    const initialVisibility: Record<string, boolean> = {};
-    urls.forEach((url) => {
-      initialVisibility[url] = true;
-    });
-    setVisibleMeshes(initialVisibility);
-  }, [setVisibleMeshes, urls]);
+  // Removed useEffect that initializes visibleMeshes
 
   useEffect(() => {
     if (materialRef.current && planes.length > 0 && isCut) {
@@ -56,7 +51,7 @@ const Model = ({ urls }: { urls: string[] }) => {
           camera={camera}
           materialRef={materialRef}
           gl={gl}
-          visible={visibleMeshes[urls[index]]}
+          visible={meshVisibility[index]}
           localRef={meshRefs[index]}
           color={meshColors[index % meshColors.length]}
         />

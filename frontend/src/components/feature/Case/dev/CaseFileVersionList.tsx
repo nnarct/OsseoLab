@@ -31,12 +31,12 @@ const CaseFileVersionList = () => {
   if (isLoading) return <div>Loading...</div>;
 
   const columns: TableProps<D>['columns'] = [
-    { dataIndex: 'id', title: 'Version ID', sorter: (a, b) => a.id.localeCompare(b.id) },
-    {
-      dataIndex: 'case_file_id',
-      title: 'Case File ID',
-      sorter: (a, b) => a.case_file_id.localeCompare(b.case_file_id),
-    },
+    // { dataIndex: 'id', title: 'Version ID', sorter: (a, b) => a.id.localeCompare(b.id) },
+    // {
+    //   dataIndex: 'case_file_id',
+    //   title: 'Case File ID',
+    //   sorter: (a, b) => a.case_file_id.localeCompare(b.case_file_id),
+    // },
     { dataIndex: 'filename', title: 'File name', sorter: (a, b) => a.filename.localeCompare(b.filename) },
     {
       title: <div className='whitespace-nowrap'>Size (MB)</div>,

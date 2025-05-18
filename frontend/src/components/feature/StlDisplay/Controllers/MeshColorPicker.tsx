@@ -1,8 +1,8 @@
 import { useStlModel } from '@/hooks/useStlModel';
-import { Button, Card, ColorPicker, Tooltip } from 'antd';
+import { Button, Card, ColorPicker, Tooltip, Switch } from 'antd';
 import { IoReloadSharp } from 'react-icons/io5';
 const MeshColorPicker = ({ isOpen }: { isOpen: boolean }) => {
-  const { totalMesh, meshColors, updateMeshColor, resetMeshColor } = useStlModel();
+  const { totalMesh, meshColors, updateMeshColor, resetMeshColor, names, meshVisibility, updateMeshVisibility } = useStlModel();
 
   return (
     <div
@@ -18,7 +18,7 @@ const MeshColorPicker = ({ isOpen }: { isOpen: boolean }) => {
         }}
       >
         <Card size='small' style={{ minWidth: 180, border: 'none' }}>
-          {Array.from({ length: totalMesh }).map((_, index) => (
+          {names.map((name, index) => (
             <div
               key={index}
               className='flex items-center justify-between px-1 py-2'
@@ -28,8 +28,15 @@ const MeshColorPicker = ({ isOpen }: { isOpen: boolean }) => {
                 <Tooltip title='Reset'>
                   <Button icon={<IoReloadSharp />} type='text' onClick={() => resetMeshColor(index)} />
                 </Tooltip>
-                <span>Mesh {index + 1}</span>
+                <span>
+                  {index + 1}. {name}
+                </span>
               </div>
+              <Switch
+                checked={meshVisibility[index]}
+                onChange={(checked) => updateMeshVisibility(index, checked)}
+                size="small"
+              />
               <ColorPicker
                 value={meshColors[index]}
                 onChange={(color) => updateMeshColor(index, color.toHexString())}

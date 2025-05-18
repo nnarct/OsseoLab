@@ -41,7 +41,7 @@ const ClippingPlane = ({
     if (planeRef.current) {
       const mesh = planeRef.current;
       const origin = mesh.getWorldPosition(new THREE.Vector3());
-      const normal = new THREE.Vector3(0, 0, 1)
+      const normal = new THREE.Vector3(0, 0, -1)
         .applyQuaternion(mesh.getWorldQuaternion(new THREE.Quaternion()))
         .normalize();
   

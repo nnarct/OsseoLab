@@ -86,7 +86,7 @@ const CaseDetailDoctor = ({
             </Descriptions.Item>
           </Descriptions>
           <Divider />
-          <CaseFilesList files={data.files} caseId={id} caseNumber={data.case_number} readOnly />
+          <CaseFilesList files={data.files} caseId={id} caseNumber={data.case_number} readOnly  urls={data.urls} names={data.names}/>
         </>
       ) : (
         <></>

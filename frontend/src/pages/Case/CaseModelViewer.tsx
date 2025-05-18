@@ -1,57 +1,58 @@
-import { useEffect, useState } from 'react';
+import { StlDisplayProvider } from '@/context/StlDisplayContext';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import { Button, Layout, Result } from 'antd';
 import CustomHeader from '@/components/common/CustomHeader';
 import Center from '@/components/feature/StlDisplay/Center';
-import { StlDisplayProvider } from '@/context/StlDisplayContext';
-
-import { Navigate, useLocation, useParams } from 'react-router-dom';
-import { useGetCaseNumberById } from '@/services/case/case.service';
+import { StlModelProvider } from '@/context/StlModelContext';
 
 const CaseModelViewer = () => {
   const location = useLocation();
-  const { id, caseId } = useParams();
-  const { urls, caseNumber, filename } = location.state || {};
+  const navigate = useNavigate();
+  const { caseId } = useParams();
 
-  const [validUrls, setValidUrls] = useState<string[]>([]);
+  if (!caseId) return <>case id is missing</>;
 
-  // const allUrls = typeof rawUrl === 'string' ? [rawUrl] : rawUrl;
-  // const urls = Array.isArray(allUrls) ? allUrls.filter(Boolean) : [];
+  if (!location.state)
+    return (
+      <>
+        <CustomHeader backTo={`/case/${caseId}`}>
+          <p className='text-xl font-bold'>3D Viewer</p>
+        </CustomHeader>
+        <Layout.Content
+          className='flex flex-col items-center justify-center bg-white'
+          style={{
+            height: 'calc( 100vh - 115px )',
+          }}
+        >
+          <Result
+            status='500'
+            title='500'
+            subTitle='Sorry, something went wrong.'
+            extra={
+              <Button type='primary' onClick={() => navigate(`/case/list`)}>
+                Back To Case List
+              </Button>
+            }
+          />
+        </Layout.Content>
+      </>
+    );
+  const { urls, caseNumber, names } = location.state || {};
 
-  // useEffect(() => {
-  //   const validateUrls = async () => {
-  //     const results = await Promise.allSettled(
-  //       urls.map(async (url) => {
-  //         const res = await fetch(url, { method: 'GET' });
-  //         const contentType = res.headers.get('content-type');
-  //         if (!res.ok) return null;
-  //         if (!contentType?.includes('application/octet-stream')) return null;
-  //         return url;
-  //       })
-  //     );
-
-  //     const valid = results
-  //       .filter((r): r is PromiseFulfilledResult<string> => r.status === 'fulfilled' && !!r.value)
-  //       .map((r) => r.value);
-
-  //     setValidUrls(valid);
-  //   };
-
-  //   validateUrls();
-  // }, [urls]);
-
-  if (!id || !caseId) return <>case id is missing</>;
-  console.log({ urls, caseNumber, filename });
   // if (!urls || !caseNumber || !filename) return <Navigate to={`/case/${caseId}`} />;
 
   console.log({ urls });
   return (
     <>
       <StlDisplayProvider>
-        <CustomHeader backTo={`/case/${caseId}`}>
-          <p className='text-xl font-bold'>CASE{String(caseNumber).padStart(3, '0')}</p>
-        </CustomHeader>
-        <Center urls={urls} />
-        {/* <MenuBar />
+        <StlModelProvider>
+          <CustomHeader backTo={`/case/${caseId}`}>
+            <p className='text-xl font-bold'>3D Viewer CASE{String(caseNumber).padStart(3, '0')}</p>
+          </CustomHeader>
+          <Center urls={urls} names={names} />
+          {/* <MenuBar />
       <CanvasScene url={url} /> */}
+        </StlModelProvider>
       </StlDisplayProvider>
     </>
   );

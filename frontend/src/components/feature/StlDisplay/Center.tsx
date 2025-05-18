@@ -19,7 +19,7 @@ import { message } from 'antd';
 import { PlaneDataType } from '@/types/stlDisplay';
 import { StlModelProvider } from '@/context/StlModelContext';
 
-const Center = ({ urls }: { urls: string[] }) => {
+const Center = ({ urls, names }: { urls: string[]; names: string[] }) => {
   // console.log('Center/>');
   const location = useLocation();
   const [messageApi, contextHolder] = message.useMessage();
@@ -106,15 +106,14 @@ const Center = ({ urls }: { urls: string[] }) => {
       // console.log('Saved cutting planes:', response.data);
       const data = response.data as ResponseType;
       if (data.results.length > 0) {
-        const results = data.results;
+        // const results = data.results;
         // messageApi.success(`Saved cutting planes. ${response.data.results[0]?.cut_method}`);
         messageApi.success(`Anatomical structure was successfully segmented`);
-        navigate(`/case/${caseId}/file/${results[0].new_version.case_file_id}`, {
-          state: { caseNumber, urls: data.urls, filename: results[0].new_version.filename },
+        navigate(`/case/${caseId}/file`, {
+          state: { caseNumber, urls: data.urls, names },
         });
-      } else{
+      } else {
         messageApi.success(`No changes were applied to the anatomical model`);
-
       }
       // clearPlane()
     } catch (err) {
@@ -148,7 +147,7 @@ const Center = ({ urls }: { urls: string[] }) => {
             <Suspense fallback={<Loader />}>
               <SceneSetter />
               <Controllers />
-              <Model urls={urls} />
+              <Model urls={urls} names={names}/>
 
               {/* <Angle/> */}
               <ClippingPlaneList />

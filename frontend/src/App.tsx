@@ -77,7 +77,7 @@ const App = () => {
                 {createRoleRoute('/case/list', [UserRole.Doctor], <CaseList />)}
                 {createRoleRoute('/case/create', [UserRole.Admin, UserRole.Technician], <CaseCreateForm />)}
                 {createRoleRoute(
-                  '/case/:caseId/file/:id',
+                  '/case/:caseId/file/',
                   [UserRole.Admin, UserRole.Technician, UserRole.Doctor],
                   <CaseModelViewer />
                 )}
