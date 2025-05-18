@@ -11,6 +11,8 @@ interface StlModelContextType {
   totalMesh: number;
   names: string[];
   setNames: React.Dispatch<React.SetStateAction<string[]>>;
+  isPreSur: boolean;
+  setIsPreSur: React.Dispatch<React.SetStateAction<boolean>>;
   meshVisibility: boolean[];
   updateMeshVisibility: (index: number, visible: boolean) => void;
 }
@@ -22,6 +24,7 @@ export const StlModelProvider = ({ children }: { children: ReactNode }) => {
   const [meshColors, setMeshColors] = useState<string[]>([]);
   const [names, setNames] = useState<string[]>([]);
   const [meshVisibility, setMeshVisibility] = useState<boolean[]>([]);
+  const [isPreSur, setIsPreSur] = useState<boolean>(false);
 
   useEffect(() => {
     if (geometries.length > 0) {
@@ -59,7 +62,7 @@ export const StlModelProvider = ({ children }: { children: ReactNode }) => {
       return updated;
     });
   };
-  
+
   return (
     <StlModelContext.Provider
       value={{
@@ -74,6 +77,8 @@ export const StlModelProvider = ({ children }: { children: ReactNode }) => {
         setNames,
         meshVisibility,
         updateMeshVisibility,
+        isPreSur,
+        setIsPreSur,
       }}
     >
       {children}

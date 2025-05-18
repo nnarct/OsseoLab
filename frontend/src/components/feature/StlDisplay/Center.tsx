@@ -28,8 +28,6 @@ interface Files {
 }
 
 const Center = ({ files }: { files: Files[] }) => {
-  const [isPreSur, setIsPreSur] = useState<boolean>(false);
-
   // console.log('Center/>');
   const urls = files.map((i) => i.url);
   const names = files.map((i) => i.name);

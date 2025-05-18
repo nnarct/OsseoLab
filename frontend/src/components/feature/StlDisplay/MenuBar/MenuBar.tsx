@@ -15,6 +15,7 @@ import ItemListPanel from '../ItemList/ItemListPanel';
 import ResetModelButton from './ResetModelButton';
 import FaceFrontButton from './FaceFrontButton';
 import MeshsButton from './MeshsButton';
+import SurgicalSettingButton from './SurgicalSettingButton';
 // import VisibilityButton from './VisibilityButton';
 interface MenuBarProps {
   onSave: () => Promise<void>;
@@ -63,24 +64,30 @@ const MenuBar = (props: MenuBarProps) => {
   return (
     <>
       <div
-        className='flex gap-3 p-3'
+        className='p-3'
         style={{
           background: '#fff',
           borderBottom: '1px solid rgba(5, 5, 5, 0.05)',
           position: 'sticky',
           top: 73,
           zIndex: 1000,
+          borderLeft: '1px solid rgba(5, 5, 5, 0.05)',
         }}
       >
-        <ItemListPanel />
-        {/* <VisibilityButton/> */}
-        <FaceFrontButton />
-        <PlaneButton />
-        <MeasureButton />
-        <AngleButton />
-        <ResetModelButton />
-        <MeshsButton />
-        <SaveButton onClick={props.onSave} />
+        <div className='flex items-center justify-between gap-x-3'>
+          <div className='flex gap-x-3'>
+            <ItemListPanel />
+            {/* <VisibilityButton/> */}
+            <FaceFrontButton />
+            <PlaneButton />
+            <MeasureButton />
+            <AngleButton />
+            <ResetModelButton />
+            <MeshsButton />
+            <SaveButton onClick={props.onSave} />
+          </div>
+          <SurgicalSettingButton />
+        </div>
       </div>
       {/* {isMeasureActive && (
         <>

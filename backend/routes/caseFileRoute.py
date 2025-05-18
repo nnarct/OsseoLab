@@ -252,6 +252,7 @@ def get_case_files_by_case_id(case_id):
             "error": str(e)
         }), 500
 
+
 @case_file_bp.route("/case-file/<string:file_id>/set-pre", methods=["PATCH"])
 @jwt_required()
 def set_case_file_pre(file_id):
@@ -308,3 +309,43 @@ def set_case_file_post(file_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"statusCode": 500, "message": "Failed to update 'post' status", "error": str(e)}), 500
+
+
+@case_file_bp.route("/case-files/<string:case_id>/active", methods=["GET"])
+@jwt_required()
+def get_active_case_files_by_case_id(case_id):
+    try:
+        case_files = CaseFile.query.filter_by(
+            case_id=case_id, active=True).all()
+        result = []
+        from models.case_file_versions import CaseFileVersion
+        for cf in case_files:
+            current_version = CaseFileVersion.query.get(cf.current_version_id)
+            result.append({
+                "id": str(cf.id),
+                "name": current_version.nickname if current_version else "",
+                "pre": cf.pre,
+                "post": cf.post
+            })
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"statusCode": 500, "message": "Failed to get active case files", "error": str(e)}), 500
+
+
+@case_file_bp.route("/case-files/update-pre-post", methods=["PATCH"])
+@jwt_required()
+def update_pre_post_flags():
+    try:
+        data = request.get_json()
+        for file_id, flags in data.items():
+            case_file = CaseFile.query.filter_by(id=file_id).first()
+            if case_file:
+                if "pre" in flags:
+                    case_file.pre = bool(flags["pre"])
+                if "post" in flags:
+                    case_file.post = bool(flags["post"])
+        db.session.commit()
+        return jsonify({"statusCode": 200, "message": "Pre/Post flags updated successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"statusCode": 500, "message": "Failed to update Pre/Post flags", "error": str(e)}), 500
