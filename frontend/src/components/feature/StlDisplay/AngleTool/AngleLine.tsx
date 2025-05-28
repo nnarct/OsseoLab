@@ -39,30 +39,34 @@ const AngleLine = ({ triple, markerRadius }: { triple: AngleGroupDataType; marke
         polygonOffset={true}
         polygonOffsetFactor={-1}
       />
-     {triple.show && <Html
-        position={triple.middle.point}
-        center
-        // style={{
-        //   transform: `scale(${computeScale(camera, midPoint)})`,
-        //   transformOrigin: 'center center',
-        // }}
-      >
-        <div
-          style={{
-            // width: '50vw',
-            padding: '0.5rem',
-            borderRadius: '0.5rem',
-            backgroundColor: '#ff6f00',
-            color: 'white',
-            // fontWeight: 'bold',
-            fontSize: '1rem',
-            boxShadow: '0 0 4px rgba(0,0,0,0.3)',
-            whiteSpace: 'nowrap',
-          }}
+      {triple.show && (
+        <Html
+          position={triple.middle.point}
+          center
+          // style={{
+          //   transform: `scale(${computeScale(camera, midPoint)})`,
+          //   transformOrigin: 'center center',
+          // }}
+          zIndexRange={[0, 0]}
+          style={{ zIndex: 1 }}
         >
-          {triple.angleDeg.toFixed(2)}°
-        </div>
-      </Html>}
+          <div
+            style={{
+              // width: '50vw',
+              padding: '0.5rem',
+              borderRadius: '0.5rem',
+              backgroundColor: '#ff6f00',
+              color: 'white',
+              // fontWeight: 'bold',
+              fontSize: '1rem',
+              boxShadow: '0 0 4px rgba(0,0,0,0.3)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {triple.angleDeg.toFixed(2)}°
+          </div>
+        </Html>
+      )}
     </group>
   );
 };
