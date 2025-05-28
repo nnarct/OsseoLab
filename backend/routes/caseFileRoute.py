@@ -7,6 +7,7 @@ import uuid
 from models.case_files import CaseFile
 from models.quick_case_files import QuickCaseFile
 from itsdangerous import URLSafeTimedSerializer, BadSignature
+from services.smart_filename import resolve_filename_conflict
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -37,6 +38,7 @@ def add_new_case_file():
         filename = secure_filename(file.filename)
         upload_folder = os.path.join(
             get_case_files_upload_folder(), str(case_id))
+        filename = resolve_filename_conflict(upload_folder, filename)
         os.makedirs(upload_folder, exist_ok=True)
         filepath = os.path.join(upload_folder, filename)
         file.save(filepath)
@@ -216,7 +218,9 @@ def get_case_files_by_case_id(case_id):
     try:
         case_files = CaseFile.query.filter_by(case_id=case_id).all()
         if not case_files:
-            return jsonify({"statusCode": 404, "message": "No case files found for this case ID"}), 404
+            return jsonify({"statusCode": 404,
+                            "message": "No case files found for this case ID",
+                            "data": {"case_files": jsonify(case_files), "case_id": case_id}}), 404
 
         from models.case_file_versions import CaseFileVersion
 
