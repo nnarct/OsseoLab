@@ -30,6 +30,7 @@ const CaseFilesList = ({ caseId, readOnly }: { caseId: string; readOnly?: boolea
       queryClient.invalidateQueries({ queryKey: ['case', caseId] });
       queryClient.invalidateQueries({ queryKey: ['case-file-versions'] });
       queryClient.invalidateQueries({ queryKey: ['caseFilesByCaseId', caseId] });
+      queryClient.invalidateQueries({ queryKey: ['caseModelByCaseId', caseId] });
     } catch (error) {
       console.error(error);
       messageApi.error('Failed to update status');
@@ -158,9 +159,11 @@ const CaseFilesList = ({ caseId, readOnly }: { caseId: string; readOnly?: boolea
       // queryClient.invalidateQueries({ queryKey: [STL_LIST_QUERY_KEY] });
       messageApi.success('uploaded');
       setFile(null);
+      form.resetFields();
       queryClient.invalidateQueries({ queryKey: ['case', caseId] });
       queryClient.invalidateQueries({ queryKey: ['case-file-versions'] });
       queryClient.invalidateQueries({ queryKey: ['caseFilesByCaseId', caseId] });
+      queryClient.invalidateQueries({ queryKey: ['caseModelByCaseId', caseId] });
     } catch (error) {
       messageApi.error('Upload failed!');
       console.error(error);
