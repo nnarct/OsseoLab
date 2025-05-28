@@ -31,6 +31,14 @@ const SurgicalSettingButton = () => {
         const response = await axios.get(`/case-files/${caseId}/active`);
         console.log({ response });
         setCaseFiles(response.data);
+        // const caseModels = response.data as CaseFile[];
+        // caseModels.forEach((cf, i) => {
+        //   if (isPreSur === 'pre') {
+        //     updateMeshVisibility(i, cf.pre);
+        //   } else if (isPreSur === 'post') {
+        //     updateMeshVisibility(i, cf.post);
+        //   }
+        // });
       } catch (err) {
         console.error('Failed to fetch case files:', err);
       }
@@ -39,7 +47,7 @@ const SurgicalSettingButton = () => {
     if (caseId) {
       fetchCaseFiles();
     }
-  }, [caseId, isOpen, setCaseFiles]);
+  }, [caseId, isOpen, isPreSur, setCaseFiles, updateMeshVisibility]);
   if (!caseId) {
     return null;
   }
@@ -60,7 +68,7 @@ const SurgicalSettingButton = () => {
     setCaseFiles(tempCaseFiles);
   };
   const onLocalSetSurgical = async (value: 'pre' | 'post') => {
-    setIsPreSur(value )
+    setIsPreSur(value);
     caseFiles.forEach((cf, i) => {
       if (value === 'pre') {
         updateMeshVisibility(i, cf.pre);

@@ -15,7 +15,6 @@ export const initializeSTLModel = (
   gl: THREE.WebGLRenderer
 ) => {
   if (!geometry) return;
-  console.log('initialize model');
   gl.localClippingEnabled = true;
 
   geometry.computeBoundingBox();

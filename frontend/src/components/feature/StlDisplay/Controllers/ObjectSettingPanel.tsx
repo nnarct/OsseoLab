@@ -1,5 +1,5 @@
 import { useStlModel } from '@/hooks/useStlModel';
-import { Button, Card, ColorPicker, Tooltip, Switch, Slider } from 'antd';
+import { Button, Card, ColorPicker, Tooltip, Slider } from 'antd';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { IoReloadSharp } from 'react-icons/io5';
 

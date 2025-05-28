@@ -105,10 +105,10 @@ def cut_and_save_multiple():
                 # Convert normal and origin to numpy arrays
                 vec_normal = np.array([normal['x'], normal['y'], normal['z']])
                 origin = plane_data.get("origin")
-                vec_origin = np.array([origin['x'], origin['y'], origin['z']]) if origin is not None else None
+                # vec_origin = np.array([origin['x'], origin['y'], origin['z']]) if origin is not None else None
                 # Apply rotation
                 rotated_normal = rotation_matrix @ vec_normal
-                rotated_origin = rotation_matrix @ vec_origin if vec_origin is not None else None
+                # rotated_origin = rotation_matrix @ vec_origin if vec_origin is not None else None
                 # Use rotated normal for cutting, constant remains the same
                 cut_method, mesh = cut_plane(
                     mesh,
@@ -134,15 +134,15 @@ def cut_and_save_multiple():
                 constant_b = plane_data_b.get("constant")
                 vec_a = np.array([normal_a['x'], normal_a['y'], normal_a['z']])
                 vec_b = np.array([normal_b['x'], normal_b['y'], normal_b['z']])
-                origin_a = plane_data_a.get("origin")
-                origin_b = plane_data_b.get("origin")
-                vec_origin_a = np.array([origin_a['x'], origin_a['y'], origin_a['z']]) if origin_a is not None else None
-                vec_origin_b = np.array([origin_b['x'], origin_b['y'], origin_b['z']]) if origin_b is not None else None
+                # origin_a = plane_data_a.get("origin")
+                # origin_b = plane_data_b.get("origin")
+                # vec_origin_a = np.array([origin_a['x'], origin_a['y'], origin_a['z']]) if origin_a is not None else None
+                # vec_origin_b = np.array([origin_b['x'], origin_b['y'], origin_b['z']]) if origin_b is not None else None
                 # Apply rotation
                 rotated_normal_a = rotation_matrix @ vec_a
                 rotated_normal_b = rotation_matrix @ vec_b
-                rotated_origin_a = rotation_matrix @ vec_origin_a if vec_origin_a is not None else None
-                rotated_origin_b = rotation_matrix @ vec_origin_b if vec_origin_b is not None else None
+                # rotated_origin_a = rotation_matrix @ vec_origin_a if vec_origin_a is not None else None
+                # rotated_origin_b = rotation_matrix @ vec_origin_b if vec_origin_b is not None else None
                 try:
                     cut_method, mesh = cut_two_planes(
                         mesh,
