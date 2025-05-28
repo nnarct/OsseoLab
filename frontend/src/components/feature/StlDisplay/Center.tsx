@@ -1,4 +1,4 @@
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import Controllers from './Controllers/Controllers';
 import Model from './Model';
@@ -34,7 +34,7 @@ const Center = ({ files }: { files: CaseModelById[] }) => {
   } = useStlDisplay();
   const { isActive: isMeasureActive } = measureHandler;
   const { isActive: isAngleActive } = angleHandler;
-  const urls = files.map((i) => i.url);
+  const urls = files.filter((i) => i.active).map((i) => i.url);
   const names = files.map((i) => i.name);
   const save = async () => {
     const planes: PlaneDataType[] = getPlanes();
