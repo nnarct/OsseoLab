@@ -7,12 +7,7 @@ import { useStlModel } from '@/hooks/useStlModel';
 import useSafeStlLoader from '@/hooks/useSafeStlLoader';
 
 const Model = ({ urls, names }: { urls: string[]; names: string[] }) => {
-  // console.log('render <Model/>')
-  const { camera, gl } = useThree();
-
-  // Removed unused visibleMeshes and setVisibleMeshes from useStlDisplay().meshVisibility
-
-  const loadedGeometries = useSafeStlLoader(urls);
+  const { geometries: loadedGeometries, isLoading } = useSafeStlLoader(urls);
   const { geometries, setGeometries, setNames, meshColors, meshVisibility, meshOpacities } = useStlModel()!;
 
   useEffect(() => {
@@ -26,7 +21,7 @@ const Model = ({ urls, names }: { urls: string[]; names: string[] }) => {
 
   // Removed useEffect that initializes visibleMeshes
 
-  if (!geometries || geometries.length === 0 || geometries[0].attributes.position.count === 0) {
+  if (!isLoading && (!geometries || geometries.length === 0 || geometries[0].attributes.position.count === 0)) {
     console.warn('Empty STL loaded — no geometry found');
     return null;
   }
@@ -37,8 +32,6 @@ const Model = ({ urls, names }: { urls: string[]; names: string[] }) => {
         <MeshComponent
           key={index}
           geometry={geometry}
-          camera={camera}
-          gl={gl}
           visible={meshVisibility[index]}
           localRef={meshRefs[index]}
           color={meshColors[index % meshColors.length]}
@@ -53,16 +46,12 @@ export default Model;
 
 const MeshComponent = ({
   geometry,
-  camera,
-  gl,
   visible,
   localRef,
   color,
   opacity,
 }: {
   geometry: THREE.BufferGeometry;
-  camera: THREE.Camera;
-  gl: THREE.WebGLRenderer;
   visible: boolean;
   onClick?: () => void;
   localRef: Ref<THREE.Mesh>;
@@ -72,6 +61,7 @@ const MeshComponent = ({
   const { planeHandler } = useStlDisplay();
   const { isCut } = planeHandler;
   const planes = planeHandler.getPlanes();
+  const { camera, gl } = useThree();
 
   useEffect(() => {
     if (localRef) {
