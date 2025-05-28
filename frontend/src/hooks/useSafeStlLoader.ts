@@ -2,8 +2,14 @@ import { useState, useEffect } from 'react';
 import { STLLoader } from 'three/examples/jsm/Addons.js';
 import * as THREE from 'three';
 import { axios } from '@/config/axiosConfig';
-const useSafeStlLoader = (urls: string[]): { geometries: THREE.BufferGeometry[], isLoading: boolean } => {
-  const [geometries, setGeometries] = useState<THREE.BufferGeometry[]>([]);
+
+interface GeometryType {
+  url: string;
+  geometry: THREE.BufferGeometry;
+}
+
+const useSafeStlLoader = (urls: string[]): { geometries: GeometryType[]; isLoading: boolean } => {
+  const [geometries, setGeometries] = useState<GeometryType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -12,7 +18,7 @@ const useSafeStlLoader = (urls: string[]): { geometries: THREE.BufferGeometry[],
     const loadAll = async () => {
       setIsLoading(true);
       try {
-        const loadedGeometries: THREE.BufferGeometry[] = [];
+        const loadedGeometries: GeometryType[] = [];
 
         for (const url of urls) {
           try {
@@ -26,7 +32,7 @@ const useSafeStlLoader = (urls: string[]): { geometries: THREE.BufferGeometry[],
 
             const bufferResponse = await axios.get(url, { responseType: 'arraybuffer' });
             const geometry = loader.parse(bufferResponse.data);
-            loadedGeometries.push(geometry);
+            loadedGeometries.push({ url, geometry });
           } catch (err) {
             console.error('Error loading STL:', err);
           }

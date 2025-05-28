@@ -1,4 +1,4 @@
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import Controllers from './Controllers/Controllers';
 import Model from './Model';
@@ -20,7 +20,8 @@ import { StlModelProvider } from '@/context/StlModelContext';
 import { NavigateFunction, useNavigate, useParams } from 'react-router-dom';
 import queryClient from '@/config/queryClient';
 import { MessageInstance } from 'antd/es/message/interface';
-import { CaseModelById } from '@/api/files.api';
+import type { CaseModelById } from '@/api/files.api';
+
 const Center = ({ files }: { files: CaseModelById[] }) => {
   // console.log('Center/>');
   const navigate = useNavigate();
@@ -34,10 +35,11 @@ const Center = ({ files }: { files: CaseModelById[] }) => {
   } = useStlDisplay();
   const { isActive: isMeasureActive } = measureHandler;
   const { isActive: isAngleActive } = angleHandler;
-  const urls = files.filter((i) => i.active).map((i) => i.url);
-  const names = files.map((i) => i.name);
+  const activeMeshes = files.filter((i) => i.active);
+
   const save = async () => {
     const planes: PlaneDataType[] = getPlanes();
+    const urls = files.filter((i) => i.active).map((i) => i.url);
     await saveModel(urls, planes, messageApi, caseId, navigate);
   };
   useEffect(() => {
@@ -63,7 +65,7 @@ const Center = ({ files }: { files: CaseModelById[] }) => {
             <Suspense fallback={<Loader />}>
               <SceneSetter />
               <Controllers />
-              <Model urls={urls} names={names} />
+              <Model activeMeshes={activeMeshes} />
 
               {/* <Angle/> */}
               <ClippingPlaneList />

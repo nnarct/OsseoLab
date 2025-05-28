@@ -4,16 +4,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { IoReloadSharp } from 'react-icons/io5';
 
 const ObjectSettingPanel = ({ isOpen }: { isOpen: boolean }) => {
-  const {
-    meshColors,
-    updateMeshColor,
-    resetMeshColor,
-    names,
-    meshVisibility,
-    updateMeshVisibility,
-    meshOpacities,
-    updateMeshOpacity,
-  } = useStlModel();
+  const { meshes, updateMeshVisibility, updateMeshColor, updateMeshOpacity, resetMeshColor } = useStlModel();
 
   return (
     <div
@@ -29,7 +20,7 @@ const ObjectSettingPanel = ({ isOpen }: { isOpen: boolean }) => {
         }}
       >
         <Card size='small' style={{ minWidth: 180, border: 'none' }}>
-          {names.map((name, index) => (
+          {meshes.map((mesh, index) => (
             <div
               key={index}
               className='flex items-center justify-between px-1 py-2'
@@ -37,24 +28,24 @@ const ObjectSettingPanel = ({ isOpen }: { isOpen: boolean }) => {
             >
               <div className='flex items-center gap-x-1'>
                 <Tooltip title='Reset'>
-                  <Button icon={<IoReloadSharp />} type='text' onClick={() => resetMeshColor(index)} />
+                  <Button icon={<IoReloadSharp />} type='text' onClick={() => resetMeshColor(mesh.id)} />
                 </Tooltip>
                 <span>
-                  {index + 1}. {name}
+                  {index + 1}. {mesh.name}
                 </span>
               </div>
               <div className='flex items-center gap-x-1 pl-4'>
-                <Tooltip title={meshVisibility[index] ? 'Hide' : 'Show'}>
+                <Tooltip title={mesh.visible ? 'Hide' : 'Show'}>
                   <Button
                     type='text'
-                    icon={meshVisibility[index] ? <FaEye /> : <FaEyeSlash />}
-                    onClick={() => updateMeshVisibility(index, !meshVisibility[index])}
+                    icon={mesh.visible ? <FaEye /> : <FaEyeSlash />}
+                    onClick={() => updateMeshVisibility(mesh.id, !mesh.visible)}
                   />
                 </Tooltip>
                 <Tooltip title={'Change object color'}>
                   <ColorPicker
-                    value={meshColors[index]}
-                    onChange={(color) => updateMeshColor(index, color.toHexString())}
+                    value={mesh.color}
+                    onChange={(color) => updateMeshColor(mesh.id, color.toHexString())}
                     style={{ marginLeft: '8px' }}
                   />
                 </Tooltip>
@@ -63,8 +54,8 @@ const ObjectSettingPanel = ({ isOpen }: { isOpen: boolean }) => {
                     min={0}
                     max={1}
                     step={0.01}
-                    value={meshOpacities[index]}
-                    onChange={(value) => updateMeshOpacity(index, value)}
+                    value={mesh.opacity}
+                    onChange={(value) => updateMeshOpacity(mesh.id, value)}
                     style={{ width: 60, marginLeft: 8 }}
                   />
                 </Tooltip>

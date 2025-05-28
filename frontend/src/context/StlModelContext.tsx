@@ -1,102 +1,119 @@
-import { createContext, ReactNode, useState, useEffect } from 'react';
+import { CaseModelById } from '@/api/files.api';
+import { createContext, ReactNode, useState, useEffect, createRef } from 'react';
 import * as THREE from 'three';
 
+interface MeshItem {
+  geometry: THREE.BufferGeometry<THREE.NormalBufferAttributes>;
+  name: string;
+  color: string;
+  visible: boolean;
+  opacity: number;
+  ref: React.RefObject<THREE.Mesh>;
+  pre: boolean;
+  post: boolean;
+  id: string;
+}
+
 interface StlModelContextType {
-  geometries: THREE.BufferGeometry<THREE.NormalBufferAttributes>[];
-  setGeometries: React.Dispatch<React.SetStateAction<THREE.BufferGeometry<THREE.NormalBufferAttributes>[]>>;
-  meshColors: string[];
-  setMeshColors: React.Dispatch<React.SetStateAction<string[]>>;
-  updateMeshColor: (index: number, color: string) => void;
-  resetMeshColor: (index: number) => void;
+  meshes: MeshItem[];
+  setMeshes: React.Dispatch<React.SetStateAction<MeshItem[]>>;
+  updateMeshProperty: <K extends keyof MeshItem>(index: number, key: K, value: MeshItem[K]) => void;
   totalMesh: number;
-  names: string[];
-  setNames: React.Dispatch<React.SetStateAction<string[]>>;
-  isPreSur: boolean;
-  setIsPreSur: React.Dispatch<React.SetStateAction<boolean>>;
-  meshVisibility: boolean[];
-  updateMeshVisibility: (index: number, visible: boolean) => void;
-  meshOpacities: number[];
-  updateMeshOpacity: (index: number, opacity: number) => void;
+  currentSurgicalType: 'pre' | 'post';
+  setCurrentSurgicalType: React.Dispatch<React.SetStateAction<'pre' | 'post'>>;
+  initializeMeshes: (loadedGeometries: { url: string; geometry: THREE.BufferGeometry }[], activeMeshes: any[]) => void;
+  updateMeshVisibility: (id: string, visible: boolean) => void;
+  updateMeshOpacity: (id: string, opacity: number) => void;
+  updateMeshColor: (id: string, color: string) => void;
+  resetMeshColor: (id: string) => void;
 }
 
 const StlModelContext = createContext<StlModelContextType | undefined>(undefined);
 const defaultColors = ['#E8D7C0', '#ff8383', '#73ff73', '#7e7eff', '#ADD8E6', '#708090'];
+
 export const StlModelProvider = ({ children }: { children: ReactNode }) => {
-  const [geometries, setGeometries] = useState<THREE.BufferGeometry<THREE.NormalBufferAttributes>[]>([]);
-  const [meshColors, setMeshColors] = useState<string[]>([]);
-  const [names, setNames] = useState<string[]>([]);
-  const [meshVisibility, setMeshVisibility] = useState<boolean[]>([]);
-  const [isPreSur, setIsPreSur] = useState<boolean>(false);
-  const [meshOpacities, setMeshOpacities] = useState<number[]>([]);
+  const [meshes, setMeshes] = useState<MeshItem[]>([]);
+  const [currentSurgicalType, setCurrentSurgicalType] = useState<'pre' | 'post'>('pre');
 
   useEffect(() => {
-    if (geometries.length > 0) {
-      setMeshColors(geometries.map((_, index) => defaultColors[index % defaultColors.length]));
-      setMeshVisibility(geometries.map(() => true));
-      setMeshOpacities(geometries.map(() => 1)); // default full opacity
-    }
-  }, [geometries]);
-  const totalMesh = geometries.length;
+    setMeshes((prev) => (prev.length === 0 ? [] : prev));
+  }, []);
 
-  const updateMeshColor = (index: number, color: string) => {
-    setMeshColors((prevColors) => {
-      const updated = [...prevColors];
+  useEffect(() => {
+    setMeshes((prev) => (prev.length === 0 ? [] : prev));
+  }, []);
+
+  const updateMeshProperty = <K extends keyof MeshItem>(index: number, key: K, value: MeshItem[K]) => {
+    setMeshes((prev) => {
+      const updated = [...prev];
       if (index >= 0 && index < updated.length) {
-        updated[index] = color;
+        updated[index] = { ...updated[index], [key]: value };
       }
       return updated;
     });
   };
 
-  const resetMeshColor = (index: number) => {
-    setMeshColors((prevColors) => {
-      const updated = [...prevColors];
-      if (index >= 0 && index < updated.length) {
-        updated[index] = defaultColors[index % defaultColors.length];
-      }
-      return updated;
-    });
+  const initializeMeshes = (
+    loadedGeometries: { url: string; geometry: THREE.BufferGeometry }[],
+    activeMeshes: CaseModelById[]
+  ) => {
+    setMeshes(
+      () =>
+        loadedGeometries
+          .map(({ url, geometry }, index) => {
+            const match = activeMeshes.find((m) => m.url === url);
+            if (!match) return null;
+            return {
+              geometry,
+              id: match.case_file_id ?? '',
+              name: match.name ?? 'Unnamed mesh',
+              color: defaultColors[index % defaultColors.length],
+              visible: true,
+              opacity: 1,
+              ref: createRef<THREE.Mesh>(),
+              pre: match.pre,
+              post: match.post,
+            };
+          })
+          .filter(Boolean) as MeshItem[]
+    );
   };
 
-  const updateMeshVisibility = (index: number, visible: boolean) => {
-    setMeshVisibility((prevVisibility) => {
-      const updated = [...prevVisibility];
-      if (index >= 0 && index < updated.length) {
-        updated[index] = visible;
-      }
-      return updated;
-    });
+  const totalMesh = meshes.length;
+
+  const updateMeshVisibility = (id: string, visible: boolean) => {
+    setMeshes((prev) => prev.map((mesh) => (mesh.id === id ? { ...mesh, visible } : mesh)));
+  };
+  const updateMeshOpacity = (id: string, opacity: number) => {
+    setMeshes((prev) => prev.map((mesh) => (mesh.id === id ? { ...mesh, opacity } : mesh)));
   };
 
-  const updateMeshOpacity = (index: number, opacity: number) => {
-    console.log(opacity);
-    setMeshOpacities((prevOpacities) => {
-      const updated = [...prevOpacities];
-      if (index >= 0 && index < updated.length) {
-        updated[index] = opacity;
-      }
-      return updated;
-    });
+  const updateMeshColor = (id: string, color: string) => {
+    setMeshes((prev) => prev.map((mesh) => (mesh.id === id ? { ...mesh, color } : mesh)));
+  };
+
+  const resetMeshColor = (id: string) => {
+    setMeshes((prev) =>
+      prev.map((mesh, index) =>
+        mesh.id === id ? { ...mesh, color: defaultColors[index % defaultColors.length] } : mesh
+      )
+    );
   };
 
   return (
     <StlModelContext.Provider
       value={{
-        geometries,
-        setGeometries,
-        meshColors,
-        setMeshColors,
-        updateMeshColor,
+        meshes,
+        setMeshes,
+        updateMeshProperty,
         totalMesh,
-        resetMeshColor,
-        names,
-        setNames,
-        meshVisibility,
+        currentSurgicalType,
+        setCurrentSurgicalType,
         updateMeshVisibility,
-        isPreSur,
-        setIsPreSur,
-        meshOpacities,
         updateMeshOpacity,
+        updateMeshColor,
+        resetMeshColor,
+        initializeMeshes,
       }}
     >
       {children}
@@ -105,3 +122,15 @@ export const StlModelProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export { StlModelContext };
+
+// useEffect(() => {
+//   setMeshes((prev) =>
+//     geometries.map((geometry, index) => ({
+//       geometry,
+//       name: names[index] ?? `Mesh ${index + 1}`,
+//       color: defaultColors[index % defaultColors.length],
+//       visible: true,
+//       opacity: 1,
+//     }))
+//   );
+// }, [geometries, names]);

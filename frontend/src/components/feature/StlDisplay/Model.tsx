@@ -1,41 +1,42 @@
-import { Ref, useEffect, useRef, useMemo, createRef } from 'react';
+import { useEffect, useRef, createRef } from 'react';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { initializeSTLModel } from '@/utils/stlUtils';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
 import { useStlModel } from '@/hooks/useStlModel';
 import useSafeStlLoader from '@/hooks/useSafeStlLoader';
+import type { CaseModelById } from '@/api/files.api';
+import { useMemo } from 'react';
+interface ModelProps {
+  activeMeshes: CaseModelById[];
+}
 
-const Model = ({ urls, names }: { urls: string[]; names: string[] }) => {
+const Model = ({ activeMeshes }: ModelProps) => {
+  const urls = useMemo(() => activeMeshes.map((mesh) => mesh.url), [activeMeshes]);
   const { geometries: loadedGeometries, isLoading } = useSafeStlLoader(urls);
-  const { geometries, setGeometries, setNames, meshColors, meshVisibility, meshOpacities } = useStlModel()!;
+  const { meshes, initializeMeshes } = useStlModel()!;
 
   useEffect(() => {
-    if (loadedGeometries && loadedGeometries.length > 0) {
-      setGeometries(loadedGeometries);
-      setNames(names);
+    if (loadedGeometries && loadedGeometries.length > 0 && meshes.length === 0) {
+      initializeMeshes(loadedGeometries, activeMeshes);
     }
-  }, [loadedGeometries, names, setGeometries, setNames]);
+  }, [loadedGeometries, activeMeshes, initializeMeshes, meshes.length]);
 
-  const meshRefs = useMemo(() => urls.map(() => createRef<THREE.Mesh>()), [urls]);
-
-  // Removed useEffect that initializes visibleMeshes
-
-  if (!isLoading && (!geometries || geometries.length === 0 || geometries[0].attributes.position.count === 0)) {
+  if (!isLoading && (!meshes || meshes.length === 0 || meshes[0].geometry.attributes.position.count === 0)) {
     console.warn('Empty STL loaded — no geometry found');
     return null;
   }
 
   return (
     <>
-      {geometries.map((geometry, index) => (
+      {meshes.map((mesh, index) => (
         <MeshComponent
           key={index}
-          geometry={geometry}
-          visible={meshVisibility[index]}
-          localRef={meshRefs[index]}
-          color={meshColors[index % meshColors.length]}
-          opacity={meshOpacities[index]}
+          geometry={mesh.geometry}
+          visible={mesh.visible}
+          localRef={mesh.ref}
+          color={mesh.color}
+          opacity={mesh.opacity}
         />
       ))}
     </>
@@ -43,7 +44,6 @@ const Model = ({ urls, names }: { urls: string[]; names: string[] }) => {
 };
 
 export default Model;
-
 const MeshComponent = ({
   geometry,
   visible,
@@ -53,8 +53,7 @@ const MeshComponent = ({
 }: {
   geometry: THREE.BufferGeometry;
   visible: boolean;
-  onClick?: () => void;
-  localRef: Ref<THREE.Mesh>;
+  localRef: React.RefObject<THREE.Mesh>;
   color: string;
   opacity?: number;
 }) => {
@@ -62,44 +61,34 @@ const MeshComponent = ({
   const { isCut } = planeHandler;
   const planes = planeHandler.getPlanes();
   const { camera, gl } = useThree();
+  const material = useRef<THREE.MeshStandardMaterial>(new THREE.MeshStandardMaterial());
 
+  // Only initialize once
   useEffect(() => {
-    if (localRef) {
-      if (!localRef.current || !geometry || localRef.current.userData.initialized) return;
-
+    if (localRef.current && geometry && !localRef.current.userData.initialized) {
       initializeSTLModel(geometry, camera, localRef, gl);
       localRef.current.userData.initialized = true;
       localRef.current.userData.type = 'stlModel';
     }
   }, [geometry, camera, gl, localRef]);
 
-  const material = useRef<THREE.MeshStandardMaterial>();
-
+  // Always update material when props change
   useEffect(() => {
-    if (!material.current) {
-      material.current = new THREE.MeshStandardMaterial();
-    }
-
-    material.current.color = new THREE.Color(color);
-    material.current.metalness = 0.1;
-    material.current.roughness = 0.6;
-    material.current.clipIntersection = true;
-    material.current.clipShadows = true;
+    if (!material.current) return;
+    material.current.color.set(color);
     material.current.opacity = opacity ?? 1;
     material.current.transparent = opacity !== undefined && opacity < 1;
-
-    if (planes.length > 0 && isCut) {
-      material.current.clippingPlanes = planes.map((item) => item.plane);
-    } else {
-      material.current.clippingPlanes = null;
-    }
-
+    material.current.clipIntersection = true;
+    material.current.clipShadows = true;
+    material.current.metalness = 0.1;
+    material.current.roughness = 0.6;
+    material.current.clippingPlanes = planes.length > 0 && isCut ? planes.map((item) => item.plane) : null;
     material.current.needsUpdate = true;
   }, [color, opacity, planes, isCut]);
 
   return (
     <group rotation={[-Math.PI / 2, 0, 0]}>
-      <mesh ref={localRef} geometry={geometry} visible={visible} material={material.current} />
+      <mesh ref={localRef} geometry={geometry} visible={visible} material={material.current} renderOrder={-1} />
     </group>
   );
 };

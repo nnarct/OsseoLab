@@ -16,7 +16,7 @@ import ResetModelButton from './ResetModelButton';
 import FaceFrontButton from './FaceFrontButton';
 import MeshsButton from './MeshsButton';
 import SurgicalSettingButton from './SurgicalSettingButton';
-// import VisibilityButton from './VisibilityButton';
+
 interface MenuBarProps {
   onSave: () => Promise<void>;
   // saving: boolean;
