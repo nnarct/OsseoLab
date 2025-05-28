@@ -1,5 +1,5 @@
 import { axios } from '@/config/axiosConfig';
-import CaseFilesList from './CaseFilesList';
+import CaseFilesList from '@/components/feature/Case/CaseFilesList';
 import { useGetCaseById } from '@/services/case/case.service';
 import { Button, Card, DatePicker, Divider, Form, Input, notification, Select, Switch, Typography } from 'antd';
 import dayjs from 'dayjs';
@@ -47,7 +47,7 @@ const CaseDetail = ({ id }: { id: string }) => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      console.log({ values });
+ 
       if (values.surgery_date) {
         values.surgery_date = dayjs(values.surgery_date).hour(12).format('YYYY-MM-DD');
       }
@@ -229,8 +229,8 @@ const CaseDetail = ({ id }: { id: string }) => {
             </Typography.Text>
           </div>
           <Divider />
-          <CaseFilesList files={data.files} caseId={id} caseNumber={data.case_number} urls={data.urls} names={data.names}/>
-          <CaseFileVersionList/>
+          <CaseFilesList caseId={id} />
+          <CaseFileVersionList />
         </>
       ) : (
         <></>

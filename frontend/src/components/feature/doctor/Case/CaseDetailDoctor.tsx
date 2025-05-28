@@ -1,7 +1,6 @@
-import { axios } from '@/config/axiosConfig';
-import CaseFilesList from '../../Case/CaseFilesList';
+import CaseFilesList from '@/components/feature/Case/CaseFilesList';
 import { useGetCaseById } from '@/services/case/case.service';
-import { Button, Card, DatePicker, Divider, Form, Input, notification, Select, Switch, Typography } from 'antd';
+import { Button, Card, DatePicker, Divider, Form, Input, Select, Switch, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -29,7 +28,7 @@ const CaseDetailDoctor = ({ id }: { id: string }) => {
     <Card loading={isLoading} title={`CASE${data ? String(case_number).padStart(3, '0') : ''}`}>
       {data ? (
         <>
-          <Form 
+          <Form
             className='grid grid-cols-2 gap-x-4'
             layout='vertical'
             form={form}
@@ -109,11 +108,11 @@ const CaseDetailDoctor = ({ id }: { id: string }) => {
               Created At: {dayjs.unix(data.created_at).format('DD MMM YYYY HH:mm:ss A')}
             </Typography.Text>
             <Typography.Text type='secondary'>
-              Last Updated: {dayjs.unix(data.last_updated).format('DD MMM YYYY HH:mm:ss A')}
+              Last Updated: {dayjs.unix(data.updated_at).format('DD MMM YYYY HH:mm:ss A')}
             </Typography.Text>
           </div>
           <Divider />
-          <CaseFilesList files={data.files} caseId={id} caseNumber={data.case_number} />
+          <CaseFilesList caseId={id} />
         </>
       ) : (
         <></>

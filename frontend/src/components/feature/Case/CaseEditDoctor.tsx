@@ -1,5 +1,5 @@
 import { axios } from '@/config/axiosConfig';
-import CaseFilesList from './CaseFilesList';
+import CaseFilesList from '@/components/feature/Case/CaseFilesList';
 import { useGetCaseById } from '@/services/case/case.service';
 import { Button, Card, DatePicker, Divider, Form, Input, notification, Select, Switch, Typography } from 'antd';
 import dayjs from 'dayjs';
@@ -230,7 +230,7 @@ const CaseEditDoctor = ({
             </Form.Item>
 
             <div className='col-span-2 flex items-center justify-center gap-x-4'>
-              <Button onClick={() => setIsEditing(false)}  className='w-22' size='middle'>
+              <Button onClick={() => setIsEditing(false)} className='w-22' size='middle'>
                 Cancel
               </Button>
               <Button type='primary' htmlType='submit' className='w-22' size='middle'>
@@ -243,11 +243,11 @@ const CaseEditDoctor = ({
               Created At: {dayjs.unix(data.created_at).format('DD MMM YYYY HH:mm:ss A')}
             </Typography.Text>
             <Typography.Text type='secondary'>
-              Last Updated: {dayjs.unix(data.last_updated).format('DD MMM YYYY HH:mm:ss A')}
+              Last Updated: {dayjs.unix(data.updated_at).format('DD MMM YYYY HH:mm:ss A')}
             </Typography.Text>
           </div>
           <Divider />
-          <CaseFilesList files={data.files} caseId={id} caseNumber={data.case_number} readOnly />
+          <CaseFilesList caseId={id} readOnly />
         </>
       ) : (
         <></>

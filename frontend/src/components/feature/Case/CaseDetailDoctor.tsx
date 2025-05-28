@@ -1,4 +1,4 @@
-import CaseFilesList from './CaseFilesList';
+import CaseFilesList from '@/components/feature/Case/CaseFilesList';
 import { useGetCaseById } from '@/services/case/case.service';
 import { Button, Card, Descriptions, Divider } from 'antd';
 import dayjs from 'dayjs';
@@ -86,7 +86,7 @@ const CaseDetailDoctor = ({
             </Descriptions.Item>
           </Descriptions>
           <Divider />
-          <CaseFilesList files={data.files} caseId={id} caseNumber={data.case_number} readOnly  urls={data.urls} names={data.names}/>
+          <CaseFilesList caseId={id} readOnly />
         </>
       ) : (
         <></>

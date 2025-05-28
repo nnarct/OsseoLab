@@ -59,6 +59,7 @@ const CaseFilesTable = ({ caseId, filesData, readOnly, openModal }: CaseFilesTab
       key: 'pre',
       dataIndex: 'pre',
       align: 'center',
+      sorter: (a, b) => Number(a.pre) - Number(b.pre),
       render: (pre: boolean, record) => (
         <TagCheckbox
           nickname={record.nickname}
@@ -74,6 +75,7 @@ const CaseFilesTable = ({ caseId, filesData, readOnly, openModal }: CaseFilesTab
       key: 'post',
       dataIndex: 'post',
       align: 'center',
+      sorter: (a, b) => Number(a.post) - Number(b.post),
       render: (post: boolean, record) => (
         <TagCheckbox
           nickname={record.nickname}
