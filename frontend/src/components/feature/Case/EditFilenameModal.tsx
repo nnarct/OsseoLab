@@ -1,8 +1,8 @@
-import { Button, Modal, Input, message } from 'antd';
+import { Button, Modal, Input, message, Form } from 'antd';
 import { useState } from 'react';
 import { renameCaseFileVersion } from '@/api/case-file.api';
 import { BiSolidEdit } from 'react-icons/bi';
-import queryClient from '@/config/queryClient';
+import { invalidateCaseQueries } from './CaseFilesList/invalidateCaseQueries';
 
 interface EditFilenameModalProps {
   initialFilename: string;
@@ -22,9 +22,7 @@ const EditFilenameModal = ({ initialFilename, version_id, caseId, disabled }: Ed
     try {
       await renameCaseFileVersion(version_id, filename);
       messageApi.success('Model name updated');
-      queryClient.invalidateQueries({ queryKey: ['case', caseId] });
-
-      queryClient.invalidateQueries({ queryKey: ['case-file-versions', caseId] });
+      invalidateCaseQueries(caseId);
       closeModal();
     } catch {
       messageApi.error('Failed to update filename');
@@ -34,7 +32,10 @@ const EditFilenameModal = ({ initialFilename, version_id, caseId, disabled }: Ed
   return (
     <>
       {contextHolder}
-      <Button type='text' onClick={openModal} icon={<BiSolidEdit />} disabled={disabled} />
+      <div className='flex items-center'>
+        <Button type='text' onClick={openModal} icon={<BiSolidEdit />} disabled={disabled} />
+        {initialFilename}
+      </div>
       <Modal
         centered
         open={isOpen}
@@ -42,8 +43,16 @@ const EditFilenameModal = ({ initialFilename, version_id, caseId, disabled }: Ed
         onCancel={closeModal}
         onOk={onSubmit}
         okText='Save'
+        keyboard
       >
-        <Input value={filename} onChange={(e) => setFilename(e.target.value)} placeholder='Enter new filename' />
+        <Form onFinish={onSubmit}>
+          <Input
+            value={filename}
+            onChange={(e) => setFilename(e.target.value)}
+            placeholder='Enter new filename'
+            autoFocus
+          />
+        </Form>
       </Modal>
     </>
   );
