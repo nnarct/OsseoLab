@@ -25,4 +25,4 @@ RUN pnpm format
 EXPOSE 5001
 
 # Start app
-CMD ["pnpm", "dev"]
+CMD ["pnpm", "run", "dev", "--", "--host"]
