@@ -1,5 +1,5 @@
 import { axios } from '@/config/axiosConfig';
-import CaseFilesList from '@/components/feature/Case/CaseFilesList';
+import CaseFilesList from './CaseFilesList';
 import { useGetCaseById } from '@/services/case/case.service';
 import { Button, Card, DatePicker, Divider, Form, Input, notification, Select, Switch, Typography } from 'antd';
 import dayjs from 'dayjs';

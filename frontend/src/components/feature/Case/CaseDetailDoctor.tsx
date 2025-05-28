@@ -1,4 +1,4 @@
-import CaseFilesList from '@/components/feature/Case/CaseFilesList';
+import CaseFilesList from './CaseFilesList';
 import { useGetCaseById } from '@/services/case/case.service';
 import { Button, Card, Descriptions, Divider } from 'antd';
 import dayjs from 'dayjs';

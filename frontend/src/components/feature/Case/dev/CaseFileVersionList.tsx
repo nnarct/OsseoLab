@@ -50,10 +50,7 @@ const CaseFileVersionList = () => {
       dataIndex: 'nickname',
       title: 'Model name',
       render: (nickname, record) => (
-        <div className='whitespace-nowrap'>
-          <EditFilenameModal version_id={record.id} initialFilename={nickname} caseId={id as string} />
-          {nickname}
-        </div>
+        <EditFilenameModal version_id={record.id} initialFilename={nickname} caseId={id as string} />
       ),
       sorter: (a, b) => a.nickname.localeCompare(b.nickname),
     },

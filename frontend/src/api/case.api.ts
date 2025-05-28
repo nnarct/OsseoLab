@@ -4,7 +4,6 @@ import type { CaseData, CaseSummary, QuickCaseData } from '@/types/case';
 export const getCaseById = async (id: string): Promise<CaseData> => {
   try {
     const response = await axios.get(`/case/${id}`);
-    console.log({data: response.data.data})
     return response.data.data;
   } catch (error) {
     console.error('Failed to fetch case by ID:', error);
@@ -60,7 +59,6 @@ export const deleteQuickCaseById = async (quickCaseId: string): Promise<void> =>
     throw error;
   }
 };
-
 
 export const getQuickCaseById = async (id: string): Promise<QuickCaseData> => {
   try {
