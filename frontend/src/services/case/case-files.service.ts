@@ -28,7 +28,7 @@ export const useCaseFilesByCaseId = (caseId: string) => {
     enabled: !!caseId,
   });
 };
-export const useCaseModelsByCaseId = (caseId: string) => {
+export const useGetCaseModelsByCaseId = (caseId: string) => {
   return useQuery({
     queryKey: ['caseModelByCaseId', caseId],
     queryFn: () => getCaseModelsByCaseId(caseId),

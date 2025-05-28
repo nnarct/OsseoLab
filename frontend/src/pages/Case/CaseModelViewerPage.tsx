@@ -4,7 +4,7 @@ import { Button, Layout, Result } from 'antd';
 import CustomHeader from '@/components/common/CustomHeader';
 import Center from '@/components/feature/StlDisplay/Center';
 import { StlModelProvider } from '@/context/StlModelContext';
-import { useCaseModelsByCaseId } from '@/services/case/case-files.service';
+import { useGetCaseModelsByCaseId } from '@/services/case/case-files.service';
 const CaseModelViewerPage = () => {
   const navigate = useNavigate();
   const { caseId } = useParams();
@@ -49,7 +49,7 @@ const CaseModelViewerPage = () => {
 export default CaseModelViewerPage;
 
 const CaseModelViewer = ({ caseId }: { caseId: string }) => {
-  const { data } = useCaseModelsByCaseId(caseId);
+  const { data } = useGetCaseModelsByCaseId(caseId);
   if (!data) return null;
 
   return (
