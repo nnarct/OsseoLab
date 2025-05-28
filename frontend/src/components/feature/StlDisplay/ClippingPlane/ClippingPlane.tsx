@@ -7,6 +7,7 @@ import { createClippingPlaneMaterial } from '@/utils/stlUtils';
 import { useTransformControls } from '@/hooks/useTransformControls';
 import { usePlaneUpdater } from '@/hooks/usePlaneUpdater';
 import { useStlDisplay } from '@/hooks/useStlDisplay';
+import { useThree } from '@react-three/fiber';
 
 const ClippingPlane = ({
   plane,
@@ -30,12 +31,10 @@ const ClippingPlane = ({
   const planeRef = meshRef;
   const { planeHandler, tool } = useStlDisplay();
   const updatePlane = usePlaneUpdater(plane, id);
-
+  const { camera } = useThree();
   const isActive = id === planeHandler.activePlaneId && tool.current === 'plane';
 
-  const { transformRef, camera, domElement } = useTransformControls(isActive, planeRef, () =>
-    updatePlane(planeRef.current)
-  );
+  const { transformRef, domElement } = useTransformControls(isActive, planeRef, () => updatePlane(planeRef.current));
   const material = createClippingPlaneMaterial(frontColor, backColor, opacity);
   useEffect(() => {
     if (planeRef.current) {

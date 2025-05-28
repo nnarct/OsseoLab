@@ -8,7 +8,7 @@ export const useTransformControls = (
   updatePlane: () => void
 ) => {
   const transformRef = useRef<THREE.TransformControls>(null);
-  const { camera, gl } = useThree();
+  const { gl } = useThree();
 
   useEffect(() => {
     if (isActive && transformRef.current && planeRef.current) {
@@ -26,5 +26,5 @@ export const useTransformControls = (
     };
   }, [updatePlane]);
 
-  return { transformRef, camera, domElement: gl.domElement };
+  return { transformRef, domElement: gl.domElement };
 };
