@@ -15,6 +15,7 @@ from .notificationRoute import notification_bp
 from .caseManagerRoute import case_manager_bp
 from .cuttingPlaneRoute import cutting_plane_bp
 from .caseFileVersionRoute import case_file_version_bp
+from .surgeryDisplayRoute import surgery_display_bp
 
 def register_routes(app):
     app.register_blueprint(auth_bp)
@@ -33,3 +34,4 @@ def register_routes(app):
     app.register_blueprint(case_manager_bp)
     app.register_blueprint(cutting_plane_bp)
     app.register_blueprint(case_file_version_bp)
+    app.register_blueprint(surgery_display_bp)

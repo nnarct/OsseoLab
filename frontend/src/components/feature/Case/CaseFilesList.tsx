@@ -9,7 +9,20 @@ import { FaRegTrashAlt } from 'react-icons/fa';
 import queryClient from '@/config/queryClient';
 import EditFilenameModal from './EditFilenameModal';
 import { MdOutlineViewInAr } from 'react-icons/md';
-import { Form, Button, Modal, Table, type TableProps, Typography, message, Input, Upload, Switch } from 'antd';
+import {
+  Form,
+  Button,
+  Modal,
+  Table,
+  type TableProps,
+  Typography,
+  message,
+  Input,
+  Upload,
+  Switch,
+  Popconfirm,
+  Checkbox,
+} from 'antd';
 import { useCaseFilesByCaseId } from '@/services/case/case-files.service';
 import { CaseFileById } from '@/api/files.api';
 
@@ -26,46 +39,28 @@ const CaseFilesList = ({ caseId, readOnly }: { caseId: string; readOnly?: boolea
   const toggleActive = async (id: string) => {
     try {
       await axios.patch(`/case-file/${id}/toggle-active`);
-      messageApi.success('Status updated');
-      queryClient.invalidateQueries({ queryKey: ['case', caseId] });
-      queryClient.invalidateQueries({ queryKey: ['case-file-versions'] });
-      queryClient.invalidateQueries({ queryKey: ['caseFilesByCaseId', caseId] });
-      queryClient.invalidateQueries({ queryKey: ['caseModelByCaseId', caseId] });
+      const updatedFile = filesData?.find((f) => f.case_file_id === id);
+      const newStatus = updatedFile?.active ? 'deactivated' : 'activated';
+      messageApi.success(`File ${newStatus}`);
+      invalidateQueries(caseId);
     } catch (error) {
       console.error(error);
       messageApi.error('Failed to update status');
     }
   };
-  console.log({ filesData });
+
   const columns: TableProps<CaseFileById>['columns'] = [
-    // {
-    //   width: '0',
-    //   align: 'center',
-    //   dataIndex: 'id',
-    //   title: <div className='whitespace-nowrap'>3D viewer</div>,
-    //   key: 'id',
-    //   render: (_, record) => (
-    //     <Button
-    //       icon={<MdOutlineViewInAr />}
-    //       onClick={() => {
-    //         console.log({ urls: record.urls, caseNumber, filename: record.filename });
-    //         navigate(`/case/${caseId}/file/${record.id}`, {
-    //           state: { urls: record.urls, caseNumber, filename: record.filename },
-    //         });
-    //       }}
-    //     >
-    //       3D Viewer
-    //     </Button>
-    //   ),
-    // },
-    // {
-    //   title: 'ID',
-    //   key: 'id',
-    //   dataIndex: 'id',
-    //   className: 'whitespace-nowrap',
-    //   width: '0',
-    //   sorter: (a, b) => a.id.localeCompare(b.id),
-    // },
+    {
+      title: 'No.',
+      key: 'order',
+      dataIndex: 'order',
+      className: 'whitespace-nowrap',
+      width: '0',
+      align: 'center',
+      sorter: (a, b) => a.order - b.order,
+      sortDirections: ['descend'],
+      showSorterTooltip: false,
+    },
     {
       title: 'Model Name',
       key: 'nickname',
@@ -91,6 +86,50 @@ const CaseFilesList = ({ caseId, readOnly }: { caseId: string; readOnly?: boolea
       render: (size) => `${(size / (1024 * 1024)).toFixed(2)} MB`,
       align: 'center',
       sorter: (a, b) => a.filesize - b.filesize,
+    },
+    {
+      title: 'Pre-surgical',
+      key: 'pre',
+      dataIndex: 'pre',
+      align: 'center',
+      render: (pre: boolean, record) => (
+        <Checkbox
+          checked={pre}
+          onChange={async (e) => {
+            try {
+              await axios.patch(`/surgery_display/case-file/${record.case_file_id}/tag`, {
+                pre: e.target.checked,
+              });
+              messageApi.success(`Marked as ${e.target.checked ? 'Pre-surgical' : 'Not Pre-surgical'}`);
+              invalidateQueries(caseId);
+            } catch {
+              messageApi.error('Failed to update Pre-surgical tag');
+            }
+          }}
+        />
+      ),
+    },
+    {
+      title: 'Post-surgical',
+      key: 'post',
+      dataIndex: 'post',
+      align: 'center',
+      render: (post: boolean, record) => (
+        <Checkbox
+          checked={post}
+          onChange={async (e) => {
+            try {
+              await axios.patch(`/surgery_display/case-file/${record.case_file_id}/tag`, {
+                post: e.target.checked,
+              });
+              messageApi.success(`Marked ${record.nickname} as ${e.target.checked ? 'Post-surgical' : 'Not Post-surgical'}`);
+              invalidateQueries(caseId);
+            } catch {
+              messageApi.error('Failed to update Post-surgical tag');
+            }
+          }}
+        />
+      ),
     },
     {
       title: 'Active',
@@ -119,17 +158,19 @@ const CaseFilesList = ({ caseId, readOnly }: { caseId: string; readOnly?: boolea
       dataIndex: 'case_file_id',
       key: 'delete',
       render: (id: string) => (
-        <Button
-          type='text'
-          danger
-          icon={<FaRegTrashAlt />}
-          onClick={async () => {
+        <Popconfirm
+          placement='topRight'
+          title='Are you sure to delete this file?'
+          onConfirm={async () => {
             await deleteCaseFileById(id);
-            queryClient.invalidateQueries({ queryKey: ['case-file-versions'] });
-            queryClient.invalidateQueries({ queryKey: ['case', caseId] });
-            queryClient.invalidateQueries({ queryKey: ['caseFilesByCaseId', caseId] });
+            invalidateQueries(caseId);
+            messageApi.success('File deleted successfully!');
           }}
-        />
+          okText='Yes'
+          cancelText='No'
+        >
+          <Button type='text' danger icon={<FaRegTrashAlt />} />
+        </Popconfirm>
       ),
     });
   }
@@ -226,3 +267,10 @@ const CaseFilesList = ({ caseId, readOnly }: { caseId: string; readOnly?: boolea
 };
 
 export default CaseFilesList;
+
+const invalidateQueries = (caseId: string) => {
+  queryClient.invalidateQueries({ queryKey: ['case', caseId] });
+  queryClient.invalidateQueries({ queryKey: ['case-file-versions'] });
+  queryClient.invalidateQueries({ queryKey: ['caseFilesByCaseId', caseId] });
+  queryClient.invalidateQueries({ queryKey: ['caseModelByCaseId', caseId] });
+};

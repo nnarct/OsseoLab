@@ -70,6 +70,7 @@ export const getCaseModelsByCaseId = async (caseId: string): Promise<CaseModelBy
 };
 
 export interface CaseFileById {
+  order: number;
   case_file_id: string;
   version_id: string;
   version_number: number;
@@ -81,6 +82,8 @@ export interface CaseFileById {
   uploaded_at: number;
   uploaded_by: string;
   url: string;
+  post: boolean;
+  pre: boolean;
 }
 export interface CaseModelById {
   case_file_id: string;

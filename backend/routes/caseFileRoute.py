@@ -216,7 +216,7 @@ def toggle_case_file_active(file_id):
 @jwt_required()
 def get_case_files_by_case_id(case_id):
     try:
-        case_files = CaseFile.query.filter_by(case_id=case_id).all()
+        case_files = CaseFile.query.filter_by(case_id=case_id).order_by(CaseFile.created_at.asc()).all()
         if not case_files:
             return jsonify({"statusCode": 404,
                             "message": "No case files found for this case ID",
@@ -225,7 +225,7 @@ def get_case_files_by_case_id(case_id):
         from models.case_file_versions import CaseFileVersion
 
         result = []
-        for file in case_files:
+        for index, file in enumerate(case_files, start=1):
             current_version = CaseFileVersion.query.get(
                 file.current_version_id)
             result.append({
@@ -240,8 +240,10 @@ def get_case_files_by_case_id(case_id):
                 "uploaded_by": current_version.uploaded_by if current_version else None,
                 "uploaded_at": int(file.updated_at.timestamp()),
                 "url": (generate_secure_url_case_file(
-                    str(file.current_version_id)))
-
+                    str(file.current_version_id))),
+                "order": index,
+                "post": file.post,
+                "pre": file.pre
             })
 
         return jsonify({
@@ -359,14 +361,14 @@ def update_pre_post_flags():
 @jwt_required()
 def get_case_models_by_case_id(case_id):
     try:
-        case_files = CaseFile.query.filter_by(case_id=case_id).all()
+        case_files = CaseFile.query.filter_by(case_id=case_id).order_by(CaseFile.created_at.asc()).all()
         if not case_files:
             return jsonify({"statusCode": 404, "message": "No case model found for this case ID"}), 404
 
         from models.case_file_versions import CaseFileVersion
 
         result = []
-        for file in case_files:
+        for index, file in enumerate(case_files, start=1):
             current_version = CaseFileVersion.query.get(
                 file.current_version_id)
             result.append({
@@ -377,8 +379,8 @@ def get_case_models_by_case_id(case_id):
                 "pre": file.pre,
                 "post": file.post,
                 "url": (generate_secure_url_case_file(
-                    str(file.current_version_id)))
-
+                    str(file.current_version_id))),
+                "order": index
             })
 
         return jsonify({
