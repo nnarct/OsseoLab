@@ -65,7 +65,7 @@ const ClippingPlane = ({
       )}
       <mesh ref={planeRef} userData={{ type: 'clippingPlane' }} name={id} visible={show}>
         <planeGeometry args={[150, 150]} />
-        <primitive object={material} />
+        <primitive object={material ?? undefined} />
       </mesh>
     </>
   );
