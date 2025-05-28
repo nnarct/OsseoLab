@@ -47,7 +47,7 @@ export const StlModelProvider = ({ children }: { children: ReactNode }) => {
       return updated;
     });
   };
-  
+
   const resetMeshColor = (index: number) => {
     setMeshColors((prevColors) => {
       const updated = [...prevColors];
@@ -69,7 +69,7 @@ export const StlModelProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateMeshOpacity = (index: number, opacity: number) => {
-    console.log(opacity)
+    console.log(opacity);
     setMeshOpacities((prevOpacities) => {
       const updated = [...prevOpacities];
       if (index >= 0 && index < updated.length) {

@@ -43,10 +43,6 @@ const AngleLine = ({ triple, markerRadius }: { triple: AngleGroupDataType; marke
         <Html
           position={triple.middle.point}
           center
-          // style={{
-          //   transform: `scale(${computeScale(camera, midPoint)})`,
-          //   transformOrigin: 'center center',
-          // }}
           zIndexRange={[0, 0]}
           style={{ zIndex: 1 }}
         >
