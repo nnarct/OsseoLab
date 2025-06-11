@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 const TechnicianHomepage = () => {
   const { data, isLoading, isError } = useGetTechnicianDashboardData();
- 
+
   if (!data || isError) {
     return <Card>Error loading data</Card>;
   }
@@ -17,7 +17,13 @@ const TechnicianHomepage = () => {
         <p className='text-2xl font-bold'>Dashboard</p>
       </CustomHeader>
       <Layout.Content className='p-4'>
-        <DashboardCard title='Assigned Cases' count={data.assigned_case_ids?.length || 'N/A'} link='/case/list' isLoading={isLoading} className='max-w-sm'/>
+        <DashboardCard
+          title='Assigned Cases'
+          count={data.assigned_case_ids?.length || '0'}
+          link='/case/list'
+          isLoading={isLoading}
+          className='max-w-sm'
+        />
       </Layout.Content>
     </>
   );

@@ -1,14 +1,15 @@
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required
-from services.authService import admin_required
+from services.authService import roles_required,admin_required
 from models.doctors import Doctor
 from models.users import User
 
 doctor_bp = Blueprint("doctor", __name__)
 
+
 @doctor_bp.route("/doctor/select-options", methods=["GET"])
 @jwt_required()
-@admin_required
+@roles_required("admin", "technician")
 def get_doctor_dropdown_options():
     try:
         doctors = Doctor.query.join(Doctor.user).order_by(
