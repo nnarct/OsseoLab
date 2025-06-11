@@ -74,7 +74,7 @@ const MenuBar = (props: MenuBarProps) => {
           borderLeft: '1px solid rgba(5, 5, 5, 0.05)',
         }}
       >
-        <div className='flex items-center justify-between gap-x-3'>
+        <div className='flex flex-wrap items-center justify-between gap-3'>
           <div className='flex gap-x-3'>
             <ItemListPanel />
             {/* <VisibilityButton/> */}

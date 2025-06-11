@@ -5,6 +5,7 @@ import { v4 as uuid } from 'uuid';
 import type { IntersectionData, MarkerPairDataType, AngleGroupDataType } from '@/types/measureTool';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import React from 'react';
+import { DEFAULT_BACK_COLOR, DEFAULT_FRONT_COLOR, DEFAULT_OPACITY } from '@/constants/clippingPlane';
 
 interface SceneHandlerRefType {
   camera?: THREE.PerspectiveCamera;
@@ -195,9 +196,9 @@ export const StlDisplayProvider = ({ children }: { children: ReactNode }) => {
         // origin,
         meshRef: meshRef,
         mode: 'translate' as TransformControlsMode,
-        frontColor: '#5bd389',
-        backColor: '#e95e5e',
-        opacity: 0.5,
+        frontColor: DEFAULT_FRONT_COLOR,
+        backColor: DEFAULT_BACK_COLOR,
+        opacity: DEFAULT_OPACITY,
         show: true,
         number: planes[planes.length - 1]?.number + 1 || 1,
       };
