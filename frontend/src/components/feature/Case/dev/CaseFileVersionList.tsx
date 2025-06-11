@@ -30,6 +30,13 @@ const CaseFileVersionList = () => {
 
   if (isLoading) return <div>Loading...</div>;
 
+  // Compute maxVersionMap for case_file_id
+  const maxVersionMap: Record<string, number> = {};
+  data.forEach((item) => {
+    const currentMax = maxVersionMap[item.case_file_id] || 0;
+    maxVersionMap[item.case_file_id] = Math.max(currentMax, item.version_number);
+  });
+
   const columns: TableProps<D>['columns'] = [
     // { dataIndex: 'id', title: 'Version ID', sorter: (a, b) => a.id.localeCompare(b.id) },
     // {
@@ -70,13 +77,13 @@ const CaseFileVersionList = () => {
     {
       title: 'Action',
       render: (_, record) => {
-        const maxVersion = Math.max(...data.map((item) => item.version_number));
-        const isCurrent = record.version_number === maxVersion;
+        const maxVersion = maxVersionMap[record.case_file_id];
+        const isCurrent = record.version_number === maxVersion && maxVersion > 0;
         return isCurrent ? (
-          'Current Version'
+          `Current Version`
         ) : (
           <Popconfirm title='Revert to this version?' onConfirm={() => reverseVersion(record.id)}>
-            <Button type='link'>Revert</Button>
+            <Button type='link'>Revert to v{record.version_number}</Button>
           </Popconfirm>
         );
       },
@@ -105,6 +112,7 @@ const CaseFileVersionList = () => {
           columns={columns}
           rowKey={'id'}
           pagination={false}
+          scroll={{ x: 'max-content' }}
         />
       </>
     );
