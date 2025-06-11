@@ -119,6 +119,15 @@ def create_case():
         db.session.add(new_case)
         db.session.commit()
 
+        # Create CaseTechnician relationship if created by technician
+        creator = get_current_user()
+        if creator.role == RoleEnum.technician:
+            technician = Technician.query.filter_by(user_id=created_by).first()
+            if technician:
+                new_relation = CaseTechnician(case_id=new_case.id, technician_id=technician.id)
+                db.session.add(new_relation)
+                db.session.commit()
+
         # --- Save uploaded files ---
         upload_folder = os.path.join(
             get_case_files_upload_folder(), str(new_case.id))

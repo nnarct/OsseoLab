@@ -14,7 +14,7 @@ case_surgeon_bp = Blueprint("case_surgeon", __name__)
 
 @case_surgeon_bp.route("/case-surgeon/add", methods=["POST"])
 @jwt_required()
-@admin_required
+@roles_required("admin", "technician")
 def add_case_surgeon():
     try:
         data = request.get_json()
