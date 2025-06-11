@@ -1,15 +1,11 @@
 import CustomHeader from '@/components/common/CustomHeader';
-import { Card, Layout, Descriptions, Button } from 'antd';
+import { Card, Layout, Descriptions, Button, Alert } from 'antd';
 import { Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useGetQuickCaseById } from '@/services/case/case.service';
-import { StlDisplayProvider } from '@/context/StlDisplayContext';
-import Center from '@/components/feature/StlDisplay/Center';
-import { useState } from 'react';
 
 const QuickCaseDetail = () => {
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { data, isLoading } = useGetQuickCaseById(id!);
   const files = (data?.files as QuickCaseFile[]) || [];
@@ -53,8 +49,8 @@ const QuickCaseDetail = () => {
 
   return (
     <>
-      <CustomHeader>
-        <p className='text-2xl font-bold'>Case submission</p>
+      <CustomHeader backTo={'/case/quick-case/'}>
+        <p className='text-2xl font-bold'>Quick Case submission</p>
       </CustomHeader>
       <Layout.Content className='p-4'>
         <Card>
@@ -62,12 +58,7 @@ const QuickCaseDetail = () => {
             <p>Loading...</p>
           ) : data ? (
             <>
-              <Descriptions
-                title='Case Submission Information'
-                bordered
-                column={1}
-                styles={{ label: { width: '200px' } }}
-              >
+              <Descriptions title='Information' bordered column={1} styles={{ label: { width: '200px' } }}>
                 <Descriptions.Item label='Doctor Name'>{`${data.firstname} ${data.lastname}`}</Descriptions.Item>
                 <Descriptions.Item label='Doctor Mobile Phone'>{data.phone}</Descriptions.Item>
                 <Descriptions.Item label='Product'>{data.product}</Descriptions.Item>
@@ -96,6 +87,11 @@ const QuickCaseDetail = () => {
             <></>
           )}
         </Card>
+        <Alert
+          message='This feature is under development. Converting a submitted Quick Case to a full case is currently unavailable.'
+          style={{ marginTop: '1rem' }}
+          type='warning'
+        />
       </Layout.Content>
     </>
   );

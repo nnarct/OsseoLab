@@ -121,7 +121,13 @@ const QuickCaseList = () => {
             onChange={(e) => setSearchText(e.target.value)}
             style={{ marginBottom: 16 }}
           />
-          <Table columns={columns} dataSource={filteredData} loading={isLoading} rowKey='id' />
+          <Table
+            columns={columns}
+            dataSource={filteredData}
+            loading={isLoading}
+            rowKey='id'
+            scroll={{ x: 'max-content' }}
+          />
         </Card>
       </Layout.Content>
     </>
