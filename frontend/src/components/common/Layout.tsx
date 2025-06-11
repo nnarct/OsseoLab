@@ -82,7 +82,7 @@ const AppLayout = () => {
         {/* 🔹 Footer */}
         <Footer style={{ textAlign: 'center', padding: '0 50px' }}>
           <div className='flex h-[1rem] items-center justify-center py-5 text-xs'>
-            STL Viewer ©{new Date().getFullYear()}
+            KMUTT STL Viewer ©{new Date().getFullYear()}
           </div>
         </Footer>
       </Layout>

@@ -34,7 +34,7 @@ class QuickCase(db.Model):
             "product": self.product,
             "other_product": self.other_product,
             "anatomy": self.anatomy,
-            "surgery_date": int(self.surgery_date.timestamp()) if self.surgery_date else None,
+            "surgery_date": int(datetime.combine(self.surgery_date, datetime.min.time()).timestamp()) if self.surgery_date else None,
             "additional_info": self.additional_info,
             "created_at": int(self.created_at.timestamp()) if self.created_at else None,
         }
