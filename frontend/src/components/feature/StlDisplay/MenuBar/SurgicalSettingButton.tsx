@@ -1,24 +1,15 @@
 import { useStlModel } from '@/hooks/useStlModel';
 import { Button, Radio } from 'antd';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { IoSettingsOutline } from 'react-icons/io5';
 import SurgicalSettingModal from '../Controllers/SurgicalSettingModal';
 import { useParams } from 'react-router-dom';
-import { axios } from '@/config/axiosConfig';
-
-type CaseFile = {
-  id: string;
-  name: string;
-  pre: boolean;
-  post: boolean;
-};
 
 const SurgicalSettingButton = () => {
   const { caseId } = useParams();
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [caseFiles, setCaseFiles] = useState<CaseFile[]>([]);
-  const { meshes, currentSurgicalType } = useStlModel();
+  const { currentSurgicalType, setCurrentSurgicalType } = useStlModel();
   const openModal = () => {
     setIsOpen(true);
   };
@@ -54,33 +45,33 @@ const SurgicalSettingButton = () => {
   //   });
   // };
 
-  return (
-    <>
-      <div className='relative'>
-        <Button icon={<IoSettingsOutline size={18} />} shape='circle' className='mr-3' onClick={openModal} />
-        <Radio.Group
-          value={currentSurgicalType}
-          optionType='button'
-          buttonStyle='solid'
-          // onChange={(e) => onLocalSetSurgical(e.target.value)}
-          options={[
-            { value: 'pre', label: 'Pre Surgery' },
-            { value: 'post', label: `Post Surgery` },
-          ]}
+  if (caseId) {
+    return (
+      <>
+        <div className='relative'>
+          <Button icon={<IoSettingsOutline size={18} />} shape='circle' className='mr-3' onClick={openModal} />
+          <Radio.Group
+            value={currentSurgicalType}
+            optionType='button'
+            buttonStyle='solid'
+            onChange={(e) => setCurrentSurgicalType(e.target.value)}
+            options={[
+              { value: 'pre', label: 'Pre Surgery' },
+              { value: 'post', label: `Post Surgery` },
+            ]}
+          />
+        </div>
+        <SurgicalSettingModal
+          caseId={caseId}
+          isOpen={isOpen}
+          closeModal={closeModal}
+          openModal={openModal}
+          onUpdate={async () => {}}
+          // onUpdate={async () => await onSetSurgical()}
         />
-      </div>
-      <SurgicalSettingModal
-        caseId={caseId || ''}
-        isOpen={isOpen}
-        closeModal={closeModal}
-        openModal={openModal}
-        caseFiles={caseFiles}
-        setCaseFiles={setCaseFiles}
-        onUpdate={async () => {}}
-        // onUpdate={async () => await onSetSurgical()}
-      />
-    </>
-  );
+      </>
+    );
+  }
 };
 
 export default SurgicalSettingButton;

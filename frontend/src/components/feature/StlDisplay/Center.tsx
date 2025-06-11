@@ -16,14 +16,12 @@ import Loader from './Loader';
 import { axios } from '@/config/axiosConfig';
 import { message } from 'antd';
 import { PlaneDataType } from '@/types/stlDisplay';
-import { StlModelProvider } from '@/context/StlModelContext';
 import { NavigateFunction, useNavigate, useParams } from 'react-router-dom';
-import queryClient from '@/config/queryClient';
-import { MessageInstance } from 'antd/es/message/interface';
+import type { MessageInstance } from 'antd/es/message/interface';
+import { invalidateCaseQueries } from '../Case/CaseFilesList/invalidateCaseQueries';
 import type { CaseModelById } from '@/api/files.api';
 
 const Center = ({ files }: { files: CaseModelById[] }) => {
-  // console.log('Center/>');
   const navigate = useNavigate();
   const { caseId } = useParams();
   const [messageApi, contextHolder] = message.useMessage();
@@ -40,7 +38,9 @@ const Center = ({ files }: { files: CaseModelById[] }) => {
   const save = async () => {
     const planes: PlaneDataType[] = getPlanes();
     const urls = files.filter((i) => i.active).map((i) => i.url);
-    await saveModel(urls, planes, messageApi, caseId, navigate);
+    if (caseId) {
+      await saveModel(urls, planes, messageApi, caseId, navigate);
+    }
   };
   useEffect(() => {
     resetModel();
@@ -49,34 +49,31 @@ const Center = ({ files }: { files: CaseModelById[] }) => {
 
   return (
     <>
-      <StlModelProvider>
-        {contextHolder}
-        <MenuBar onSave={save} />
-        <div
-          style={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            maxHeight: 'calc( 100vh - 188px )',
-          }}
-        >
-          <Canvas style={{ flex: 1, background: '#f7f7f7' }}>
-            {/* <Canvas style={{ width: '50vw', height: '50vh', background: '#f7f7f7', marginInline: 'auto' }}> */}
-            <Suspense fallback={<Loader />}>
-              <SceneSetter />
-              <Controllers />
-              <Model activeMeshes={activeMeshes} />
+      {contextHolder}
+      <MenuBar onSave={save} />
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: 'calc( 100vh - 188px )',
+        }}
+      >
+        <Canvas style={{ flex: 1, background: '#f7f7f7' }}>
+          <Suspense fallback={<Loader />}>
+            <SceneSetter />
+            <Controllers />
+            <Model activeMeshes={activeMeshes} />
 
-              {/* <Angle/> */}
-              <ClippingPlaneList />
-              {isAngleActive && <AngleTool />}
-              {isMeasureActive && <MeasureTool />}
-              <MeasureLineGroup />
-              <AngleLineGroup />
-            </Suspense>
-          </Canvas>
-        </div>
-      </StlModelProvider>
+            {/* <Angle/> */}
+            <ClippingPlaneList />
+            {isAngleActive && <AngleTool />}
+            {isMeasureActive && <MeasureTool />}
+            <MeasureLineGroup />
+            <AngleLineGroup />
+          </Suspense>
+        </Canvas>
+      </div>
     </>
   );
 };
@@ -128,14 +125,13 @@ const saveModel = async (
   urls: string[],
   planes: PlaneDataType[],
   messageApi: MessageInstance,
-  caseId: string | undefined,
+  caseId: string,
   navigate: NavigateFunction
 ) => {
   const tokens = urls.map((url) => {
     const parts = url.split('/');
     return parts[parts.length - 1];
   });
-  // const planes: PlaneDataType[] = getPlanes();
 
   if (!planes.length || !urls.length) return;
   const payload = {
@@ -167,23 +163,6 @@ const saveModel = async (
     tokens,
   };
 
-  if (payload.planes.length === 2) {
-    // const [p0, p1] = payload.planes;
-    // const origin0 = new THREE.Vector3(p0.origin.x, p0.origin.y, p0.origin.z);
-    // const origin1 = new THREE.Vector3(p1.origin.x, p1.origin.y, p1.origin.z);
-    // const normal0 = new THREE.Vector3(p0.normal.x, p0.normal.y, p0.normal.z).normalize();
-    // const normal1 = new THREE.Vector3(p1.normal.x, p1.normal.y, p1.normal.z).normalize();
-    // const direction01 = origin1.clone().sub(origin0).normalize();
-    // const direction10 = origin0.clone().sub(origin1).normalize();
-    // const facing0 = normal0.dot(direction01); // > 0 means Plane 0 faces Plane 1
-    // const facing1 = normal1.dot(direction10); // > 0 means Plane 1 faces Plane 0
-    // const areFacingEachOther = facing0 > 0 && facing1 > 0;
-    // console.log(`[FACING CHECK] Plane 0 facing 1:`, facing0, `Plane 1 facing 0:`, facing1);
-    // console.log('Planes facing each other:', areFacingEachOther);
-  }
-
-  // console.log({ payload: payload.planes });
-  // return;
   try {
     const response = await axios.post('/cutting-plane/save-multiple', payload, {
       headers: {
@@ -191,22 +170,17 @@ const saveModel = async (
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     });
-    // console.log('Saved cutting planes:', response.data);
     const data = response.data as ResponseType;
     if (data.results.length > 0) {
-      // const results = data.results;
-      // messageApi.success(`Saved cutting planes. ${response.data.results[0]?.cut_method}`);
       messageApi.success(`Anatomical structure was successfully segmented`);
-      console.log({ response });
-      queryClient.invalidateQueries({ queryKey: ['caseModelByCaseId', caseId] });
+      invalidateCaseQueries(caseId);
+
       navigate(`/case/${caseId}/file`);
     } else {
       messageApi.success(`No changes were applied to the anatomical model`);
     }
-    // clearPlane()
   } catch (err) {
     console.error('Failed to save cutting planes:', err);
     messageApi.error('Failed to save cutting planes');
   }
-  // finally{    navigate(-1)}
 };

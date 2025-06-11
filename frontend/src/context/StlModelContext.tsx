@@ -2,7 +2,7 @@ import { CaseModelById } from '@/api/files.api';
 import { createContext, ReactNode, useState, useEffect, createRef } from 'react';
 import * as THREE from 'three';
 
-interface MeshItem {
+export interface MeshItem {
   geometry: THREE.BufferGeometry<THREE.NormalBufferAttributes>;
   name: string;
   color: string;
@@ -12,11 +12,13 @@ interface MeshItem {
   pre: boolean;
   post: boolean;
   id: string;
+  url: string;
+  version_id: string;
 }
 
 interface StlModelContextType {
   meshes: MeshItem[];
-  setMeshes: React.Dispatch<React.SetStateAction<MeshItem[]>>;
+  setMeshes: React.Dispatch<React.SetStateAction<MeshItem[]>>
   updateMeshProperty: <K extends keyof MeshItem>(index: number, key: K, value: MeshItem[K]) => void;
   totalMesh: number;
   currentSurgicalType: 'pre' | 'post';
@@ -43,6 +45,16 @@ export const StlModelProvider = ({ children }: { children: ReactNode }) => {
     setMeshes((prev) => (prev.length === 0 ? [] : prev));
   }, []);
 
+  useEffect(() => {
+    setMeshes((prev) =>
+      prev.map((mesh) => {
+        const shouldBeVisible =
+          (currentSurgicalType === 'pre' && mesh.pre) || (currentSurgicalType === 'post' && mesh.post);
+        return { ...mesh, visible: shouldBeVisible };
+      })
+    );
+  }, [currentSurgicalType]);
+
   const updateMeshProperty = <K extends keyof MeshItem>(index: number, key: K, value: MeshItem[K]) => {
     setMeshes((prev) => {
       const updated = [...prev];
@@ -68,11 +80,13 @@ export const StlModelProvider = ({ children }: { children: ReactNode }) => {
               id: match.case_file_id ?? '',
               name: match.name ?? 'Unnamed mesh',
               color: defaultColors[index % defaultColors.length],
-              visible: true,
+              visible: match.pre,
               opacity: 1,
               ref: createRef<THREE.Mesh>(),
               pre: match.pre,
               post: match.post,
+              url: match.url,
+              version_id: match.version_id
             };
           })
           .filter(Boolean) as MeshItem[]
