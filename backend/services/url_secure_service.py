@@ -8,8 +8,8 @@ SECRET_KEY = os.getenv("STL_SECRET_KEY")
 serializer = URLSafeTimedSerializer(SECRET_KEY)
 
 
-def generate_secure_url_case_file(case_id: str) -> str:
-    token = serializer.dumps(case_id)
+def generate_secure_url_case_file(current_version_id: str) -> str:
+    token = serializer.dumps(current_version_id)
     return f"{BASE_URL}/case-file/{token}"
 
 
