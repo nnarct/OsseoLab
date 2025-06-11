@@ -26,23 +26,39 @@ const Marker = ({ position, normal, radius, lookAtNormal = true }: MarkerProps) 
 
   return (
     <object3D ref={markerRef}>
-      <group>
-        <Line points={circlePoints} color='black' lineWidth={1} />
+      <group renderOrder={99}>
+        <Line
+          points={circlePoints}
+          color='black'
+          lineWidth={1}
+          depthTest={false}
+          depthWrite={false}
+          polygonOffset={true}
+          polygonOffsetFactor={-10}
+        />
         <Line
           points={[
             [-radius, 0, 0],
             [radius, 0, 0],
           ]}
+          depthTest={false}
+          depthWrite={false}
+          polygonOffset={true}
+          polygonOffsetFactor={-10}
           color='black'
           lineWidth={1}
         />
         <Line
+          depthTest={false}
+          depthWrite={false}
+          polygonOffset={true}
+          polygonOffsetFactor={-10}
+          color='black'
+          lineWidth={1}
           points={[
             [0, -radius, 0],
             [0, radius, 0],
           ]}
-          color='black'
-          lineWidth={1}
         />
       </group>
     </object3D>

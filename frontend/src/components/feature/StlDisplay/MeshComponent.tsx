@@ -35,7 +35,13 @@ const MeshComponent = ({
 
   return (
     <group rotation={[-Math.PI / 2, 0, 0]}>
-      <mesh key={`${id}-${geometry.uuid}`} geometry={geometry} visible={visible} material={material} />
+      <mesh
+        key={`${id}-${geometry.uuid}`}
+        geometry={geometry}
+        visible={visible}
+        material={material}
+        userData={{ type: 'stlModel' }}
+      />
     </group>
   );
 };

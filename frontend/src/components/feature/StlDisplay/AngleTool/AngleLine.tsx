@@ -23,29 +23,28 @@ const AngleLine = ({ triple, markerRadius }: { triple: AngleGroupDataType; marke
         <meshBasicMaterial color='red' />
       </mesh>
 
-      <Line
-        points={[triple.origin.point, triple.middle.point]}
-        color='#ff0000'
-        lineWidth={1}
-        depthTest={false}
-        polygonOffset={true}
-        polygonOffsetFactor={-1}
-      />
-      <Line
-        points={[triple.middle.point, triple.destination.point]}
-        color='#ff0000'
-        lineWidth={1}
-        depthTest={false}
-        polygonOffset={true}
-        polygonOffsetFactor={-1}
-      />
+      <group renderOrder={99}>
+        <Line
+          points={[triple.origin.point, triple.middle.point]}
+          color='#ff6f00'
+          lineWidth={1}
+          depthTest={false}
+          depthWrite={false}
+          polygonOffset={true}
+          polygonOffsetFactor={-10}
+        />
+        <Line
+          points={[triple.middle.point, triple.destination.point]}
+          color='#ff6f00'
+          lineWidth={1}
+          depthTest={false}
+          depthWrite={false}
+          polygonOffset={true}
+          polygonOffsetFactor={-10}
+        />
+      </group>
       {triple.show && (
-        <Html
-          position={triple.middle.point}
-          center
-          zIndexRange={[0, 0]}
-          style={{ zIndex: 1 }}
-        >
+        <Html position={triple.middle.point} center zIndexRange={[0, 0]} style={{ zIndex: 1 }}>
           <div
             style={{
               // width: '50vw',

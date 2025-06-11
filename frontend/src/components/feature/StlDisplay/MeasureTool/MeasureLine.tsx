@@ -3,7 +3,7 @@ import Marker from './Marker';
 import * as THREE from 'three';
 import { Line, Html } from '@react-three/drei';
 
-const MeasureLine = ({ pair, markerRadius }: { pair: MarkerPairDataType;  markerRadius: number }) => {
+const MeasureLine = ({ pair, markerRadius }: { pair: MarkerPairDataType; markerRadius: number }) => {
   const midPoint = pair.origin.point
     .clone()
     .add(pair.destination.point)
@@ -30,16 +30,13 @@ const MeasureLine = ({ pair, markerRadius }: { pair: MarkerPairDataType;  marker
         color='#ff0000'
         lineWidth={1}
         depthTest={false}
+        depthWrite={false}
         polygonOffset={true}
         polygonOffsetFactor={-1}
+        renderOrder={99}
       />
       {pair.show && (
-        <Html
-          position={midPoint}
-          center
-          zIndexRange={[0, 0]} 
-          style={{ zIndex: 1 }}
-        >
+        <Html position={midPoint} center zIndexRange={[0, 0]} style={{ zIndex: 1 }}>
           <div
             style={{
               padding: '0.5rem',
