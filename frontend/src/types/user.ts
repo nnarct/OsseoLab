@@ -24,7 +24,7 @@ export interface UserProfile {
   phone: string | null;
   dob: number | null;
   username: string | null;
-  gender: 'male' | 'female' | 'other';
+  gender: Gender;
   role: UserRole;
   country: string | null;
   profile_image: string | null;
@@ -41,7 +41,7 @@ export interface FormUserProfile {
   phone: string | null;
   dob: Dayjs | string | null;
   username: string | null;
-  gender: 'male' | 'female' | 'other';
+  gender: Gender;
   country: string | null;
   hospital?: string | null;
   reference?: string | null;
@@ -55,7 +55,7 @@ export interface CreateDoctorFormData {
   email: string;
   phone: string | null;
   country: string | null;
-  gender: 'male' | 'female' | 'other' | null;
+  gender: Gender | null;
   dob: Dayjs | string | null;
   password: string;
 }
@@ -66,7 +66,7 @@ export interface CreateTechFormData {
   email: string;
   phone: string | null;
   country: string | null;
-  gender: 'male' | 'female' | 'other' | null;
+  gender: Gender | null;
   dob: Dayjs | string | null;
   password: string;
 }
@@ -77,7 +77,7 @@ export interface CreateAdminFormData {
   email: string;
   phone: string | null;
   country: string | null;
-  gender: 'male' | 'female' | 'other' | null;
+  gender: Gender | null;
   dob: Dayjs | string | null;
   password: string;
 }
@@ -89,8 +89,10 @@ export interface CreateUserFormData {
   email: string;
   phone: string | null;
   country: string | null;
-  gender: 'male' | 'female' | 'other' | null;
+  gender: Gender | null;
   dob: Dayjs | string | null;
   password: string;
   role: UserRole;
 }
+
+export type Gender = 'male' | 'female' | 'other';

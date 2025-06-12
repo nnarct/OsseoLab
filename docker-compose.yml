@@ -12,7 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  flask-backend:  # ✅ renamed service here
+  flask-backend:
     build: ./backend
     container_name: flask-backend
     restart: always
@@ -35,7 +35,7 @@ services:
     ports:
       - "5001:5001"
     depends_on:
-      - flask-backend  # ✅ update dependency name here
+      - flask-backend
 
   adminer:
     image: adminer

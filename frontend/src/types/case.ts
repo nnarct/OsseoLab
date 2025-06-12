@@ -25,13 +25,6 @@ export interface CaseSummary {
   case_code: string;
 }
 
-// export interface CaseFile {
-//   filename: string;
-//   id: string;
-//   order: number;
-//   uploaded_at: number;
-//   urls: string[];
-// }
 export interface CaseFile {
   created_at: number;
   filename: string;

@@ -9,10 +9,10 @@ type Props = {
   isOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
-  onUpdate: () => void;
+  onUpdate?: () => void;
 };
 
-const SurgicalSettingModal = ({ caseId, isOpen, closeModal, onUpdate }: Props) => {
+const SurgicalSettingModal = ({ caseId, isOpen, closeModal }: Props) => {
   const [updatedMeshes, setUpdatedMeshes] = useState<Record<string, { pre: boolean; post: boolean }>>({});
   const [messageApi, contextHolder] = message.useMessage();
   const { meshes, setMeshes, currentSurgicalType } = useStlModel();
@@ -40,7 +40,6 @@ const SurgicalSettingModal = ({ caseId, isOpen, closeModal, onUpdate }: Props) =
       await axios.patch('/case-files/update-pre-post', updatedMeshes);
       messageApi.success('Saved successfully');
       invalidateCaseQueries(caseId);
-      onUpdate();
       setMeshes((prev) =>
         prev.map((mesh) => {
           const update = updatedMeshes[mesh.id];

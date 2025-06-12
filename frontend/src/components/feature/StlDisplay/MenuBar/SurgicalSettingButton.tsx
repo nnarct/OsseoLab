@@ -17,34 +17,6 @@ const SurgicalSettingButton = () => {
     setIsOpen(false);
   };
 
-  // updateMeshVisibility;
-
-  // const onSetSurgical = async () => {
-  //   const response = await axios.get(`/case-files/${caseId}/active`);
-  //   const tempCaseFiles = response.data as CaseFile[];
-
-  //   tempCaseFiles.forEach((cf, i) => {
-  //     if (isPreSur === 'pre') {
-  //       updateMeshVisibility(i, cf.pre);
-  //     } else if (isPreSur === 'post') {
-  //       updateMeshVisibility(i, cf.post);
-  //     }
-  //   });
-
-  //   setCaseFiles(tempCaseFiles);
-  // };
-
-  // const onLocalSetSurgical = async (value: 'pre' | 'post') => {
-  //   setIsPreSur(value);
-  //   caseFiles.forEach((cf, i) => {
-  //     if (value === 'pre') {
-  //       updateMeshVisibility(i, cf.pre);
-  //     } else if (value === 'post') {
-  //       updateMeshVisibility(i, cf.post);
-  //     }
-  //   });
-  // };
-
   if (caseId) {
     return (
       <>

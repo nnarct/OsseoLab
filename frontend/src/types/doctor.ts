@@ -6,7 +6,7 @@ export interface Doctor {
   hospital: string | null;
   id: string;
   last_updated: number;
-  lastname: 'name';
+  lastname: string;
   phone: string | null;
   user_id: string;
   username: string;
