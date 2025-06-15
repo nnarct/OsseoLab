@@ -7,15 +7,12 @@ import datetime
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from models.users import User
-from models.doctors import Doctor
-from models.technicians import Technician
 from models.enums import RoleEnum
-# from config.extensions import db
+from services.file_service import get_case_files_upload_folder
 from services.authService import admin_required
 # from werkzeug.exceptions import HTTPException
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")
-
 
 @user_bp.route("/list", methods=["GET"])
 @jwt_required()
@@ -156,10 +153,6 @@ def update_current_user():
     }), 200
 
 
-# Additional imports for delete_user
-UPLOAD_FOLDER = os.getenv("CASE_FILE_UPLOAD_FOLDER")
-
-
 @user_bp.route("/<user_id>", methods=["DELETE"])
 @jwt_required()
 @admin_required
@@ -176,8 +169,8 @@ def delete_user(user_id):
         if user.doctor_profile:
             doctor = user.doctor_profile
             doctor_id = doctor.id
-            doctor_case_surgeon = CaseSurgeon.query.filter_by(
-                surgeon_id=doctor_id).delete()
+            # doctor_case_surgeon = CaseSurgeon.query.filter_by(
+            #     surgeon_id=doctor_id).delete()
 
             doctor_cases = Case.query.filter_by(surgeon_id=doctor_id).all()
             for case in doctor_cases:
@@ -186,11 +179,12 @@ def delete_user(user_id):
 
             # Delete case files from DB and disk
                 case_files = CaseFile.query.filter_by(case_id=case.id).all()
-                for f in case_files:
-                    filepath = os.path.join(UPLOAD_FOLDER, f.filepath)
+                for file in case_files:
+                    filepath = os.path.join(
+                        get_case_files_upload_folder(), file.filepath)
                     if os.path.exists(filepath):
                         os.remove(filepath)
-                    db.session.delete(f)
+                    db.session.delete(file)
 
                 db.session.delete(case)
 

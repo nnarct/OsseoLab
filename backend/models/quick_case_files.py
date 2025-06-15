@@ -52,17 +52,3 @@ class QuickCaseFile(db.Model):
 
         return data
 
-
-@event.listens_for(QuickCaseFile, 'after_delete')
-def delete_file_from_disk(mapper, connection, target):
-    file_path = os.path.join(current_app.root_path, target.filepath)
-    try:
-        if os.path.exists(file_path):
-            os.remove(file_path)
-
-        # Attempt to remove the case folder if it's empty
-        folder_path = os.path.dirname(file_path)
-        if os.path.isdir(folder_path) and not os.listdir(folder_path):
-            os.rmdir(folder_path)
-    except Exception:
-        pass
