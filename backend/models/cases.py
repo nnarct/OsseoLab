@@ -93,10 +93,3 @@ class Case(db.Model):
 
         return data
 
-
-@event.listens_for(Case, 'before_insert')
-def set_case_number(mapper, connect, target):
-    if target.case_number is None:
-        result = connect.execute(select(func.max(Case.case_number)))
-        max_number = result.scalar()
-        target.case_number = (max_number or 0) + 1

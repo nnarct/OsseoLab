@@ -7,7 +7,7 @@ import uuid
 from models.case_files import CaseFile
 from models.quick_case_files import QuickCaseFile
 from itsdangerous import URLSafeTimedSerializer, BadSignature
-from services.smart_filename import resolve_filename_conflict
+from services.file_service import resolve_filename_conflict
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 

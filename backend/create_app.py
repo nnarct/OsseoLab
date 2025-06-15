@@ -5,6 +5,7 @@ from routes import register_routes
 from handlers.jwt_handler import configure_jwt
 from handlers.errors_handler import register_error_handlers
 from middlewares.cors_middleware import add_cors_headers
+from middlewares import event_listeners  # triggers SQLAlchemy event registration
 import models  # triggers import of all model classes
 
 
@@ -30,5 +31,6 @@ def create_app(config_class=Config):
     register_routes(app)
     register_error_handlers(app)
     app.after_request(add_cors_headers)
+
 
     return app
