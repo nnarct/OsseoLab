@@ -4,7 +4,7 @@ from constants.paths import UPLOAD_FOLDER
 from services.url_secure_service import generate_secure_url_case_file
 from models.case_files import CaseFile
 from flask import Blueprint, jsonify, current_app
-from flask_jwt_extended import jwt_required, get_jwt
+from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from services.authService import admin_required, roles_required
 from services.authService import get_current_user
 from models.enums import RoleEnum
@@ -14,20 +14,16 @@ from models.technicians import Technician
 
 from models.case_surgeons import CaseSurgeon
 from models.case_technicians import CaseTechnician
+from models.case_file_versions import CaseFileVersion
 
 from flask import request, jsonify
 from datetime import datetime, date
 from models.enums import GenderEnum
 from config.extensions import db
 from werkzeug.utils import secure_filename
+from services.file_service import get_case_files_upload_folder
 
 case_bp = Blueprint("case", __name__)
-
-# UPLOAD_FOLDER = os.getenv("CASE_FILE_UPLOAD_FOLDER")
-
-
-def get_case_files_upload_folder():
-    return os.path.join(current_app.root_path, "uploads", "case_files")
 
 
 @case_bp.route("/case/list", methods=["GET"])
@@ -124,7 +120,8 @@ def create_case():
         if creator.role == RoleEnum.technician:
             technician = Technician.query.filter_by(user_id=created_by).first()
             if technician:
-                new_relation = CaseTechnician(case_id=new_case.id, technician_id=technician.id)
+                new_relation = CaseTechnician(
+                    case_id=new_case.id, technician_id=technician.id)
                 db.session.add(new_relation)
                 db.session.commit()
 
@@ -132,24 +129,50 @@ def create_case():
         upload_folder = os.path.join(
             get_case_files_upload_folder(), str(new_case.id))
         os.makedirs(upload_folder, exist_ok=True)
-
+        upload_folder = os.path.join(
+            get_case_files_upload_folder(), str(new_case.id))
+        os.makedirs(upload_folder, exist_ok=True)
         files = request.files.getlist("files")
+        user_id = get_jwt_identity()
+        from models.case_file_versions import CaseFileVersion
+        from services.file_service import resolve_filename_conflict
+
         for file in files:
+
             filename = secure_filename(file.filename)
-            file_path = os.path.join(upload_folder, filename)
-            file.save(file_path)
+            filename = resolve_filename_conflict(upload_folder, filename)
+            filepath = os.path.join(upload_folder, filename)
+            file.save(filepath)
+
+            # get file size
             file.stream.seek(0, os.SEEK_END)
             filesize = file.stream.tell()
             file.stream.seek(0)
-            file_record = CaseFile(
-                nickname=filename,
+
+            temp_case_file = CaseFile(
                 case_id=new_case.id,
+                original_filename=filename,
+            )
+
+            db.session.add(temp_case_file)
+            db.session.flush()
+
+            new_version = CaseFileVersion(
+                case_file_id=temp_case_file.id,
+                version_number=1,
+                file_path=os.path.relpath(
+                    filepath, start=get_case_files_upload_folder()),
                 filename=filename,
-                filepath=os.path.relpath(file_path, start=UPLOAD_FOLDER),
+                nickname=filename,
                 filetype=file.content_type,
                 filesize=filesize,
+                uploaded_by=user_id
             )
-            db.session.add(file_record)
+            db.session.add(new_version)
+            db.session.flush()
+
+            temp_case_file.current_version_id = new_version.id
+            db.session.add(temp_case_file)
 
         db.session.commit()
 
@@ -272,14 +295,14 @@ def delete_case(case_id):
         if not case:
             return jsonify({"statusCode": 404, "message": "Case not found"}), 404
 
-        # Delete related case surgeons
         CaseSurgeon.query.filter_by(case_id=case_id).delete()
 
-        # Delete related case files and their disk files
         case_files = CaseFile.query.filter_by(case_id=case_id).all()
         for file in case_files:
+            current_version_id = file.current_version_id
+            current_version = CaseFileVersion.query.get(current_version_id)
             filepath = os.path.join(
-                get_case_files_upload_folder(), file.filepath)
+                get_case_files_upload_folder(), current_version.file_path)
             if os.path.exists(filepath):
                 os.remove(filepath)
             db.session.delete(file)
