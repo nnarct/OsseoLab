@@ -177,7 +177,7 @@ const saveModel = async (
 
       navigate(`/case/${caseId}/file`);
     } else {
-      messageApi.success(`No changes were applied to the anatomical model`);
+      messageApi.warning(`No changes were applied to the anatomical model`);
     }
   } catch (err) {
     console.error('Failed to save cutting planes:', err);
