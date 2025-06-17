@@ -22,9 +22,17 @@ const RegisterPage = () => {
   const goLogin = () => navigate('/login');
 
   const onSubmit = async (values: RegisterFormDataType) => {
+    const payload = {
+      firstname: values.firstname,
+      lastname: values.lastname,
+      username: values.username,
+      email: values.newEmail,
+      password: values.newPassword,
+      role: values.role,
+    };
     setLoading(true);
     try {
-      await axios.post('/register', values);
+      await axios.post('/register', payload);
       messageApi.success('Register success');
       goLogin();
     } catch (error) {
@@ -58,35 +66,35 @@ const RegisterPage = () => {
             label={<div className='font-medium'>First Name</div>}
             rules={[{ required: true, message: 'Please input your first name!' }]}
           >
-            <Input placeholder='Enter your first name' />
+            <Input placeholder='Enter your first name' autoComplete='off' />
           </Item>
           <Item
             name='lastname'
             label={<div className='font-medium'>Last Name</div>}
             rules={[{ required: true, message: 'Please input your last name!' }]}
           >
-            <Input placeholder='Enter your last name' />
+            <Input placeholder='Enter your last name' autoComplete='off' />
           </Item>
           <Item
             name='username'
             label={<div className='font-medium'>Username</div>}
             rules={[{ required: true, message: 'Please input your username!' }]}
           >
-            <Input placeholder='Enter your username' />
+            <Input placeholder='Enter your username' autoComplete='new-username' />
           </Item>
           <Item
-            name='email'
+            name='newEmail'
             label={<div className='font-medium'>Email address</div>}
             rules={[{ required: true, message: 'Please input your email!' }]}
           >
-            <Input placeholder='Enter your email' />
+            <Input placeholder='Enter your email' autoComplete='off' />
           </Item>
           <Item
-            name='password'
+            name='newPassword'
             label={<div className='font-medium'>Password</div>}
             rules={[{ required: true, message: 'Please input your password!' }]}
           >
-            <Input.Password placeholder='password' />
+            <Input.Password placeholder='password' autoComplete='new-password' />
           </Item>
           <Item
             name='role'
@@ -125,7 +133,7 @@ interface RegisterFormDataType {
   firstname: string;
   lastname: string;
   username: string;
-  email: string;
-  password: string;
+  newEmail: string;
+  newPassword: string;
   role: UserRole;
 }

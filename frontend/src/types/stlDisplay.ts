@@ -1,4 +1,4 @@
-import type { Plane, Vector3, Mesh } from 'three';
+import type { Plane, Mesh } from 'three';
 
 export type TransformControlsMode = 'translate' | 'scale' | 'rotate';
 

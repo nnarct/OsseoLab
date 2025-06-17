@@ -11,6 +11,7 @@ import type {
   CreateAdminFormData,
   CreateDoctorFormData,
   CreateTechFormData,
+  CreateUserPayloadData,
   FormUserProfile,
   UserRole,
 } from '@/types/user';
@@ -69,7 +70,7 @@ export const useCreateAdminUser = () => {
 
 export const useCreateUser = () => {
   return useMutation({
-    mutationFn: async (data: CreateAdminFormData & { role: UserRole }) => {
+    mutationFn: async (data: CreateUserPayloadData & { role: UserRole }) => {
       const { role, ...rest } = data;
 
       if (role === 'admin') {

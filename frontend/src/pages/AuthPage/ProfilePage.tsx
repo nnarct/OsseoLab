@@ -189,7 +189,7 @@ const ProfilePage = () => {
               Created At: {dayjs.unix(data.created_at).format('DD MMM YYYY HH:mm:ss A')}
             </Typography.Text>
             <Typography.Text type='secondary'>
-              Last Updated: {dayjs.unix(data.last_updated).format('DD MMM YYYY HH:mm:ss A')}
+              Last Updated: {dayjs.unix(data.updated_at).format('DD MMM YYYY HH:mm:ss A')}
             </Typography.Text>
           </div>
         </Card>

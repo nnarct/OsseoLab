@@ -29,7 +29,7 @@ export interface UserProfile {
   country: string | null;
   profile_image: string | null;
   created_at: number;
-  last_updated: number;
+  updated_at: number;
   hospital?: string | null;
   reference?: string | null;
   doctor_registration_id?: string | null;
@@ -83,6 +83,18 @@ export interface CreateAdminFormData {
 }
 
 export interface CreateUserFormData {
+  firstname: string;
+  lastname: string;
+  newUsername: string;
+  newEmail: string;
+  phone: string | null;
+  country: string | null;
+  gender: Gender | null;
+  dob: Dayjs | string | null;
+  newPassword: string;
+  role: UserRole;
+}
+export interface CreateUserPayloadData {
   firstname: string;
   lastname: string;
   username: string;

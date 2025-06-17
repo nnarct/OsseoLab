@@ -1,5 +1,5 @@
 import { COUNTRIES } from '@/constants/option';
-import type { CreateUserFormData } from '@/types/user';
+import type { CreateUserFormData, CreateUserPayloadData } from '@/types/user';
 import { Button, Modal, Form, Input, Select, DatePicker, notification } from 'antd';
 import dayjs from 'dayjs';
 import { useState } from 'react';
@@ -15,7 +15,7 @@ const CreateUserModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) 
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
 
-  const { mutateAsync, isPending } = useCreateUser();
+  const { mutateAsync: createUserAsync, isPending } = useCreateUser();
 
   const handleSubmit = async () => {
     try {
@@ -23,7 +23,19 @@ const CreateUserModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) 
       if (values.dob && typeof values.dob !== 'string') {
         values.dob = values.dob.format('YYYY-MM-DD');
       }
-      await mutateAsync(values);
+      const payload: CreateUserPayloadData = {
+        firstname: values.firstname,
+        lastname: values.lastname,
+        username: values.newUsername,
+        email: values.newEmail,
+        phone: values.phone,
+        role: values.role,
+        gender: values.gender,
+        dob: values.dob,
+        password: values.newPassword,
+        country: values.country,
+      };
+      await createUserAsync(payload);
 
       notificationApi.success({
         message: 'User created successfully',
@@ -70,11 +82,11 @@ const CreateUserModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) 
           <Form.Item name='lastname' label='Last Name' rules={[{ required: true, message: 'Last name is required' }]}>
             <Input placeholder='Enter user last name' allowClear />
           </Form.Item>
-          <Form.Item name='username' label='Username' rules={[{ required: true, message: 'Username is required' }]}>
-            <Input placeholder='Enter user username' type='text' />
+          <Form.Item name='newUsername' label='Username' rules={[{ required: true, message: 'Username is required' }]}>
+            <Input placeholder='Enter user username' type='text'  autoComplete='new-username'/>
           </Form.Item>
-          <Form.Item name='email' label='Email' rules={[{ required: true, message: 'Email is required' }]}>
-            <Input placeholder='Enter user email address' type='email' />
+          <Form.Item name='newEmail' label='Email' rules={[{ required: true, message: 'Email is required' }]}>
+            <Input placeholder='Enter user email address' type='email' autoComplete='off' />
           </Form.Item>
           <Form.Item
             name='phone'
@@ -116,8 +128,8 @@ const CreateUserModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) 
               allowClear
             />
           </Form.Item>
-          <Form.Item name='password' label='Password' rules={[{ required: true, message: 'Password is required' }]}>
-            <Input.Password placeholder='Enter user password' />
+          <Form.Item name='newPassword' label='Password' rules={[{ required: true, message: 'Password is required' }]}>
+            <Input.Password placeholder='Enter user password' autoComplete='new-password'/>
           </Form.Item>
         </Form>
       </Modal>
