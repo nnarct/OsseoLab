@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres
-    container_name: flask_postgres
+    container_name: flask_postgres_osseo
     restart: always
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME}
@@ -12,9 +12,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  flask-backend:
+  flask-backend-osseo:
     build: ./backend
-    container_name: flask-backend
+    container_name: flask-backend-osseo
     restart: always
     volumes:
       - ./backend:/app
@@ -28,20 +28,20 @@ services:
 
   frontend:
     build: ./frontend
-    container_name: vite-frontend
+    container_name: vite-frontend-osseo
     volumes:
       - ./frontend:/app
       - /app/node_modules
     ports:
       - "5001:5001"
     depends_on:
-      - flask-backend
+      - flask-backend-osseo
 
   adminer:
     image: adminer
     restart: always
     ports:
-      - "8081:8080"
+      - "8082:8080"
 
 volumes:
   postgres_data:
