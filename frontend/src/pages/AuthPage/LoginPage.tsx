@@ -73,10 +73,6 @@ const LoginPage = () => {
           >
             <Input.Password placeholder='password' />
           </Item>
-          <Item name='remember' valuePropName='checked' className='!text-gray-400'>
-            <Checkbox>Remember me</Checkbox>
-          </Item>
-
           <Item className='!mb-0'>
             <Button type='primary' htmlType='submit' className='w-full'>
               {loading ? 'Logging in...' : 'Login'}
