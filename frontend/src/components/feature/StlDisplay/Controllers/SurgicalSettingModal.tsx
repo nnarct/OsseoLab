@@ -64,7 +64,7 @@ const SurgicalSettingModal = ({ caseId, isOpen, closeModal }: Props) => {
 
   const columns: TableProps['columns'] = [
     {
-      title: 'Object',
+      title: `Object${meshes.length > 1 ? 's' : ''}`,
       dataIndex: 'name',
       key: 'name',
     },
@@ -109,7 +109,15 @@ const SurgicalSettingModal = ({ caseId, isOpen, closeModal }: Props) => {
           centered
           title='Define Pre surgical and post surgical'
         >
-          <Table size='small' bordered dataSource={meshes} columns={columns} rowKey='id' pagination={false} />
+          <Table
+            size='small'
+            bordered
+            dataSource={meshes}
+            columns={columns}
+            rowKey='id'
+            pagination={false}
+            scroll={{ x: 'auto' }}
+          />
         </Modal>
       </>
     );
