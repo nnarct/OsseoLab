@@ -26,7 +26,6 @@ const PlaneButton = () => {
     tool.clear();
   }, [tool]);
 
-
   return (
     <>
       <Dropdown
@@ -40,13 +39,6 @@ const PlaneButton = () => {
                 onClick: handleAddPlane,
               },
               ...(isActive
-                ? [
-                    {
-                      key: 'cancel',
-                      label: 'Cancel',
-                      onClick: handleCancel,
-                    },
-                  ]
                 ? [
                     {
                       key: 'cancel',
@@ -68,19 +60,12 @@ const PlaneButton = () => {
             icon={<LuSquareDashedBottom />}
             type={isActive ? 'primary' : 'default'}
           />
-          <MenuButton
-            onClick={() => tool.select.plane()}
-            text='Plane'
-            icon={<LuSquareDashedBottom />}
-            type={isActive ? 'primary' : 'default'}
-          />
         </div>
       </Dropdown>
 
       <MenuButton
         onClick={handleCutToggle}
         text='Cut'
-        type={isCut ? 'primary' : 'default'}
         type={isCut ? 'primary' : 'default'}
         disabled={planes.length === 0 || !isActive}
         icon={<RiScissorsCutLine />}
