@@ -7,7 +7,7 @@ import LOGO_IMG from '@/assets/OsseoLabsLogo.svg';
 
 import SidebarMenu from '@/components/common/SidebarMenu';
 import SidebarUserInfo from '@/components/common/SidebarUserInfo';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
 
 const { Content, Sider, Footer } = Layout;
@@ -33,6 +33,16 @@ const AppLayout = () => {
     // scrollbarGutter: 'stable',
     background: 'white',
   };
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <Layout hasSider style={{ height: '100vh' }}>
@@ -74,6 +84,11 @@ const AppLayout = () => {
       </Sider>
       <Layout>
         {/* 🔹 Page Content */}
+              {isSmallScreen && (
+        <div className="bg-yellow-100 text-yellow-800 px-3 py-2 text-sm rounded-t-md">
+          Only desktop is supported. Some small screen sizes might not display properly.
+        </div>
+      )}
         {/* <Content className='p-8' style={{ flex: 1, overflow: 'initial' }}> */}
         <Content style={{ flex: 1, overflow: 'auto' }}>
           <Outlet /> {/* 🚀 This renders the current route's component */}
